@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
@@ -7,10 +7,18 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  // 메소드 이름
+  // req : id
+  // res : { 채널명 }들
+	@Get()
+	@ApiOperation({summary: 'req : id, \
+							res : { 채널 id, 채널명 }들',
+				         description: 'req : id, \
+                           res : { 채널 id, 채널명 }들'})
+	  f1(@Param('id') id: string) {
+	  return Object.assign({
+	  });
+	}
 }
 
 // 1-1, 1-2, 1-3, 1-4
@@ -18,10 +26,121 @@ export class AppController {
 export class Login {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  // 계정 등록
+	// req : (body)user id, (body)nickname, (body)avatar
+	// res : status code(성공 : 200, 실패 : 400)
+	@Post('newaccount')
+	@ApiOperation({summary: 'req : user id, nickname\
+							res : status code(성공 : 200, 실패 : 400)'})
+  f1(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+  // 이차 인증 로그인 성공 여부
+	// req : (body)user id, (body)certified number
+	// res : status code(성공 : 200, 실패 : 400)
+	@Post('certificate')
+	@ApiOperation({summary: 'req : user id, certificate number\
+							res : status code(성공 : 200, 실패 : 400)'})
+  f2(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+}
+
+// 2-2
+@Controller("/mypage")
+export class Mypage {
+  constructor(private readonly appService: AppService) {}
+
+	// 정보 가져오기
+	// req : user id
+	// res : {nickname, avatar binary code, twoFactor 여부}
+	@Get('')
+	@ApiOperation({summary: 'req : user id, \
+							res : {nickname, avatar binary code, twoFactor 여부}'})
+  f1(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// avatar 수정
+	// req : (body)user id, (body)avatar binary code
+	// res : status code(성공 : 200, 실패 : 400)
+	@Patch('avatar')
+	@ApiOperation({summary: 'req : user id, avatar binary code \
+							res : status code(성공 : 200, 실패 : 400)'})
+  f2(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+  // 닉네임 수정
+	// req : (body)user id, (body)nickname
+	// res : status code(성공 : 200, 실패 : 400)
+	@Patch('nickname')
+	@ApiOperation({summary: 'req : user id, nickname\
+							res : status code(성공 : 200, 실패 : 400)'})
+  f3(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// 2차 인증 여부 수정
+	// req : (body)user id, (body)twoFactor
+	// res :
+	@Patch('twoFactor')
+	@ApiOperation({summary: 'req : user id\
+							res : '})
+  f4(@Param('id') id: string) {
+    return Object.assign({
+    });
+	}
+
+	// 친구 목록 가져오기
+	// req : user id
+	// res : follow ids[]
+	@Get('follows')
+	@ApiOperation({summary: 'req : user id, \
+							res : follows[]'})
+  f5(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// follow의 현재 접속 상태 가져오기
+	// req : user id
+	// res : user status
+	@Get('follows/status')
+	@ApiOperation({summary: 'req : user id, \
+							res : user status'})
+  f6(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// 게임 전적 가져오기
+	// req : user id
+	// res : {winner, loser}[5]
+	@Get('gameHistory')
+	@ApiOperation({summary: 'req : user id, \
+							res : status code(성공: 200, 실패: 404)'})
+  f7(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// 게임 승패 가져오기
+	// req : user id
+	// res : wins, loses
+	@Get('gameStat')
+	@ApiOperation({summary: 'req : user id, \
+							res : wins, loses'})
+  f8(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
 }
 
 // 2-2, 2-4
@@ -29,10 +148,82 @@ export class Login {
 export class Users {
   constructor(private readonly appService: AppService) {}
 
+  // 유저 검색
+  // req : user id
+  // res : status code(성공: 200, 실패: 404)
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  @ApiOperation({summary: 'req : user id, \
+						   res : status code(성공: 200, 실패: 404)'})
+    f1(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// user 정보 가져오기
+	// req : user id
+	// res : {nickname, avatar binary code}
+	@Get('/:id')
+	@ApiOperation({summary: 'req : user id, \
+							 res : '})
+    f2(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// 게임 전적 가져오기
+	// req : user id
+	// res : {winner, loser}[5]
+	@Get('gameHistory')
+	@ApiOperation({summary: 'req : user id, \
+							res : status code(성공: 200, 실패: 404)'})
+  f3(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+	// 게임 승패 가져오기
+	// req : user id
+	// res : wins, loses
+	@Get('gameStat')
+	@ApiOperation({summary: 'req : user id, \
+							res : wins, loses'})
+  f4(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+  // 팔로우 상태 변경
+	// req : (body)user id, (body)follow id, (body)follow 여부
+	// res :
+	@Patch('follow')
+	@ApiOperation({summary: 'req : user id, follow id, follow 여부\
+							res : '})
+  f5(@Param('id') id: string) {
+    return Object.assign({
+    });
+	}
+
+  // user의 현재 접속 상태 가져오기
+	// req : user id
+	// res : user status
+	@Get('status')
+	@ApiOperation({summary: 'req : user id, \
+							res : user status'})
+  f6(@Param('id') id: string) {
+      return Object.assign({
+    });
+	}
+
+  // 친구 차단하기
+	// req : (body)user id, (body)block id
+	// res :
+	@Patch('block')
+	@ApiOperation({summary: 'req : user id, block id\
+							res : '})
+  f7(@Param('id') id: string) {
+    return Object.assign({
+    });
+	}
 }
 
 // 3-1, 3-2
@@ -42,10 +233,10 @@ export class Games {
   constructor(private readonly appService: AppService) {}
 
   // 매칭 중 첫 페이지 들어옴
-  // req : id 
+  // req : id
   // res : id, nickname
 	@Get()
-  @ApiOperation({summary: 'req : id, \
+	@ApiOperation({summary: 'req : id, \
                            res : id, nickname',
                 description: 'req : id, \
                               res : id, nickname'})
@@ -57,8 +248,8 @@ export class Games {
 	};
 
   // 게임 끝날 때
-  // post, put
-  // req: 승자 id, 패자 id
+  // post
+  // req: (body)승자 id, (body)패자 id
   // res: X. 상태코드 리다이렉트 홈페이지
   @Post()
   @ApiOperation({summary: 'req : 승자 id, 패자 id, \
@@ -73,9 +264,9 @@ export class Games {
   // 게임 관전
   // req: p1 id
   // res: p1 id, p1 nickname, p2 id, p2 nickname
-  @Get('/watch')
-  @ApiOperation({summary: 'req : p1 id, \
-                           res : p1 id, p1 nickname, p2 id, p2 nickname', 
+	@Get('/watch')
+	@ApiOperation({summary: 'req : p1 id, \
+							 res : p1 id, p1 nickname, p2 id, p2 nickname',
                 description: 'req : p1 id, \
                               res :p1 id, p1 nickname, p2 id, p2 nickname' })
 	f3(@Param('id') id: string,) {
@@ -102,62 +293,62 @@ export class Channels {
   constructor(private readonly appService: AppService) {}
 
   // 참여 중인 채널 목록 받기
-  // req : id
+  // req : (body)id
   // res : { 채널명 }들
 	@Get('list/join')
-  @ApiOperation({summary: 'req : id, \
+	@ApiOperation({summary: 'req : id, \
                            res : { 채널 id, 채널명 }들',
                 description: 'req : id, \
                               res : { 채널 id, 채널명 }들'})
 	f1(@Param('id') id: string) {
     return Object.assign({
     });
-	};
+	}
 
   // 채널 목록 받기
-  // req : id
+  // req : (body)id
   // res : { 채널명, 비밀번호 유무 }들
 	@Get('list')
-  @ApiOperation({summary: 'req : id, \
+	@ApiOperation({summary: 'req : id, \
                            res : { 채널 id, 채널명, 비밀번호 유무 }들',
                 description: 'req : id, \
                               res : { 채널 id, 채널명, 비밀번호 유무 }들'})
 	f2(@Param('id') id: string) {
     return Object.assign({
     });
-	};
-  
+	}
+
   // 채널 입장
-  // req : user id, channel id, channel pw
+  // req : (body)user id, (body)channel id, (body)channel pw
   // res : 상태코드(비밀번호 틀린 거(403)랑 ban(204) 구분)
 	@Post('enter')
-  @ApiOperation({summary: 'req : {user id, channel id, channel pw}, \
+	@ApiOperation({summary: 'req : {user id, channel id, channel pw}, \
                            res : 상태코드 (Invalid PW(403)랑 ban(204), enter(201))',
                 description: 'req : {user id, channel id, channel pw}, \
                               res : 상태코드 (Invalid PW(403)랑 ban(204), enter(201))'})
 	f3(@Param('id') id: string) {
     return Object.assign({
     });
-	};
+	}
 
   // 채널 참여 중인 유저
-  // req : channel id
+  // req : (body)channel id
   // res : user id[]
 	@Get('room/users')
-  @ApiOperation({summary: 'req : channel id, \
+	@ApiOperation({summary: 'req : channel id, \
                            res : user id[]',
                 description: 'req : channel id, \
                               res : user id[]'})
 	f4(@Param('id') id: string) {
     return Object.assign({
     });
-	};
+	}
 
   // 유저 상태
-  // req : user id[]
+  // req : (body)user id[]
   // res : userStatus{id, status}[]
 	@Get('room/users/status')
-  @ApiOperation({summary: 'req : user id[], \
+	@ApiOperation({summary: 'req : user id[], \
                            res : userStatus{id, status}[]',
                 description: 'req : user id[], \
                               res : userStatus{id, status}[]'})
@@ -167,7 +358,7 @@ export class Channels {
 	};
 
   // 채팅방 나가기
-  // req : user id, channel id
+  // req : (body)user id, (body)channel id
   // res : status code (성공: 202)
 	@Get('room/exit')
   @ApiOperation({summary: 'req : user id, channel id, \
@@ -180,7 +371,7 @@ export class Channels {
 	};
 
   // 채널 개설
-  // req : user id, channel name, channel pw
+  // req : (body)user id, (body)channel name, (body)channel pw
   // res : channel id, status code (성공: 202, 실패: )
 	@Post('create')
   @ApiOperation({summary: 'req : user id, channel name, channel pw, \
@@ -193,7 +384,7 @@ export class Channels {
 	};
 
   // DM
-  // req : sender id, reciever id
+  // req : (body)sender id, (body)reciever id
   // res : status code (성공: 200 or 201, 실패: )
   // 200: DM 연결, 201: 신규 DM 연결
   @Put('dm')
