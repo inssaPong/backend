@@ -1,5 +1,8 @@
-# Files
+# Environment
 .env
+
+# Git
+.gitmessage
 
 # compiled output
 /dist
