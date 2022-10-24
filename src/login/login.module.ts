@@ -6,6 +6,6 @@ import { SessionSerializer } from './session.serializer';
 
 @Module({
   controllers: [LoginController],
-  providers: [LoginService, FtStrategy, SessionSerializer]
+  providers: [LoginService, FtStrategy, SessionSerializer],
 })
 export class LoginModule {}

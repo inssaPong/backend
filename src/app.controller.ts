@@ -8,11 +8,8 @@ export class AppController {
   // 메소드 이름
   // req : id
   // res : { 채널명 }들
-	@Get()
-	f1(@Param('id') id: string) {
-		return Object.assign({
-		});
-	}
+  @Get()
+  f1(@Param('id') id: string) {
+    return Object.assign({});
+  }
 }
-
-
