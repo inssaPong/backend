@@ -1,11 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AppController, Channels, Games, Users } from './app.controller';
+import { AppController} from './app.controller';
 import { AppService } from './app.service';
 import { EventsModule } from './sockets/game.module';
+import { LoginModule } from './login/login.module';
+import { MypageModule } from './mypage/mypage.module';
+import { UsersModule } from './users/users.module';
+import { GamesModule } from './games/games.module';
+import { ChannelsModule } from './channels/channels.module';
 
 @Module({
-  imports: [EventsModule],
-  controllers: [AppController, Users, Games, Channels],
+  imports: [LoginModule, MypageModule, UsersModule, GamesModule, ChannelsModule, EventsModule],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
