@@ -10,7 +10,8 @@ import {
 	import { Socket } from 'socket.io';
   import { Server } from 'ws';
   
-  @WebSocketGateway({ namespace: 'game' })
+  // @WebSocketGateway({ namespace: 'game' })
+  @WebSocketGateway()
   export class GameGateway {
 	@WebSocketServer()
 	server: Server;
