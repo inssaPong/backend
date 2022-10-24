@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Query, Redirect, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FtAuthGuard } from './ft.guard';
 import { LoginService } from './login.service';
 
 // 1-1, 1-2, 1-3, 1-4
@@ -7,6 +8,22 @@ import { LoginService } from './login.service';
 @ApiTags("로그인 API")
 export class LoginController {
 	constructor(private readonly loginService: LoginService) {}
+	@Get()
+	Login() {
+		return "auth";
+	}
+
+	@Get('42')
+	@UseGuards(FtAuthGuard)
+	async ftLogin() {
+	}
+
+	@Get('42/callback')
+	@UseGuards(FtAuthGuard)
+	@Redirect('/')
+	async ftAuthRedirect(@Req() req) {
+		return 'success';
+	}
 	// 계정 등록
 	// req : (body)user id, (body)nickname, (body)avatar
 	// res : status code(성공 : 200, 실패 : 400)
