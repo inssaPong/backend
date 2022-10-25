@@ -1,4 +1,4 @@
-import { Controller, HttpCode, Post, Query } from '@nestjs/common';
+import { Controller, Header, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoginService } from './login.service';
 
@@ -12,11 +12,9 @@ export class LoginController {
   // res : status code(성공 : 200, 실패 : 400)
   @Post('/newaccount')
   @HttpCode(200)
-  @ApiOperation({
-    summary:
-      'req : user id, nickname \
-              res : status code(성공 : 200, 실패 : 400)',
-  })
+  @ApiOperation({summary: 'req : user id, nickname \
+              res : status code(성공 : 200, 실패 : 400)'})
+  @Header('access-control-allow-origin', '*')
   f1(@Query('id') id: string) {
     return 200;
   }
@@ -26,11 +24,9 @@ export class LoginController {
   // res : status code(성공 : 200, 실패 : 400)
   @Post('/certificate')
   @HttpCode(200)
-  @ApiOperation({
-    summary:
-      'req : user id, certificate number\
-				        res : status code(성공 : 200, 실패 : 400)',
-  })
+  @ApiOperation({summary: 'req : user id, certificate number\
+				        res : status code(성공 : 200, 실패 : 400)'})
+  @Header('access-control-allow-origin', '*')
   f2(@Query('id') id: string) {
     return 200;
   }

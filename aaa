@@ -1,0 +1,10 @@
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+ORIGIN_BRANCH="main"
+
+echo $BRANCH
+
+if [ $BRANCH == $ORIGIN_BRANCH ]; then
+    echo "Equal"
+else
+    echo "Not Equal"
+fi

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Post, Put, HttpCode, Header } from '@nestjs/common';
+import { Controller, Get, Header, HttpCode, Query, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ChannelsService } from './channels.service';
 
@@ -12,6 +12,7 @@ export class ChannelsController {
   // res : { 채널명 }들
   @Get('/list/join')
   @ApiOperation({ summary: 'req : id, res : { 채널 id, 채널명 }[]' })
+  @Header('access-control-allow-origin', '*')
   f1() {
     return Object.assign({
       1: { id: '1', name: '안뇽~~~~~' },
@@ -39,6 +40,7 @@ export class ChannelsController {
   // res : 상태코드(비밀번호 틀린 거(403)랑 ban(204) 구분)
   @Post('/enter')
   @HttpCode(204)
+  @Header('access-control-allow-origin', '*')
   @ApiOperation({
     summary:
       'req : {user id, channel id, channel pw}, \
@@ -53,6 +55,7 @@ export class ChannelsController {
   // res : user id[]
   @Get('/room/users')
   @ApiOperation({ summary: 'req : channel id, res : user id[]' })
+  @Header('access-control-allow-origin', '*')
   f4() {
     return Object.assign({
       1: { id: 'seungoh' },
@@ -68,6 +71,7 @@ export class ChannelsController {
   // res : userStatus{id, status}[]
   @Get('/room/users/status')
   @ApiOperation({ summary: 'req : user id[], res : userStatus{id, status}[]' })
+  @Header('access-control-allow-origin', '*')
   f5() {
     return Object.assign({
       1: { id: 'seungoh', status: '1' },
@@ -83,9 +87,8 @@ export class ChannelsController {
   // res : status code (성공: 202)
   @Get('/room/exit')
   @HttpCode(202)
-  @ApiOperation({
-    summary: 'req : user id, channel id, res : status code(성공: 202)',
-  })
+  @Header('access-control-allow-origin', '*')
+  @ApiOperation({summary: 'req : user id, channel id, res : status code(성공: 202)'})
   f6(@Query('id') id: string) {
     return 202;
   }
@@ -95,11 +98,9 @@ export class ChannelsController {
   // res : channel id, status code (성공: 202, 실패: )
   @Post('/create')
   @HttpCode(202)
-  @ApiOperation({
-    summary:
-      'req : user id, channel name, channel pw, \
-                           res : channel id, status code(성공: 202, 실패: )',
-  })
+  @ApiOperation({summary: 'req : user id, channel name, channel pw, \
+                           res : channel id, status code(성공: 202, 실패: )'})
+  @Header('access-control-allow-origin', '*')
   f7() {
     return Object.assign({
       id: '5',
@@ -112,11 +113,9 @@ export class ChannelsController {
   // 200: DM 연결, 201: 신규 DM 연결
   @Put('/dm')
   @HttpCode(200)
-  @ApiOperation({
-    summary:
-      'req : sender id, reciever id, \
-                           res : status code(성공: 200 or 201, 실패: )',
-  })
+  @ApiOperation({summary: 'req : sender id, reciever id, \
+                           res : status code(성공: 200 or 201, 실패: )'})
+  @Header('access-control-allow-origin', '*')
   f8() {
     return 200;
   }
