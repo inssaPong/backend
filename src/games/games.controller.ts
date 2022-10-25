@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Post, HttpCode } from '@nestjs/common';
+import { Controller, Get, Query, Post, HttpCode, Header } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { GamesService } from './games.service';
 
@@ -13,6 +13,7 @@ export class GamesController {
   // res : id, nickname
   @Get()
   @ApiOperation({ summary: 'req : id, res : id, nickname' })
+  @Header('access-control-allow-origin', '*')
   f1(@Query('id') id: string) {
     return Object.assign({
       id: `${id}`,
@@ -26,6 +27,7 @@ export class GamesController {
   // res: X. 상태코드 리다이렉트 홈페이지
   @Post()
   @ApiOperation({ summary: 'req : 승자 id, 패자 id, res :' })
+  @Header('access-control-allow-origin', '*')
   f2(@Query('id') id: string) {
     return 200;
   }
@@ -34,11 +36,9 @@ export class GamesController {
   // req: p1 id
   // res: p1 id, p1 nickname, p2 id, p2 nickname
   @Get('/watch')
-  @ApiOperation({
-    summary:
-      'req : p1 id, \
-                res : p1 id, p1 nickname, p2 id, p2 nickname',
-  })
+  @ApiOperation({summary: 'req : p1 id, \
+                res : p1 id, p1 nickname, p2 id, p2 nickname'})
+  @Header('access-control-allow-origin', '*')
   f3(@Query('id') id: string) {
     return Object.assign({
       p1_id: 'seungoh',
@@ -54,6 +54,7 @@ export class GamesController {
   @Get('/invite')
   @HttpCode(200)
   @ApiOperation({ summary: 'req : 상대방 id, res : 상태코드(200, 404)' })
+  @Header('access-control-allow-origin', '*')
   f4(@Query('id') id: string) {
     return 200;
   }
