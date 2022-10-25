@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Patch, Query} from '@nestjs/common';
+import { Controller, Get, HttpCode, Patch, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 
@@ -12,8 +12,10 @@ export class UsersController {
   // req : user id
   // res : status code(성공: 200, 실패: 404)
   @Get()
-  @ApiOperation({summary: 'req : user id, \
-						   res : status code(성공: 200, 실패: 404)'})
+  @ApiOperation({
+    summary: 'req : user id, \
+						   res : status code(성공: 200, 실패: 404)',
+  })
   @HttpCode(200)
   f1(@Query('id') id: string) {
     return 200;
@@ -23,11 +25,11 @@ export class UsersController {
   // req : user id
   // res : {nickname, avatar binary code}
   @Get('/:id')
-  @ApiOperation({summary: 'req : user id, res : '})
+  @ApiOperation({ summary: 'req : user id, res : ' })
   f2(@Query('id') id: string) {
     return Object.assign({
-      "nickname" : "test_nickname",
-      "avatar" : "test_avatart_binary_code",
+      nickname: 'test_nickname',
+      avatar: 'test_avatart_binary_code',
     });
   }
 
@@ -35,8 +37,10 @@ export class UsersController {
   // req : user id
   // res : {winner, loser}[5]
   @Get('gameHistory')
-  @ApiOperation({summary: 'req : user id, \
-							res : status code(성공: 200, 실패: 404)'})
+  @ApiOperation({
+    summary: 'req : user id, \
+							res : status code(성공: 200, 실패: 404)',
+  })
   @HttpCode(200)
   f3(@Query('id') id: string) {
     return 200;
@@ -50,8 +54,8 @@ export class UsersController {
 							  res : wins, loses' })
   f4(@Query('id') id: string) {
     return Object.assign({
-      "win" : 9999,
-      "lose" : 9998
+      win: 9999,
+      lose: 9998,
     });
   }
 
@@ -62,17 +66,17 @@ export class UsersController {
   @ApiOperation({ summary: 'req : user id, follow id, follow 여부\
 							res : ' })
   f5(@Query('id') id: string) {
-    return ;
+    return;
   }
 
   // user의 현재 접속 상태 가져오기
   // req : user id
   // res : user status
   @Get('status')
-  @ApiOperation({summary: 'req : user id, res : user status'})
+  @ApiOperation({ summary: 'req : user id, res : user status' })
   f6(@Query('id') id: string) {
     return Object.assign({
-      "user_status" : "logged in"
+      user_status: 'logged in',
     });
   }
 
@@ -80,8 +84,8 @@ export class UsersController {
   // req : (body)user id, (body)block id
   // res :
   @Patch('block')
-  @ApiOperation({summary: 'req : user id, block id res : '})
+  @ApiOperation({ summary: 'req : user id, block id res : ' })
   f7(@Query('id') id: string) {
-    return ;
+    return;
   }
 }

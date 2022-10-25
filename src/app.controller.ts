@@ -5,11 +5,8 @@ import { AppService } from './app.service';
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
-  // 메소드 이름
-  // req : id
-  // res : { 채널명 }들
   @Get()
-  f1(@Query('id') id: string) {
-    return Object.assign({});
+  home() {
+    return 'home';
   }
 }

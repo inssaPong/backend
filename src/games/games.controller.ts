@@ -12,7 +12,7 @@ export class GamesController {
   // req : id
   // res : id, nickname
   @Get()
-  @ApiOperation({summary: 'req : id, res : id, nickname'})
+  @ApiOperation({ summary: 'req : id, res : id, nickname' })
   f1(@Query('id') id: string) {
     return Object.assign({
       id: `${id}`,
@@ -25,7 +25,7 @@ export class GamesController {
   // req: 승자 id, (body)패자 id
   // res: X. 상태코드 리다이렉트 홈페이지
   @Post()
-  @ApiOperation({summary: 'req : 승자 id, 패자 id, res :'})
+  @ApiOperation({ summary: 'req : 승자 id, 패자 id, res :' })
   f2(@Query('id') id: string) {
     return 200;
   }
@@ -34,14 +34,17 @@ export class GamesController {
   // req: p1 id
   // res: p1 id, p1 nickname, p2 id, p2 nickname
   @Get('/watch')
-  @ApiOperation({summary: 'req : p1 id, \
-                res : p1 id, p1 nickname, p2 id, p2 nickname'})
+  @ApiOperation({
+    summary:
+      'req : p1 id, \
+                res : p1 id, p1 nickname, p2 id, p2 nickname',
+  })
   f3(@Query('id') id: string) {
     return Object.assign({
-      "p1_id" : "seungoh",
-      "p1_nickname" : "짱짱",
-      "p2_id" : "dason",
-      "p2_nickname" : "bb"
+      p1_id: 'seungoh',
+      p1_nickname: '짱짱',
+      p2_id: 'dason',
+      p2_nickname: 'bb',
     });
   }
 
@@ -50,7 +53,7 @@ export class GamesController {
   // res: 상태코드(200, 404)
   @Get('/invite')
   @HttpCode(200)
-  @ApiOperation({summary: 'req : 상대방 id, res : 상태코드(200, 404)'})
+  @ApiOperation({ summary: 'req : 상대방 id, res : 상태코드(200, 404)' })
   f4(@Query('id') id: string) {
     return 200;
   }
