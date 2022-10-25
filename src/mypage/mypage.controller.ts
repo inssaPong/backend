@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Patch, HttpCode, Header } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Patch,
+  HttpCode,
+  Header,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { MypageService } from './mypage.service';
 
@@ -12,8 +19,11 @@ export class MypageController {
   // req : user id
   // res : {nickname, avatar binary code, twoFactor 여부}
   @Get()
-  @ApiOperation({summary: 'req : user id, \
-                res : {nickname, avatar binary code, twoFactor 여부}'})
+  @ApiOperation({
+    summary:
+      'req : user id, \
+                res : {nickname, avatar binary code, twoFactor 여부}',
+  })
   @Header('access-control-allow-origin', '*')
   f1(@Query('id') id: string) {
     return Object.assign({
@@ -30,7 +40,7 @@ export class MypageController {
   @ApiOperation({
     summary:
       'req : user id, avatar binary code \
-							  res : status code(성공 : 200, 실패 : 400)'
+							  res : status code(성공 : 200, 실패 : 400)',
   })
   @Header('access-control-allow-origin', '*')
   @HttpCode(200)
@@ -92,15 +102,15 @@ export class MypageController {
   // res : {winner, loser}[5]
   @Get('/gameHistory')
   @ApiOperation({
-    summary: 'req : user id, res : status code(성공: 200, 실패: 404)'
+    summary: 'req : user id, res : status code(성공: 200, 실패: 404)',
   })
   @Header('access-control-allow-origin', '*')
   f7(@Query('id') id: string) {
     const arr = [
       { winner: 'seungoh', loser: 'dason' },
       { winner: 'seungoh', loser: 'dason' },
-      { winner: 'seungoh', loser: 'dason' }
-    ]
+      { winner: 'seungoh', loser: 'dason' },
+    ];
     return arr;
   }
 
