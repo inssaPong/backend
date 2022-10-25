@@ -71,9 +71,7 @@ export class MypageController {
   @Header('access-control-allow-origin', '*')
   f5(@Query('id') id: string) {
     const follows = ['test1', 'test2', 'test3', 'test4'];
-    return Object.assign({
-      follow: follows,
-    });
+    return follows;
   }
 
   // follow들의 현재 접속 상태 가져오기
@@ -98,11 +96,12 @@ export class MypageController {
   })
   @Header('access-control-allow-origin', '*')
   f7(@Query('id') id: string) {
-    return Object.assign({
-      1: { winner: 'seungoh', loser: 'dason' },
-      2: { winner: 'seungoh', loser: 'dason' },
-      3: { winner: 'seungoh', loser: 'dason' },
-    });
+    const arr = [
+      { winner: 'seungoh', loser: 'dason' },
+      { winner: 'seungoh', loser: 'dason' },
+      { winner: 'seungoh', loser: 'dason' }
+    ]
+    return arr;
   }
 
   // 게임 승패 가져오기
