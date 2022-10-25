@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Post, Put, HttpCode } from '@nestjs/common';
+import { Controller, Get, Query, Post, Put, HttpCode, Header } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ChannelsService } from './channels.service';
 
@@ -23,9 +23,8 @@ export class ChannelsController {
   // req : (body)id
   // res : { 채널명, 비밀번호 유무 }들
   @Get('/list')
-  @ApiOperation({
-    summary: 'req : id, res : { 채널 id, 채널명, 비밀번호 유무 }[]',
-  })
+  @ApiOperation({summary: 'req : id, res : { 채널 id, 채널명, 비밀번호 유무 }[]'})
+  @Header('access-control-allow-origin', '*')
   f2() {
     return Object.assign({
       1: { id: '1', name: '안뇽~~~~~', pw: 'false' },
