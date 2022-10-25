@@ -14,10 +14,11 @@ export class ChannelsController {
   @ApiOperation({ summary: 'req : id, res : { 채널 id, 채널명 }[]' })
   @Header('access-control-allow-origin', '*')
   f1() {
-    return Object.assign({
-      1: { id: '1', name: '안뇽~~~~~' },
-      2: { id: '2', name: '채팅방~~~~~' },
-    });
+    const arr = [
+      { id: '1', name: '안뇽~~~~~' },
+      { id: '2', name: '채팅방~~~~~' }
+    ]
+    return arr;
   }
 
   // 채널 목록 받기
@@ -27,12 +28,13 @@ export class ChannelsController {
   @ApiOperation({summary: 'req : id, res : { 채널 id, 채널명, 비밀번호 유무 }[]'})
   @Header('access-control-allow-origin', '*')
   f2() {
-    return Object.assign({
-      1: { id: '1', name: '안뇽~~~~~', pw: 'false' },
-      2: { id: '2', name: '채팅방~~~~~', pw: 'false' },
-      3: { id: '3', name: '우와아아앙아~~!!!', pw: 'false' },
-      4: { id: '4', name: '비밀번호 있지롱~~~', pw: 'true' },
-    });
+    const arr = [
+      { id: '1', name: '안뇽~~~~~', pw: 'false' },
+      { id: '2', name: '채팅방~~~~~', pw: 'false' },
+      { id: '3', name: '우와아아앙아~~!!!', pw: 'false' },
+      { id: '4', name: '비밀번호 있지롱~~~', pw: 'true' }
+    ]
+    return arr;
   }
 
   // 채널 입장
@@ -57,13 +59,14 @@ export class ChannelsController {
   @ApiOperation({ summary: 'req : channel id, res : user id[]' })
   @Header('access-control-allow-origin', '*')
   f4() {
-    return Object.assign({
-      1: { id: 'seungoh' },
-      2: { id: 'dason' },
-      3: { id: 'hyson' },
-      4: { id: 'sehyan' },
-      5: { id: 'sanjeon' },
-    });
+    const arr = [
+      { id: 'seungoh' },
+      { id: 'dason' },
+      { id: 'hyson' },
+      { id: 'sehyan' },
+      { id: 'sanjeon' }
+    ]
+    return arr;
   }
 
   // 유저 상태
@@ -73,13 +76,14 @@ export class ChannelsController {
   @ApiOperation({ summary: 'req : user id[], res : userStatus{id, status}[]' })
   @Header('access-control-allow-origin', '*')
   f5() {
-    return Object.assign({
-      1: { id: 'seungoh', status: '1' },
-      2: { id: 'dason', status: '2' },
-      3: { id: 'hyson', status: '3' },
-      4: { id: 'sehyan', status: '2' },
-      5: { id: 'sehyan', status: '1' },
-    });
+    const arr = [
+      { id: 'seungoh', status: '1' },
+      { id: 'dason', status: '2' },
+      { id: 'hyson', status: '3' },
+      { id: 'sehyan', status: '2' },
+      { id: 'sehyan', status: '1' }
+    ]
+    return arr;
   }
 
   // 채팅방 나가기
