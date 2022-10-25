@@ -27,7 +27,6 @@
     "@nestjs/platform-express": "9.0.0",
     "@nestjs/swagger": "^6.1.2",
     "class-validator": "0.13.2",
-    "express-session": "^1.17.3",
     "passport": "^0.6.0",
     "passport-42": "^1.2.6",
     "reflect-metadata": "0.1.13",

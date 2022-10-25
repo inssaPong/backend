@@ -31,7 +31,6 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     console.log('access Token ', accessToken);
     console.log('\nrefreshToken: ', refreshToken);
     console.log('\nprofile: ', profile);
-    request.session.accessToken = accessToken;
     // const user = {
     // 	profile,
     // 	accessToken,
