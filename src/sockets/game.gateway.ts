@@ -7,11 +7,10 @@ import {
 } from '@nestjs/websockets';
 import { from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Socket } from 'socket.io';
-import { Server } from 'ws';
+import { Server, Socket } from 'socket.io';
 
-// @WebSocketGateway({ namespace: 'game' })
-@WebSocketGateway()
+// @WebSocketGateway({ namespace: 'game' }, { cors: true })
+@WebSocketGateway({ cors: true })
 export class GameGateway {
   @WebSocketServer()
   server: Server;
@@ -35,5 +34,10 @@ export class GameGateway {
     return from([1, 2, 3]).pipe(
       map((item) => ({ event: 'events', data: item })),
     );
+  }
+
+  @SubscribeMessage('message')
+  handleMessage(client: Socket, data: string) {
+    client.broadcast.emit('message', data);
   }
 }

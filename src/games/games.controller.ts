@@ -36,8 +36,11 @@ export class GamesController {
   // req: p1 id
   // res: p1 id, p1 nickname, p2 id, p2 nickname
   @Get('/watch')
-  @ApiOperation({summary: 'req : p1 id, \
-                res : p1 id, p1 nickname, p2 id, p2 nickname'})
+  @ApiOperation({
+    summary:
+      'req : p1 id, \
+                res : p1 id, p1 nickname, p2 id, p2 nickname',
+  })
   @Header('access-control-allow-origin', '*')
   f3(@Query('id') id: string) {
     return Object.assign({
