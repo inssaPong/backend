@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { ContextIdFactory } from '@nestjs/core';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -90,11 +91,29 @@ export class MainGateway {
     const gameRoom = this.gameRooms.find(
       (room) => room.room_id == player.gameInfo.room_id,
     );
-    if (gameRoom.p1_id == player.id) {
-      gameRoom.p1_y--;
+
+    let value;
+    if ('up' == data) {
+      value = -1;
+    } else {
+      value = 1;
     }
-    if (gameRoom.p2_id == player.id) {
-      gameRoom.p2_y--;
+    if (
+      (gameRoom.p1_y > 0 || value == 1) &&
+      (gameRoom.p1_y < 120 || value == -1) &&
+      gameRoom.p1_id == player.id
+    ) {
+      gameRoom.p1_y += value;
+      this.logger.log(gameRoom.p1_y);
     }
+    if (
+      (gameRoom.p2_y > 0 || value == 1) &&
+      (gameRoom.p2_y < 120 || value == -1) &&
+      gameRoom.p2_id == player.id
+    ) {
+      gameRoom.p2_y += value;
+      this.logger.log(gameRoom.p2_y);
+    }
+    this.getPosition(client);
   }
 }

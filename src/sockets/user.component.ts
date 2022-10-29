@@ -31,9 +31,9 @@ export class GameRoomComponent {
   p2_score: number;
   init() {
     this.p1_x = 20;
-    this.p1_y = 50;
-    this.p2_x = 200;
-    this.p2_y = 50;
+    this.p1_y = 45;
+    this.p2_x = 270;
+    this.p2_y = 45;
     this.p1_score = 0;
     this.p2_score = 0;
   }
