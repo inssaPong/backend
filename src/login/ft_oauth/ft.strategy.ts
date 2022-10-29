@@ -11,31 +11,22 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
       clientSecret:
         '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',
       callbackURL: '/login/42/callback',
-      session: true,
-      passReqToCallback: true, // Callback 함수로 req 전달. callback 함수에 req 매개변수 추가해야함
       profileFields: {
         username: 'login',
-        'emails.0.value': 'email',
-        'photos.0.value': 'image_url',
+        email: 'email',
       },
     });
   }
 
   async validate(
-    request: { session: { accessToken: string } },
     accessToken: string,
     refreshToken: string,
     profile: Profile,
     cb: VerifyCallback,
   ): Promise<any> {
-    console.log('access Token ', accessToken);
-    console.log('\nrefreshToken: ', refreshToken);
-    console.log('\nprofile: ', profile);
-    // const user = {
-    // 	profile,
-    // 	accessToken,
-    // 	refreshToken
-    // }
-    return cb(null, profile);
+    console.log('42 access Token ', accessToken);
+    console.log('\n42 refreshToken: ', refreshToken);
+    const user = { username: profile.username, email: profile.email };
+    return cb(null, user);
   }
 }
