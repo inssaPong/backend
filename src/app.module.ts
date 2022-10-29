@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { EventsModule } from './sockets/game.module';
 import { LoginModule } from './login/login.module';
 import { MypageModule } from './mypage/mypage.module';
 import { UsersModule } from './users/users.module';
@@ -14,6 +15,7 @@ import { ChannelsModule } from './channels/channels.module';
     UsersModule,
     GamesModule,
     ChannelsModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
