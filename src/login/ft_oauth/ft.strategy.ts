@@ -1,16 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile, VerifyCallback } from 'passport-42';
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, '42') {
-  constructor() {
+  constructor(private configService: ConfigService) {
     super({
-      clientID:
-        'u-s4t2ud-5e9fc00e39e3c71948befd0e309a2fc64257cec15a7d8a75ee708d5267ccba82',
-      clientSecret:
-        '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',
-      callbackURL: '/login/42/callback',
+      clientID: configService.get<string>('ft.UID'), // env config
+      clientSecret: configService.get<string>('ft.SECRET'), // env config
+      callbackURL: configService.get<string>('ft.REDIRECT_URL'), // env config
       profileFields: {
         username: 'login',
         email: 'email',

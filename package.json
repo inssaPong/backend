@@ -33,6 +33,7 @@
     "@nestjs/websockets": "^9.1.4",
     "class-validator": "0.13.2",
     "cookie-parser": "^1.4.6",
+    "joi": "^17.6.4",
     "passport": "^0.6.0",
     "passport-42": "^1.2.6",
     "passport-jwt": "^4.0.0",
