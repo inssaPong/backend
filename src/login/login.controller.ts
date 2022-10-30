@@ -10,8 +10,9 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FtAuthGuard } from './ft_oauth/ft.guard';
-import { JwtAuthGuard } from './jwt/jwt.guard';
+import { JwtSignGuard } from './jwt/jwt_sign.guard';
 import { LoginService } from './login.service';
+import { Public } from './public.decorator';
 
 // 1-1, 1-2, 1-3, 1-4
 @Controller('/login')
@@ -19,23 +20,24 @@ import { LoginService } from './login.service';
 export class LoginController {
   constructor(private readonly loginService: LoginService) {}
 
+  @Public()
   @UseGuards(FtAuthGuard)
   @Get('42')
-  async ftLogin(@Req() req) {
+  async ftLogin() {
     return;
   }
 
-  @UseGuards(FtAuthGuard, JwtAuthGuard)
+  @Public()
+  @UseGuards(FtAuthGuard, JwtSignGuard)
   @Get('42/callback')
-  @Redirect('/') // TODO: 제거. 테스트 코드
-  async ftAuthRedirect(@Req() req, @Res() res) {
+  @Redirect('/') // TODO: Test code
+  async ftAuthRedirect() {
     return;
   }
 
   // 계정 등록
   // req : (body)user id, (body)nickname, (body)avatar
   // res : status code(성공 : 200, 실패 : 400)
-  // @UseGuards(JwtAuthGuard)
   @Post('/newaccount')
   @ApiOperation({
     summary:
@@ -49,7 +51,6 @@ export class LoginController {
   // 2차 인증 로그인 성공 여부
   // req : (body)user id, (body)certified number
   // res : status code(성공 : 200, 실패 : 400)
-  // @UseGuards(JwtAuthGuard)
   @Post('/certificate')
   @ApiOperation({
     summary:

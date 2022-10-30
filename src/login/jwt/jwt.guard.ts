@@ -1,28 +1,37 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
+import { IS_PUBLIC_KEY } from '../public.decorator';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  constructor(private reflector: Reflector) {
+    super();
+  }
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const req = context.switchToHttp().getRequest();
-    const res = context.switchToHttp().getResponse();
-    const user = req.user;
-    if (user === undefined) {
-      console.log('log: undefined user');
-      return false;
+  canActivate(context: ExecutionContext) {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
     }
-    const payload = { username: user.username, email: user.email };
-    const access_token = this.jwtService.sign(payload);
-    console.log('access_token: ', access_token);
-    res.cookie('atk', access_token, {
-      httpOnly: true,
-      signed: true,
-    });
-    return true;
+    return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any, info: any) {
+    console.log('[DEBUG] err: ', err); // TODO: DEBUG
+    console.log('[DEBUG] user: ', user); // TODO: DEBUG
+    console.log('[DEBUG] info: ', info); // TODO: DEBUG
+    if (err || !user) {
+      console.log('[LOG] Unauthorized users'); // TODO: LOG
+      throw err || new UnauthorizedException();
+    }
+    return user;
   }
 }
