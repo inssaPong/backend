@@ -10,6 +10,8 @@ import { ChannelsModule } from './channels/channels.module';
 import { ConfigModule } from '@nestjs/config';
 import configuration from 'config/configuration';
 import * as Joi from 'joi';
+import { JwtAuthGuard } from './login/jwt/jwt.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -33,6 +35,12 @@ import * as Joi from 'joi';
     EventsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
