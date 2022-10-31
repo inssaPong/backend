@@ -1,18 +1,14 @@
 import { Logger } from '@nestjs/common';
-import { ContextIdFactory } from '@nestjs/core';
 import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { SignKeyObjectInput } from 'crypto';
 import { Server, Socket } from 'socket.io';
-import { UserInfo, GameRoomComponent } from './user.component';
+import { UserInfo, GameRoomComponent, GameObject } from './user.component';
 
 @WebSocketGateway({ cors: true })
 export class MainGateway {
-  // constructor(private readonly userInfo: UserInfo) {}
-
   @WebSocketServer()
   server: Server;
   users: UserInfo[] = [];
@@ -47,7 +43,6 @@ export class MainGateway {
       this.enterPlayer.push(client);
     }
     if (this.enterPlayer.length > 1) {
-      this.logger.log(`2명 이상!!!!!! 룸 생성!!!!!!`);
       let room_id: string;
       const p1 = this.users.find((user) => user.socket == this.enterPlayer[0]);
       const p2 = this.users.find((user) => user.socket == this.enterPlayer[1]);
@@ -66,7 +61,16 @@ export class MainGateway {
       gameRoom.p2_id = p2.id;
       gameRoom.init();
       this.gameRooms.push(gameRoom);
-      this.server.to(room_id).emit('startGame', p1.id, p2.id);
+      this.server
+        .to(room_id)
+        .emit(
+          'startGame',
+          p1.id,
+          p2.id,
+          GameObject.ball_radius,
+          GameObject.bar_width,
+          GameObject.bar_height,
+        );
     }
   }
 
@@ -78,6 +82,8 @@ export class MainGateway {
     );
     client.emit(
       'draw',
+      gameRoom.ball_x,
+      gameRoom.ball_y,
       gameRoom.p1_x,
       gameRoom.p1_y,
       gameRoom.p2_x,
@@ -92,26 +98,28 @@ export class MainGateway {
       (room) => room.room_id == player.gameInfo.room_id,
     );
 
-    let value;
+    let value = 1;
     if ('up' == data) {
       value = -1;
-    } else {
+    } else if ('down' == data) {
       value = 1;
     }
     if (
       (gameRoom.p1_y > 0 || value == 1) &&
-      (gameRoom.p1_y < 120 || value == -1) &&
+      (gameRoom.p1_y < GameObject.canvas_height + GameObject.bar_height ||
+        value == -1) &&
       gameRoom.p1_id == player.id
     ) {
-      gameRoom.p1_y += value;
+      gameRoom.p1_y += value * GameObject.move_pixel;
       this.logger.log(gameRoom.p1_y);
     }
     if (
       (gameRoom.p2_y > 0 || value == 1) &&
-      (gameRoom.p2_y < 120 || value == -1) &&
+      (gameRoom.p2_y < GameObject.canvas_height + GameObject.bar_height ||
+        value == -1) &&
       gameRoom.p2_id == player.id
     ) {
-      gameRoom.p2_y += value;
+      gameRoom.p2_y += value * GameObject.move_pixel;
       this.logger.log(gameRoom.p2_y);
     }
     this.getPosition(client);

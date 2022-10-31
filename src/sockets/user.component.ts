@@ -1,7 +1,16 @@
 import { Socket } from 'socket.io';
 
+export const GameObject = {
+  canvas_width: 300,
+  canvas_height: 90,
+  ball_radius: 4,
+  bar_width: 8,
+  bar_height: 30,
+  move_pixel: 1,
+  margin: 20,
+};
+
 export class UserInfo {
-  // constructor(private readonly gameComponent: GameComponent) {}
   socket: Socket;
   id: string;
   status: number;
@@ -23,6 +32,8 @@ export class GameRoomComponent {
   room_id: string;
   p1_id: string;
   p2_id: string;
+  ball_x: number;
+  ball_y: number;
   p1_x: number;
   p1_y: number;
   p2_x: number;
@@ -30,10 +41,12 @@ export class GameRoomComponent {
   p1_score: number;
   p2_score: number;
   init() {
-    this.p1_x = 20;
-    this.p1_y = 45;
-    this.p2_x = 270;
-    this.p2_y = 45;
+    this.ball_x = GameObject.canvas_width / 2;
+    this.ball_y = GameObject.canvas_height / 2;
+    this.p1_x = GameObject.margin;
+    this.p1_y = GameObject.canvas_height / 2 + GameObject.bar_height / 2;
+    this.p2_x = GameObject.canvas_width - GameObject.margin;
+    this.p2_y = GameObject.canvas_height / 2 + GameObject.bar_height / 2;
     this.p1_score = 0;
     this.p2_score = 0;
   }
