@@ -15,7 +15,7 @@ import { LoginService } from './login.service';
 import { Public } from './public.decorator';
 
 // 1-1, 1-2, 1-3, 1-4
-@Controller('/login')
+@Controller('/api/login')
 @ApiTags('로그인 API')
 export class LoginController {
   constructor(private readonly loginService: LoginService) {}
