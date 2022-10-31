@@ -1,16 +1,21 @@
-import { Controller, Header, HttpCode, Post, Query } from '@nestjs/common';
+import { Controller, Get, Header, HttpCode, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { LoginRepository } from './login.repository';
 import { LoginService } from './login.service';
 
 // 1-1, 1-2, 1-3, 1-4
 @Controller('/login')
 @ApiTags('로그인 API')
 export class LoginController {
-  constructor(private readonly loginService: LoginService) {}
+  constructor(
+    private readonly loginService: LoginService,
+    private readonly loginRepository: LoginRepository,
+  ) {}
   // 계정 등록
   // req : user id, (body)nickname, (body)avatar
   // res : status code(성공 : 200, 실패 : 400)
-  @Post('/newaccount')
+  //   @Post('/newaccount') // TODO 원래 이거
+  @Get('/newaccount')
   @HttpCode(200)
   @ApiOperation({
     summary:
@@ -18,7 +23,9 @@ export class LoginController {
               res : status code(성공 : 200, 실패 : 400)',
   })
   @Header('access-control-allow-origin', '*')
-  f1(@Query('id') id: string) {
+  createUser() {
+    console.log('in new account');
+    this.loginRepository.createUser('sanjeon', 'SangHwan', null);
     return 200;
   }
 
