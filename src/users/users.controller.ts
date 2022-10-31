@@ -29,19 +29,6 @@ export class UsersController {
     return 200;
   }
 
-  // user 정보 가져오기
-  // req : user id
-  // res : {nickname, avatar binary code}
-  @Get('/:id')
-  @ApiOperation({ summary: 'req : user id, res : ' })
-  @Header('access-control-allow-origin', '*')
-  f2(@Query('id') id: string) {
-    return Object.assign({
-      nickname: 'test_nickname',
-      avatar: 'test_avatart_binary_code',
-    });
-  }
-
   // 게임 전적 가져오기
   // req : user id
   // res : {winner, loser}[5]
@@ -61,24 +48,13 @@ export class UsersController {
   // res : wins, loses
   @Get('gameStat')
   @ApiOperation({ summary: 'req : user id, \
-							  res : wins, loses' })
+  res : wins, loses' })
   @Header('access-control-allow-origin', '*')
   f4(@Query('id') id: string) {
     return Object.assign({
       win: 9999,
       lose: 9998,
     });
-  }
-
-  // 팔로우 상태 변경
-  // req : (body)user id, (body)follow id, (body)follow 여부
-  // res :
-  @Patch('follow')
-  @ApiOperation({ summary: 'req : user id, follow id, follow 여부\
-							res : ' })
-  @Header('access-control-allow-origin', '*')
-  f5(@Query('id') id: string) {
-    return;
   }
 
   // user의 현재 접속 상태 가져오기
@@ -91,6 +67,30 @@ export class UsersController {
     return Object.assign({
       user_status: 'logged in',
     });
+  }
+
+  // user 정보 가져오기
+  // req : user id
+  // res : {nickname, avatar binary code}
+  @Get('/:id')
+  @ApiOperation({ summary: 'req : user id, res : ' })
+  @Header('access-control-allow-origin', '*')
+  f2(@Query('id') id: string) {
+    return Object.assign({
+      nickname: 'test_nickname',
+      avatar: 'test_avatart_binary_code',
+    });
+  }
+
+  // 팔로우 상태 변경
+  // req : (body)user id, (body)follow id, (body)follow 여부
+  // res :
+  @Patch('follow')
+  @ApiOperation({ summary: 'req : user id, follow id, follow 여부\
+							res : ' })
+  @Header('access-control-allow-origin', '*')
+  f5(@Query('id') id: string) {
+    return;
   }
 
   // 친구 차단하기
