@@ -1,3 +1,4 @@
+import { LoginRepository } from './login.repository';
 import {
   Controller,
   Get,
@@ -18,7 +19,10 @@ import { Public } from './public.decorator';
 @Controller('/login')
 @ApiTags('로그인 API')
 export class LoginController {
-  constructor(private readonly loginService: LoginService) {}
+  constructor(
+    private readonly loginService: LoginService,
+    private readonly loginRepository: LoginRepository,
+  ) {}
 
   @Public()
   @UseGuards(FtAuthGuard)
@@ -38,6 +42,9 @@ export class LoginController {
   // 계정 등록
   // req : (body)nickname, (body)avatar
   // res : status code(성공 : 200, 실패 : 400)
+  //   @Post('/newaccount') // TODO 원래 이거임.
+  @Get('/newaccount')
+  @HttpCode(200)
   @ApiOperation({
     summary:
       'req : nickname, avatar \
@@ -47,6 +54,8 @@ export class LoginController {
   @HttpCode(200)
   @Header('access-control-allow-origin', '*')
   registerAccount(@Query('id') id: string) {
+    console.log('in new account');
+    this.loginRepository.createUser('sanjeon', 'SangHwan', 'sanjeon@naver.com');
     return 200;
   }
 

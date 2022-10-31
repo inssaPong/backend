@@ -7,6 +7,7 @@ import { MypageModule } from './mypage/mypage.module';
 import { UsersModule } from './users/users.module';
 import { GamesModule } from './games/games.module';
 import { ChannelsModule } from './channels/channels.module';
+import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import configuration from 'config/configuration';
 import * as Joi from 'joi';
@@ -33,6 +34,18 @@ import { APP_GUARD } from '@nestjs/core';
     GamesModule,
     ChannelsModule,
     EventsModule,
+    DatabaseModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      validationSchema: Joi.object({
+        POSTGRES_HOST: Joi.string(),
+        POSTGRES_PORT: Joi.number(),
+        POSTGRES_USER: Joi.string(),
+        POSTGRES_PASSWORD: Joi.string(),
+        POSTGRES_DB_NAME: Joi.string(),
+      }),
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
   providers: [
