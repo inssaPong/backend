@@ -31,6 +31,7 @@
     "@nestjs/platform-ws": "^9.1.4",
     "@nestjs/swagger": "^6.1.2",
     "@nestjs/websockets": "^9.1.4",
+    "@types/cron": "^2.0.0",
     "class-validator": "0.13.2",
     "cookie-parser": "^1.4.6",
     "joi": "^17.6.4",
