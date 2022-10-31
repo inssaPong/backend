@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('트센 API 설계')
