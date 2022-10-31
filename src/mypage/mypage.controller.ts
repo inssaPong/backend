@@ -10,7 +10,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { MypageService } from './mypage.service';
 
 // 2-2
-@Controller('/mypage')
+@Controller('/api/mypage')
 @ApiTags('마이페이지 API')
 export class MypageController {
   constructor(private readonly mypageService: MypageService) {}
