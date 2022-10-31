@@ -7,6 +7,7 @@ import { MypageModule } from './mypage/mypage.module';
 import { UsersModule } from './users/users.module';
 import { GamesModule } from './games/games.module';
 import { ChannelsModule } from './channels/channels.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ChannelsModule } from './channels/channels.module';
     GamesModule,
     ChannelsModule,
     EventsModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

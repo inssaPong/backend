@@ -5,6 +5,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { ScheduleService } from './schedule.service';
 import { UserInfo, GameRoomComponent, GameObject } from './user.component';
 
 @WebSocketGateway({ cors: true })
@@ -59,7 +60,6 @@ export class MainGateway {
       gameRoom.room_id = room_id;
       gameRoom.p1_id = p1.id;
       gameRoom.p2_id = p2.id;
-      gameRoom.init();
       this.gameRooms.push(gameRoom);
       this.server
         .to(room_id)
@@ -71,6 +71,7 @@ export class MainGateway {
           GameObject.bar_width,
           GameObject.bar_height,
         );
+      setInterval(ScheduleService.updateBallPos, 100, gameRoom);
     }
   }
 

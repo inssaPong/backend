@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 
 export const GameObject = {
@@ -8,6 +9,7 @@ export const GameObject = {
   bar_height: 30,
   move_pixel: 1,
   margin: 20,
+  timeUpdated: 100,
 };
 
 export class UserInfo {
@@ -21,6 +23,7 @@ export class GameComponent {
   p1_id: string;
   p2_id: string;
   room_id: string;
+
   init(p1_id: string, p2_id: string, room_id: string) {
     this.p1_id = p1_id;
     this.p2_id = p2_id;
@@ -29,6 +32,10 @@ export class GameComponent {
 }
 
 export class GameRoomComponent {
+  constructor() {
+    this.init();
+  }
+  private logger: Logger = new Logger('AppGateway');
   room_id: string;
   p1_id: string;
   p2_id: string;
