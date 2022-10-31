@@ -1,11 +1,11 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseInterceptors } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ScheduleService } from './schedule.service';
+import { getPosition, nextRound, updateBallPos } from './schedule.service';
 import { UserInfo, GameRoomComponent, GameObject } from './user.component';
 
 @WebSocketGateway({ cors: true })
@@ -27,6 +27,7 @@ export class MainGateway {
   }
 
   handleDisconnect(client: Socket) {
+    this.playDisconnect(client);
     this.users = this.users.filter((user) => user.socket != client);
     this.enterPlayer = this.enterPlayer.filter((element) => element != client);
     this.logger.log(`Client Disconnected : ${client.id}`);
@@ -71,25 +72,19 @@ export class MainGateway {
           GameObject.bar_width,
           GameObject.bar_height,
         );
-      setInterval(ScheduleService.updateBallPos, 100, gameRoom);
+      gameRoom.interval_ball = setInterval(
+        updateBallPos,
+        GameObject.ballSpeed,
+        gameRoom,
+        this,
+      );
+      gameRoom.interval_move = setInterval(
+        getPosition,
+        GameObject.drawUpdateTime,
+        gameRoom,
+        this.server,
+      );
     }
-  }
-
-  @SubscribeMessage('getPosition')
-  getPosition(client: Socket) {
-    const player = this.users.find((user) => user.socket == client);
-    const gameRoom = this.gameRooms.find(
-      (room) => room.room_id == player.gameInfo.room_id,
-    );
-    client.emit(
-      'draw',
-      gameRoom.ball_x,
-      gameRoom.ball_y,
-      gameRoom.p1_x,
-      gameRoom.p1_y,
-      gameRoom.p2_x,
-      gameRoom.p2_y,
-    );
   }
 
   @SubscribeMessage('move')
@@ -107,22 +102,49 @@ export class MainGateway {
     }
     if (
       (gameRoom.p1_y > 0 || value == 1) &&
-      (gameRoom.p1_y < GameObject.canvas_height + GameObject.bar_height ||
+      (gameRoom.p1_y < GameObject.canvas_height - GameObject.bar_height ||
         value == -1) &&
       gameRoom.p1_id == player.id
     ) {
       gameRoom.p1_y += value * GameObject.move_pixel;
-      this.logger.log(gameRoom.p1_y);
     }
     if (
       (gameRoom.p2_y > 0 || value == 1) &&
-      (gameRoom.p2_y < GameObject.canvas_height + GameObject.bar_height ||
+      (gameRoom.p2_y < GameObject.canvas_height - GameObject.bar_height ||
         value == -1) &&
       gameRoom.p2_id == player.id
     ) {
       gameRoom.p2_y += value * GameObject.move_pixel;
-      this.logger.log(gameRoom.p2_y);
     }
-    this.getPosition(client);
+  }
+
+  gameOver(gameRoom: GameRoomComponent) {
+    const p1_id: string = gameRoom.p1_id;
+    const p2_id: string = gameRoom.p2_id;
+    this.gameRooms = this.gameRooms.filter(
+      (element) => element.room_id != gameRoom.room_id,
+    );
+    const p1 = this.users.find((user) => user.id == p1_id);
+    if (p1 != undefined) {
+      p1.gameInfo.reset();
+    }
+    const p2 = this.users.find((user) => user.id == p2_id);
+    if (p2 != undefined) {
+      p2.gameInfo.reset();
+    }
+  }
+
+  playDisconnect(client: Socket) {
+    const player = this.users.find((user) => user.socket == client);
+    if (player.gameInfo.room_id == '') return;
+    const gameRoom = this.gameRooms.find(
+      (room) => room.room_id == player.gameInfo.room_id,
+    );
+    if (gameRoom.p1_id == player.id) {
+      gameRoom.p2_score = GameObject.finalScore;
+    } else {
+      gameRoom.p1_score = GameObject.finalScore;
+    }
+    setTimeout(nextRound, 0, gameRoom, this);
   }
 }
