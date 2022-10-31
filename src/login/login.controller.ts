@@ -14,18 +14,18 @@ export class LoginController {
   // 계정 등록
   // req : user id, (body)nickname, (body)avatar
   // res : status code(성공 : 200, 실패 : 400)
-  //   @Post('/newaccount') // TODO 원래 이거
+  //   @Post('/newaccount') // TODO 원래 이거임.
   @Get('/newaccount')
   @HttpCode(200)
   @ApiOperation({
     summary:
-      'req : user id, nickname \
+      'req : user id, nickname, avatar \
               res : status code(성공 : 200, 실패 : 400)',
   })
   @Header('access-control-allow-origin', '*')
   createUser() {
     console.log('in new account');
-    this.loginRepository.createUser('sanjeon', 'SangHwan', null);
+    this.loginRepository.createUser('sanjeon', 'SangHwan', 'sanjeon@naver.com');
     return 200;
   }
 
