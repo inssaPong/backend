@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile, VerifyCallback } from 'passport-42';
@@ -23,8 +23,8 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     profile: Profile,
     cb: VerifyCallback,
   ): Promise<any> {
-    console.log('[LOG] 42 access Token ', accessToken); // TODO: LOG
-    console.log('[LOG] 42 refreshToken: ', refreshToken); // TODO: LOG
+    Logger.debug(`42 access Token: ${accessToken} `); // Logger.log
+    Logger.debug(`42 refreshToken: ${refreshToken}`); // Logger.log
     const user = { username: profile.username, email: profile.email };
     return cb(null, user);
   }

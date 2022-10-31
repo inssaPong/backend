@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -19,6 +20,7 @@ async function bootstrap() {
   const DOMAIN = process.env.DOMAIN; // TODO: Env config
   const PORT = process.env.PORT; // TODO: Env config
   await app.listen(PORT);
-  console.log(`[LOG] Application is running on: ${DOMAIN}:${PORT}`); // TODO: LOG
+
+  Logger.log(`Application is running on: ${DOMAIN}:${PORT}`); // Logger.log
 }
 bootstrap();

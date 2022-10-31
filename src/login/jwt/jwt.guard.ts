@@ -1,6 +1,7 @@
 import {
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -23,15 +24,24 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
     return super.canActivate(context);
   }
-
-  handleRequest(err: any, user: any, info: any) {
-    console.log('[DEBUG] err: ', err); // TODO: DEBUG
-    console.log('[DEBUG] user: ', user); // TODO: DEBUG
-    console.log('[DEBUG] info: ', info); // TODO: DEBUG
+  handleRequest(
+    err: any,
+    user: any,
+    info: any,
+    context: ExecutionContext,
+    status?: any,
+  ) {
+    // Logger.debug(`err: ${err}`); // Logger.debug
+    // Logger.debug(`user: ${user}`); // Logger.debug
+    // Logger.debug(`info: ${info}`); // Logger.debug
+    // Logger.debug(`context: ${context}`); // Logger.debug
+    // Logger.debug(`status: ${status}`); // Logger.debug
+    if (info) Logger.log(`${info}`);
     if (err || !user) {
-      console.log('[LOG] Unauthorized users'); // TODO: LOG
+      Logger.log('Unauthorized users'); // Logger.log
       throw err || new UnauthorizedException();
     }
+    Logger.log('Authorized user');
     return user;
   }
 }

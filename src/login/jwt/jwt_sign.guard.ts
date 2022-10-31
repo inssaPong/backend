@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 
@@ -13,12 +18,12 @@ export class JwtSignGuard implements CanActivate {
     const response = context.switchToHttp().getResponse();
     const user = request.user;
     if (user === undefined) {
-      console.log('[LOG] Undefined user'); // TODO: LOG
+      Logger.log('Undefined user'); // Logger.log
       return false;
     }
     const payload = { username: user.username, email: user.email };
     const access_token = this.jwtService.sign(payload);
-    console.log('[DEBUG] access_token: ', access_token); // TODO: DEBUG
+    Logger.debug(`access_token:  ${access_token}`); // Logger.debug
     response.cookie('Authorization', access_token, {
       httpOnly: true,
       // signed: true, // TODO: Encrypt cookie

@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, Req } from '@nestjs/common';
+import { Injectable, Logger, Req } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -19,12 +19,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ex)
       const has_user = userRepository.findOne(payload.username);
       if (!has_user) {
-        console.log("[LOG] 유저 정보가 없습니다.");
+        Logger.log("유저 정보가 없습니다."); // Logger.log
         return undefined
       };
     */
-    console.log('[DEBUG] username: ', payload.username); // TODO: DEBUG
-    console.log('[DEBUG] email: ', payload.email); // TODO: DEBUG
+    Logger.debug(`username: ${payload.username}`); // Logger.debug
+    Logger.debug(`email: ${payload.email}`); // Logger.debug
     return { username: payload.username, email: payload.email };
   }
 }
