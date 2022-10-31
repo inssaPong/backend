@@ -1,3 +1,6 @@
+# Files
+package-lock.json
+
 # Environment
 .env
 
