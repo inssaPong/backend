@@ -1,4 +1,4 @@
-import { Logger, UseInterceptors } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -13,7 +13,7 @@ export class MainGateway {
   @WebSocketServer()
   server: Server;
   users: UserInfo[] = [];
-  private logger: Logger = new Logger('AppGateway');
+  logger: Logger = new Logger('AppGateway');
   enterPlayer: Socket[] = [];
   gameRooms: GameRoomComponent[] = [];
 
@@ -39,6 +39,20 @@ export class MainGateway {
     user.id = id;
   }
 
+  @SubscribeMessage('game/watch')
+  gameCatch(client: Socket, id: string) {
+    const player = this.users.find((user) => user.id == id);
+    client.join(player.gameInfo.room_id);
+    client.emit(
+      'watchStart',
+      player.gameInfo.p1_id,
+      player.gameInfo.p2_id,
+      GameObject.ball_radius,
+      GameObject.bar_width,
+      GameObject.bar_height,
+    );
+  }
+
   @SubscribeMessage('enterGameQueue')
   enterGameQueue(client: Socket) {
     if (this.enterPlayer.find((element) => element == client) == undefined) {
@@ -51,7 +65,6 @@ export class MainGateway {
 
       room_id = p1.id + '_' + p2.id;
       this.enterPlayer.splice(0, 2);
-      this.logger.log(`room id : ${room_id}`);
       p1.gameInfo.init(p1.id, p2.id, room_id);
       p2.gameInfo.init(p1.id, p2.id, room_id);
       p1.socket.join(room_id);

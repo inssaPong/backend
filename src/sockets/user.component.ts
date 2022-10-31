@@ -11,7 +11,7 @@ export const GameObject = {
   margin: 20,
   drawUpdateTime: 50,
   ballSpeed: 10,
-  finalScore: 3,
+  finalScore: 5,
 };
 
 export class UserInfo {
