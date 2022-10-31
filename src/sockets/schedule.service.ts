@@ -6,7 +6,7 @@ export function updateBallPos(
   gameRoom: GameRoomComponent,
   server: MainGateway,
 ) {
-  // 윗벽
+  // 윗벽l
   if (gameRoom.ball_y <= 0 + GameObject.ball_radius) {
     gameRoom.ball_y_dir = 1;
   }
