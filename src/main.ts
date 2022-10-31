@@ -1,7 +1,8 @@
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { WsAdapter } from '@nestjs/platform-ws';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+// import * as cookieParser from 'cookie-parser'; // TODO: Encrypt cookie
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  // app.use(cookieParser(process.env.COOKIE_SECRET)); // TODO: Env config. Encrypt cookie
+  const DOMAIN = process.env.DOMAIN; // TODO: Env config
+  const PORT = process.env.PORT; // TODO: Env config
+  await app.listen(PORT);
+
+  Logger.log(`Application is running on: ${DOMAIN}:${PORT}`); // Logger.log
 }
 bootstrap();
