@@ -7,6 +7,7 @@ import { LoginService } from './login.service';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
+    DatabaseModule,
   ],
   controllers: [LoginController],
   providers: [LoginService, FtStrategy, JwtStrategy, LoginRepository],

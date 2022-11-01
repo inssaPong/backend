@@ -8,16 +8,11 @@ export class MypageRepository {
   async getUserInfo(id: string) {
     const databaseResponse = await this.databaseService.runQuery(
       `
-	SELECT
-	user.nickname,
-	user.email,
-	user.twoFactor_status,
-	user.avatar,
-	FROM user
-	WHERE user.id = $1
+	SELECT *
+	FROM "user"
+	WHERE id='${id}';
 	`,
-      [id],
     );
-    return databaseResponse.rows;
+    return databaseResponse;
   }
 }

@@ -50,12 +50,9 @@ export class LoginController {
       'req : nickname, avatar \
               res : status code(성공 : 200, 실패 : 400)',
   })
-  @Post('/newaccount')
-  @HttpCode(200)
   @Header('access-control-allow-origin', '*')
   registerAccount(@Query('id') id: string) {
-    console.log('in new account');
-    this.loginRepository.createUser('sanjeon', 'SangHwan', 'sanjeon@naver.com');
+    this.loginRepository.createUser('seungoh', 'seungeun', 'seungoh@naver.com');
     return 200;
   }
 

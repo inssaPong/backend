@@ -7,12 +7,12 @@ import { MypageModule } from './mypage/mypage.module';
 import { UsersModule } from './users/users.module';
 import { GamesModule } from './games/games.module';
 import { ChannelsModule } from './channels/channels.module';
-import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import configuration from 'config/configuration';
 import * as Joi from 'joi';
 import { JwtAuthGuard } from './login/jwt/jwt.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
