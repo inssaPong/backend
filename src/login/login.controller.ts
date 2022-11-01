@@ -34,7 +34,7 @@ export class LoginController {
   @Public()
   @UseGuards(FtAuthGuard, JwtSignGuard)
   @Get('42/callback')
-  @Redirect('/') // TODO: Test code
+  @Redirect('http://localhost:8080/home')
   async ftAuthRedirect() {
     return;
   }
