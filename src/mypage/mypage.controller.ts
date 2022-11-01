@@ -11,7 +11,7 @@ import { MypageRepository } from './mypage.repository';
 import { MypageService } from './mypage.service';
 
 // 2-2
-@Controller('/api/mypage')
+@Controller('/mypage')
 @ApiTags('마이페이지 API')
 export class MypageController {
   constructor(
@@ -29,13 +29,13 @@ export class MypageController {
                 res : {nickname, avatar binary code, twoFactor 여부}',
   })
   f1(@Query('id') id: string) {
-    const userInfo = this.mypageRepository.getUserInfo(id);
-    return userInfo;
-    // return Object.assign({
-    //   nickname: userInfo[0],
-    //   avatar: userInfo[3],
-    //   two_factor: userInfo[2],
-    // });
+    // const userInfo = this.mypageRepository.getUserInfo(id);
+    // return userInfo;
+    return Object.assign({
+      nickname: 'test',
+      avatar: 'test',
+      twofactor_status: true,
+    });
   }
 
   // avatar 수정

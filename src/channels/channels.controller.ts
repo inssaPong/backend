@@ -11,7 +11,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ChannelsService } from './channels.service';
 
 // 4-0, 4-1, 4-2, 4-3
-@Controller('/api/channels')
+@Controller('/channels')
 @ApiTags('채널 API')
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}
