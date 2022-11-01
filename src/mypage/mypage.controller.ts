@@ -7,13 +7,17 @@ import {
   Header,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { MypageRepository } from './mypage.repository';
 import { MypageService } from './mypage.service';
 
 // 2-2
 @Controller('/api/mypage')
 @ApiTags('마이페이지 API')
 export class MypageController {
-  constructor(private readonly mypageService: MypageService) {}
+  constructor(
+    private readonly mypageService: MypageService,
+    private readonly mypageRepository: MypageRepository,
+  ) {}
 
   // 정보 가져오기
   // req : user id
@@ -26,11 +30,13 @@ export class MypageController {
   })
   @Header('access-control-allow-origin', '*')
   f1(@Query('id') id: string) {
-    return Object.assign({
-      nickname: 'test_nickname',
-      avatar: 'test_avatar_binary_code',
-      two_factor: 'on',
-    });
+    const userInfo = this.mypageRepository.getUserInfo(id);
+    return userInfo;
+    // return Object.assign({
+    //   nickname: userInfo[0],
+    //   avatar: userInfo[3],
+    //   two_factor: userInfo[2],
+    // });
   }
 
   // avatar 수정

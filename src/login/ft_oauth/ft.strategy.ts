@@ -7,9 +7,9 @@ import { Strategy, Profile, VerifyCallback } from 'passport-42';
 export class FtStrategy extends PassportStrategy(Strategy, '42') {
   constructor(private configService: ConfigService) {
     super({
-      clientID: configService.get<string>('ft.UID'),
-      clientSecret: configService.get<string>('ft.SECRET'),
-      callbackURL: configService.get<string>('ft.REDIRECT_URL'),
+      clientID: configService.get<string>('ft.uid'),
+      clientSecret: configService.get<string>('ft.secret'),
+      callbackURL: configService.get<string>('ft.redirect_url'),
       profileFields: {
         username: 'login',
         email: 'email',
