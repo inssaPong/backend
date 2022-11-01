@@ -11,7 +11,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ChannelsService } from './channels.service';
 
 // 4-0, 4-1, 4-2, 4-3
-@Controller('/api/channels')
+@Controller('/channels')
 @ApiTags('채널 API')
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}
@@ -20,7 +20,6 @@ export class ChannelsController {
   // res : { 채널명 }들
   @Get('/list/join')
   @ApiOperation({ summary: 'req : id, res : { 채널 id, 채널명 }[]' })
-  @Header('access-control-allow-origin', '*')
   f1() {
     const arr = [
       { id: '1', name: '안뇽~~~~~' },
@@ -36,7 +35,6 @@ export class ChannelsController {
   @ApiOperation({
     summary: 'req : id, res : { 채널 id, 채널명, 비밀번호 유무 }[]',
   })
-  @Header('access-control-allow-origin', '*')
   f2() {
     const arr = [
       { id: '1', name: '안뇽~~~~~', pw: 'false' },
@@ -52,7 +50,6 @@ export class ChannelsController {
   // res : 상태코드(비밀번호 틀린 거(403)랑 ban(204) 구분)
   @Post('/enter')
   @HttpCode(204)
-  @Header('access-control-allow-origin', '*')
   @ApiOperation({
     summary:
       'req : {user id, channel id, channel pw}, \
@@ -67,7 +64,6 @@ export class ChannelsController {
   // res : user id[]
   @Get('/room/users')
   @ApiOperation({ summary: 'req : channel id, res : user id[]' })
-  @Header('access-control-allow-origin', '*')
   f4() {
     const arr = [
       { id: 'seungoh' },
@@ -84,7 +80,6 @@ export class ChannelsController {
   // res : userStatus{id, status}[]
   @Get('/room/users/status')
   @ApiOperation({ summary: 'req : user id[], res : userStatus{id, status}[]' })
-  @Header('access-control-allow-origin', '*')
   f5() {
     const arr = [
       { id: 'seungoh', status: '1' },
@@ -101,7 +96,6 @@ export class ChannelsController {
   // res : status code (성공: 202)
   @Get('/room/exit')
   @HttpCode(202)
-  @Header('access-control-allow-origin', '*')
   @ApiOperation({
     summary: 'req : user id, channel id, res : status code(성공: 202)',
   })
@@ -119,7 +113,6 @@ export class ChannelsController {
       'req : user id, channel name, channel pw, \
                            res : channel id, status code(성공: 202, 실패: )',
   })
-  @Header('access-control-allow-origin', '*')
   f7() {
     return Object.assign({
       id: '5',
@@ -137,7 +130,6 @@ export class ChannelsController {
       'req : sender id, reciever id, \
                            res : status code(성공: 200 or 201, 실패: )',
   })
-  @Header('access-control-allow-origin', '*')
   f8() {
     return 200;
   }

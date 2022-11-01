@@ -10,7 +10,7 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 
 // 2-2, 2-4
-@Controller('/api/users')
+@Controller('/users')
 @ApiTags('유저 API')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -23,7 +23,6 @@ export class UsersController {
     summary: 'req : user id, \
 						   res : status code(성공: 200, 실패: 404)',
   })
-  @Header('access-control-allow-origin', '*')
   @HttpCode(200)
   f1(@Query('id') id: string) {
     return 200;
@@ -37,7 +36,6 @@ export class UsersController {
     summary: 'req : user id, \
 							res : status code(성공: 200, 실패: 404)',
   })
-  @Header('access-control-allow-origin', '*')
   @HttpCode(200)
   f3(@Query('id') id: string) {
     return 200;
@@ -49,7 +47,6 @@ export class UsersController {
   @Get('gameStat')
   @ApiOperation({ summary: 'req : user id, \
   res : wins, loses' })
-  @Header('access-control-allow-origin', '*')
   f4(@Query('id') id: string) {
     return Object.assign({
       win: 9999,
@@ -62,7 +59,6 @@ export class UsersController {
   // res : user status
   @Get('status')
   @ApiOperation({ summary: 'req : user id, res : user status' })
-  @Header('access-control-allow-origin', '*')
   f6(@Query('id') id: string) {
     return Object.assign({
       user_status: 'logged in',
@@ -74,7 +70,6 @@ export class UsersController {
   // res : {nickname, avatar binary code}
   @Get('/:id')
   @ApiOperation({ summary: 'req : user id, res : ' })
-  @Header('access-control-allow-origin', '*')
   f2(@Query('id') id: string) {
     return Object.assign({
       nickname: 'test_nickname',
@@ -88,7 +83,6 @@ export class UsersController {
   @Patch('follow')
   @ApiOperation({ summary: 'req : user id, follow id, follow 여부\
 							res : ' })
-  @Header('access-control-allow-origin', '*')
   f5(@Query('id') id: string) {
     return;
   }
@@ -98,7 +92,6 @@ export class UsersController {
   // res :
   @Patch('block')
   @ApiOperation({ summary: 'req : user id, block id res : ' })
-  @Header('access-control-allow-origin', '*')
   f7(@Query('id') id: string) {
     return;
   }
