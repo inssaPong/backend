@@ -1,5 +1,5 @@
 import { Module, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { DatabaseService } from './database.service';
 import { OnApplicationShutdown } from '@nestjs/common';
@@ -7,15 +7,16 @@ import { ModuleRef } from '@nestjs/core';
 
 const databasePoolFactory = async (configService: ConfigService) => {
   return new Pool({
-    user: configService.get('POSTGRES_USER'),
-    host: configService.get('POSTGRES_HOST'),
-    database: configService.get('POSTGRES_DB'),
-    password: configService.get('POSTGRES_PASSWORD'),
-    port: configService.get('POSTGRES_PORT'),
+    user: configService.get<string>('database.postgres_user'),
+    host: configService.get<string>('database.postgres_host'),
+    database: configService.get<string>('database.postgres_db_name'),
+    password: configService.get<string>('database.postgres_password'),
+    port: configService.get<number>('database.postgres_port'),
   });
 };
 
 @Module({
+  imports: [ConfigModule],
   providers: [
     {
       provide: 'DATABASE_POOL',

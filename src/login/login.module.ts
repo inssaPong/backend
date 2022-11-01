@@ -17,9 +17,9 @@ import { DatabaseModule } from 'src/database/database.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.SECRET'),
+        secret: configService.get<string>('jwt.secret'),
         signOptions: {
-          expiresIn: configService.get<string>('jwt.EXPIRATION_TIME'),
+          expiresIn: configService.get<string>('jwt.expiration_time'),
         },
       }),
     }),
