@@ -5,15 +5,20 @@ import {
   Patch,
   HttpCode,
   Header,
+  Body,
+  Logger,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { UpdateMypageDto } from './dto/update-mypage.dto';
 import { MypageRepository } from './mypage.repository';
 import { MypageService } from './mypage.service';
+// ** 유저 본인의 아이디는 생략
 
 // 2-2
-@Controller('/api/mypage')
+@Controller('/mypage')
 @ApiTags('마이페이지 API')
 export class MypageController {
+  private readonly logger = new Logger(MypageController.name);
   constructor(
     private readonly mypageService: MypageService,
     private readonly mypageRepository: MypageRepository,
@@ -24,19 +29,15 @@ export class MypageController {
   // res : {nickname, avatar binary code, twoFactor 여부}
   @Get()
   @ApiOperation({
-    summary:
+    summary: '정보 가져오기',
+    description:
       'req : user id, \
                 res : {nickname, avatar binary code, twoFactor 여부}',
   })
   @Header('access-control-allow-origin', '*')
-  f1(@Query('id') id: string) {
+  getUserInfo(@Query('id') id: string) {
     const userInfo = this.mypageRepository.getUserInfo(id);
     return userInfo;
-    // return Object.assign({
-    //   nickname: userInfo[0],
-    //   avatar: userInfo[3],
-    //   two_factor: userInfo[2],
-    // });
   }
 
   // avatar 수정
@@ -44,14 +45,17 @@ export class MypageController {
   // res : status code(성공 : 200, 실패 : 400)
   @Patch('/avatar')
   @ApiOperation({
-    summary:
+    summary: 'avatar 수정',
+    description:
       'req : user id, avatar binary code \
 							  res : status code(성공 : 200, 실패 : 400)',
   })
   @Header('access-control-allow-origin', '*')
   @HttpCode(200)
-  f2(@Query('id') id: string) {
-    return 200;
+  patchAvatar(@Query('id') id: string, @Body() body: UpdateMypageDto) {
+    this.logger.log(`result: ${body.avatar}`);
+    this.mypageRepository.patchAvatar('sanjeon', body.avatar);
+    return;
   }
 
   // 닉네임 수정
@@ -88,19 +92,6 @@ export class MypageController {
   f5(@Query('id') id: string) {
     const follows = ['test1', 'test2', 'test3', 'test4'];
     return follows;
-  }
-
-  // follow들의 현재 접속 상태 가져오기
-  // req : user id
-  // res : follows status
-  @Get('/follows/status')
-  @ApiOperation({ summary: 'req : user id, res : follows status' })
-  @Header('access-control-allow-origin', '*')
-  f6(@Query('id') id: string) {
-    return Object.assign({
-      dason: 'on',
-      seungoh: 'on',
-    });
   }
 
   // 게임 전적 가져오기

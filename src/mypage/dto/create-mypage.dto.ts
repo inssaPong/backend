@@ -5,8 +5,6 @@ import {
   MaxLength,
   IsNotEmpty,
   MinLength,
-  IsArray,
-  IsAscii,
 } from 'class-validator';
 
 export class CreateMypageDto {
@@ -18,23 +16,9 @@ export class CreateMypageDto {
   readonly nickname: string;
 
   @ApiProperty({ description: '프로필 사진' })
-  readonly avatar: File;
+  readonly avatar: string;
 
   @IsBoolean()
   @ApiProperty({ description: '2차 인증 여부' })
   readonly twoFactor: boolean;
-}
-
-export class CreateFollowsDto {
-  @IsArray()
-  @IsString()
-  @ApiProperty()
-  readonly follows: string[];
-}
-
-export class CreateFollowsStatusDto {
-  @IsAscii()
-  @IsNotEmpty()
-  @ApiProperty()
-  readonly status: CharacterData;
 }
