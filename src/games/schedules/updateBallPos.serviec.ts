@@ -1,10 +1,11 @@
 import { MainGateway } from 'src/sockets/main.gateway';
 import { GameObject, GameRoomComponent } from '../game.component';
+import { GameGateway } from '../games.gateway';
 import nextRound from './nextRound.service';
 
 export default function updateBallPos(
   gameRoom: GameRoomComponent,
-  mainGateway: MainGateway,
+  gameGateway: GameGateway,
 ) {
   // p1 bar
   if (
@@ -41,13 +42,13 @@ export default function updateBallPos(
   // 왼쪽벽
   else if (gameRoom.ball_x <= 0 + GameObject.ball_radius) {
     gameRoom.p2_score++;
-    setTimeout(nextRound, 0, gameRoom, mainGateway);
+    setTimeout(nextRound, 0, gameRoom, gameGateway);
     return;
   }
   // 오른쪽벽
   else if (gameRoom.ball_x > GameObject.canvas_width - GameObject.ball_radius) {
     gameRoom.p1_score++;
-    setTimeout(nextRound, 0, gameRoom, mainGateway);
+    setTimeout(nextRound, 0, gameRoom, gameGateway);
     return;
   }
   gameRoom.ball_x += 1 * gameRoom.ball_x_dir;
