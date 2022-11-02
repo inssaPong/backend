@@ -1,7 +1,7 @@
 export const GameObject = {
   canvas_width: 300,
   canvas_height: 150,
-  ball_radius: 2,
+  ball_radius: 3,
   bar_width: 5,
   bar_height: 20,
   move_pixel: 5,

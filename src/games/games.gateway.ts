@@ -1,15 +1,18 @@
 import { Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
 import { GameObject, GameRoomComponent } from './game.component';
 import getPosition from './schedules/getPosition.service';
+import nextRound from './schedules/nextRound.service';
 import updateBallPos from './schedules/updateBallPos.serviec';
 
 @WebSocketGateway({ cors: true })
 export class GameGateway {
-  constructor(public mainGateway: MainGateway) {}
+  gameRooms: GameRoomComponent[] = [];
   logger: Logger = new Logger('GameGameway');
+
+  constructor(public mainGateway: MainGateway) {}
 
   @SubscribeMessage('game/watch')
   gameCatch(client: Socket, id: string) {
@@ -34,55 +37,14 @@ export class GameGateway {
       this.mainGateway.enterPlayer.push(client);
     }
     if (this.mainGateway.enterPlayer.length > 1) {
-      let room_id: string;
-      const p1 = this.mainGateway.users.find(
-        (user) => user.socket == this.mainGateway.enterPlayer[0],
-      );
-      const p2 = this.mainGateway.users.find(
-        (user) => user.socket == this.mainGateway.enterPlayer[1],
-      );
-
-      room_id = p1.id + '_' + p2.id;
-      this.mainGateway.enterPlayer.splice(0, 2);
-      p1.gameInfo.init(p1.id, p2.id, room_id);
-      p2.gameInfo.init(p1.id, p2.id, room_id);
-      p1.socket.join(room_id);
-      p2.socket.join(room_id);
-
-      const gameRoom = new GameRoomComponent();
-      gameRoom.room_id = room_id;
-      gameRoom.p1_id = p1.id;
-      gameRoom.p2_id = p2.id;
-      this.mainGateway.gameRooms.push(gameRoom);
-      this.mainGateway.server
-        .to(room_id)
-        .emit(
-          'game/start',
-          p1.id,
-          p2.id,
-          GameObject.ball_radius,
-          GameObject.bar_width,
-          GameObject.bar_height,
-        );
-      gameRoom.interval_ball = setInterval(
-        updateBallPos,
-        GameObject.ballSpeed,
-        gameRoom,
-        this.mainGateway,
-      );
-      gameRoom.interval_move = setInterval(
-        getPosition,
-        GameObject.drawUpdateTime,
-        gameRoom,
-        this.mainGateway.server,
-      );
+      this.startGame();
     }
   }
 
   @SubscribeMessage('game/move')
   movePlayer(client: Socket, data: string) {
     const player = this.mainGateway.users.find((user) => user.socket == client);
-    const gameRoom = this.mainGateway.gameRooms.find(
+    const gameRoom = this.gameRooms.find(
       (room) => room.room_id == player.gameInfo.room_id,
     );
 
@@ -112,6 +74,57 @@ export class GameGateway {
 
   @SubscribeMessage('game/giveUp')
   giveUpGame(client: Socket) {
-    this.mainGateway.playDisconnect(client);
+    const player = this.mainGateway.users.find((user) => user.socket == client);
+    const gameRoom = this.gameRooms.find(
+      (gameRoom) => gameRoom.room_id == player.gameInfo.room_id,
+    );
+    setTimeout(nextRound, 0, gameRoom, this);
+  }
+
+  startGame() {
+    let room_id: string;
+    const p1 = this.mainGateway.users.find(
+      (user) => user.socket == this.mainGateway.enterPlayer[0],
+    );
+    const p2 = this.mainGateway.users.find(
+      (user) => user.socket == this.mainGateway.enterPlayer[1],
+    );
+
+    room_id = p1.id + '_' + p2.id;
+    this.mainGateway.enterPlayer.splice(0, 2);
+    p1.gameInfo.init(p1.id, p2.id, room_id);
+    p2.gameInfo.init(p1.id, p2.id, room_id);
+    p1.socket.join(room_id);
+    p2.socket.join(room_id);
+    p1.setStatusGaming();
+    p2.setStatusGaming();
+
+    const gameRoom = new GameRoomComponent();
+    gameRoom.room_id = room_id;
+    gameRoom.p1_id = p1.id;
+    gameRoom.p2_id = p2.id;
+    this.gameRooms.push(gameRoom);
+    this.mainGateway.server
+      .to(room_id)
+      .emit(
+        'game/start',
+        p1.id,
+        p2.id,
+        GameObject.ball_radius,
+        GameObject.bar_width,
+        GameObject.bar_height,
+      );
+    gameRoom.interval_ball = setInterval(
+      updateBallPos,
+      GameObject.ballSpeed,
+      gameRoom,
+      this,
+    );
+    gameRoom.interval_move = setInterval(
+      getPosition,
+      GameObject.drawUpdateTime,
+      gameRoom,
+      this.mainGateway.server,
+    );
   }
 }
