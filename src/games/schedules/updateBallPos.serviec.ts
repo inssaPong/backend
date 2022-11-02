@@ -38,11 +38,13 @@ export default function updateBallPos(
   else if (gameRoom.ball_x <= 0 + GameObject.ball_radius) {
     gameRoom.p2_score++;
     setTimeout(nextRound, 0, gameRoom, mainGateway);
+    return;
   }
   // 오른쪽벽
   else if (gameRoom.ball_x > GameObject.canvas_width - GameObject.ball_radius) {
     gameRoom.p1_score++;
     setTimeout(nextRound, 0, gameRoom, mainGateway);
+    return;
   }
   gameRoom.ball_x += 1 * gameRoom.ball_x_dir;
   gameRoom.ball_y += 1 * gameRoom.ball_y_dir;
