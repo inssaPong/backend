@@ -9,7 +9,7 @@ export default function updateBallPos(
   // p1 bar
   if (
     gameRoom.ball_x - GameObject.ball_radius <=
-      gameRoom.p1_x + GameObject.bar_width + GameObject.bar_width &&
+      gameRoom.p1_x + GameObject.bar_width &&
     gameRoom.ball_x - GameObject.ball_radius > gameRoom.p1_x &&
     gameRoom.ball_y >= gameRoom.p1_y &&
     gameRoom.ball_y <= gameRoom.p1_y + GameObject.bar_height
@@ -17,6 +17,7 @@ export default function updateBallPos(
     gameRoom.ball_x_dir = 1;
   }
   // p2 bar
+  //
   else if (
     gameRoom.ball_x + GameObject.ball_radius >= gameRoom.p2_x &&
     gameRoom.ball_x + GameObject.ball_radius <
