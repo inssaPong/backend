@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsNotEmpty,
   MinLength,
+  IsArray,
 } from 'class-validator';
 
 export class CreateMypageDto {
@@ -21,4 +22,32 @@ export class CreateMypageDto {
   @IsBoolean()
   @ApiProperty({ description: '2차 인증 여부' })
   readonly twoFactor: boolean;
+}
+
+export class CreateGameHistoryDto {
+  @IsArray()
+  @ApiProperty({ description: '게임 기록 리스트' })
+  readonly gameHistory: OneGameHistory[];
+}
+
+export class OneGameHistory {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(10)
+  @MinLength(1)
+  @ApiProperty({ description: '승자 아이디' })
+  readonly winner: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(10)
+  @MinLength(1)
+  @ApiProperty({ description: '패자 아이디' })
+  readonly loser: string;
+}
+
+export class Follows {
+  @IsArray()
+  @ApiProperty({ description: '팔로우 아이디 배열' })
+  readonly follows: string[];
 }
