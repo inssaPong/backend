@@ -2,18 +2,24 @@ import { LoginRepository } from './login.repository';
 import {
   Controller,
   Get,
-  Header,
   HttpCode,
   Post,
   Query,
-  Redirect,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiProperty,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FtAuthGuard } from './ft_oauth/ft.guard';
-import { JwtSignGuard } from './jwt/jwt_sign.guard';
+import { JwtSignGuard } from './jwt/jwt_signup.guard';
 import { LoginService } from './login.service';
 import { Public } from './public.decorator';
+import { optional, string } from 'joi';
+import { TwoFactorDto } from './dto/swagger-login.dto';
 
 // 1-1, 1-2, 1-3, 1-4
 @Controller('/login')
@@ -24,6 +30,9 @@ export class LoginController {
     private readonly loginRepository: LoginRepository,
   ) {}
 
+  @ApiOperation({
+    summary: '42 Oauth 로그인',
+  })
   @Public()
   @UseGuards(FtAuthGuard)
   @Get('42')
@@ -31,41 +40,33 @@ export class LoginController {
     return;
   }
 
+  @ApiOperation({
+    summary: '42 Oauth 로그인 콜백',
+    description: '직접적으로 사용하지 않음',
+  })
   @Public()
   @UseGuards(FtAuthGuard, JwtSignGuard)
   @Get('42/callback')
-  @Redirect('http://localhost:8080/home')
   async ftAuthRedirect() {
     return;
   }
 
-  // 계정 등록
-  // req : (body)nickname, (body)avatar
-  // res : status code(성공 : 200, 실패 : 400)
-  //   @Post('/newaccount') // TODO 원래 이거임.
-  @Get('/newaccount')
-  @HttpCode(200)
+  // 2차 인증 성공 여부
   @ApiOperation({
-    summary:
-      'req : nickname, avatar \
-              res : status code(성공 : 200, 실패 : 400)',
+    summary: '2차 인증 성공 여부',
   })
-  registerAccount(@Query('id') id: string) {
-    this.loginRepository.createUser('seungoh', 'seungeun', 'seungoh@naver.com');
-    return 200;
-  }
-
-  // 2차 인증 로그인 성공 여부
-  // req : (body)certified number
-  // res : status code(성공 : 200, 실패 : 400)
-  @ApiOperation({
-    summary:
-      'req : certificate number\
-				        res : status code(성공 : 200, 실패 : 400)',
+  @ApiBody({ type: TwoFactorDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Authentication successful',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Authentication failed',
   })
   @Post('/certificate')
   @HttpCode(200)
-  checkTwoFactor(@Query('id') id: string) {
+  checkTwoFactor() {
     return 200;
   }
 }

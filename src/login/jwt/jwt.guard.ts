@@ -31,17 +31,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
     status?: any,
   ) {
-    // Logger.debug(`err: ${err}`); // Logger.debug
-    // Logger.debug(`user: ${user}`); // Logger.debug
-    // Logger.debug(`info: ${info}`); // Logger.debug
-    // Logger.debug(`context: ${context}`); // Logger.debug
-    // Logger.debug(`status: ${status}`); // Logger.debug
-    if (info) Logger.log(`${info}`);
+    const logger = new Logger('JwtGuard');
+    // logger.debug(`err: ${err}`);
+    // logger.debug(`user: ${user}`);
+    // logger.debug(`info: ${info}`);
+    // logger.debug(`context: ${context}`);
+    // logger.debug(`status: ${status}`);
+    if (info) logger.log(`${info}`);
     if (err || !user) {
-      Logger.log('Unauthorized users'); // Logger.log
+      logger.log('Unauthorized users');
       throw err || new UnauthorizedException();
     }
-    Logger.log('Authorized user');
+    logger.log('Authorized user');
     return user;
   }
 }

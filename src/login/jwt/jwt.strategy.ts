@@ -14,17 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any) {
-    /*
-      TODO: DB에 해당 user가 있는지 확인
-      ex)
-      const has_user = userRepository.findOne(payload.username);
-      if (!has_user) {
-        Logger.log("유저 정보가 없습니다."); // Logger.log
-        return undefined
-      };
-    */
-    Logger.debug(`username: ${payload.username}`); // Logger.debug
-    Logger.debug(`email: ${payload.email}`); // Logger.debug
+    const logger = new Logger('JwtStrategy');
+    logger.debug(`username: ${payload.username}`);
+    logger.debug(`email: ${payload.email}`);
     return { username: payload.username, email: payload.email };
   }
 }
