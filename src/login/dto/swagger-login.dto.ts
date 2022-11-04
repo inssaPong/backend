@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class TwoFactorDto {
   @ApiProperty({
-    description: 'Authentication number',
-    default: '',
+    description: 'Certified number',
+    default: '', // TODO: number vs string
     required: true,
   })
-  AuthenticationNumber: number; // TODO: 이름 변경. number vs string
+  CertifiedNumber: number; // TODO: 이름 변경. number vs string
 }
