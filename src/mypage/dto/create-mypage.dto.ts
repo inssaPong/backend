@@ -6,9 +6,10 @@ import {
   IsNotEmpty,
   MinLength,
   IsArray,
+  IsNumber,
 } from 'class-validator';
 
-export class CreateMypageDto {
+export class UserInfoDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)
@@ -24,13 +25,13 @@ export class CreateMypageDto {
   readonly twoFactor: boolean;
 }
 
-export class CreateGameHistoryDto {
+export class GameHistoryDto {
   @IsArray()
   @ApiProperty({ description: '게임 기록 리스트' })
-  readonly gameHistory: OneGameHistory[];
+  readonly gameHistory: OneGameHistoryDto[];
 }
 
-export class OneGameHistory {
+export class OneGameHistoryDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)
@@ -46,8 +47,18 @@ export class OneGameHistory {
   readonly loser: string;
 }
 
-export class Follows {
+export class FollowsDto {
   @IsArray()
   @ApiProperty({ description: '팔로우 아이디 배열' })
   readonly follows: string[];
+}
+
+export class GameStatDto {
+  @IsNumber()
+  @ApiProperty({ description: '승리 수' })
+  readonly wins: number;
+
+  @IsNumber()
+  @ApiProperty({ description: '패배 수' })
+  readonly loses: number;
 }
