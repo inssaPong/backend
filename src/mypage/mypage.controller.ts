@@ -1,22 +1,26 @@
+import { Controller, Get, Query, Patch, Body, Logger } from '@nestjs/common';
 import {
-  Controller,
-  Get,
-  Query,
-  Patch,
-  HttpCode,
-  Header,
-  Body,
-  Logger,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { UpdateMypageDto } from './dto/update-mypage.dto';
+  ApiTags,
+  ApiOperation,
+  ApiCreatedResponse,
+  ApiBody,
+  ApiResponse,
+} from '@nestjs/swagger';
+import {
+  GameHistoryDto,
+  UserInfoDto,
+  GameStatDto,
+  FollowsDto,
+} from './dto/create-mypage.dto';
+import { UpdateUserInfoDto } from './dto/update-mypage.dto';
 import { MypageRepository } from './mypage.repository';
 import { MypageService } from './mypage.service';
 // ** 유저 본인의 아이디는 생략
 
 // 2-2
-@Controller('/mypage')
 @ApiTags('마이페이지 API')
+@ApiResponse({ status: 200, description: '성공' })
+@Controller('/mypage')
 export class MypageController {
   private readonly logger = new Logger(MypageController.name);
   constructor(
@@ -24,103 +28,113 @@ export class MypageController {
     private readonly mypageRepository: MypageRepository,
   ) {}
 
-  // 정보 가져오기
-  // req : user id
-  // res : {nickname, avatar binary code, twoFactor 여부}
+  @ApiOperation({
+    summary: 'mypage 유저 정보 가져오기',
+    description:
+      'req : Null, \n\
+	  res : {nickname, avatar binary code, twoFactor 여부}',
+  })
+  @ApiCreatedResponse({
+    description: '성공',
+    status: 200,
+    type: UserInfoDto,
+  })
   @Get()
+  async getUserInfo(@Query('id') id: string) {
+    // TODO mypage 안에 모든 API 싹다 id jwt에서 추출하는 걸로 바꾸기
+    const userInfo = await this.mypageRepository.getUserInfo(id);
+    this.logger.log(`User Info: ${userInfo}`);
+    if (userInfo == 400) return { code: 400 };
+    return { code: 200, data: userInfo };
+  }
+
   @ApiOperation({
-    summary: '정보 가져오기',
+    summary: 'nickname or avatar or twoFacktor_status 업데이트',
     description:
-      'req : user id, \
-                res : {nickname, avatar binary code, twoFactor 여부}',
+      'req : {nickname | avatar | twoFacktor_status} 해당 요소들 중 최소 하나만 존재하면 됨.\n\
+							  res : status code(성공 : 200, 실패 : 500)',
   })
-  @Header('access-control-allow-origin', '*')
-  getUserInfo(@Query('id') id: string) {
-    const userInfo = this.mypageRepository.getUserInfo(id);
-    return userInfo;
+  @ApiBody({
+    type: UpdateUserInfoDto,
+  })
+  @ApiCreatedResponse({
+    description: '성공',
+    status: 200,
+  })
+  @Patch()
+  async patchUserInfo(
+    @Query('id') id: string,
+    @Body() body: UpdateUserInfoDto,
+  ) {
+    this.logger.log(`result: ${body}`);
+    const result = await this.mypageRepository.patchUserInfo(id, body);
+    return Object.assign({ code: result });
   }
 
-  // avatar 수정
-  // req : user id, (body)avatar binary code
-  // res : status code(성공 : 200, 실패 : 400)
-  @Patch('/avatar')
+  @ApiCreatedResponse({
+    description: '성공',
+    status: 200,
+    type: FollowsDto,
+  })
   @ApiOperation({
-    summary: 'avatar 수정',
-    description:
-      'req : user id, avatar binary code \
-							  res : status code(성공 : 200, 실패 : 400)',
+    summary: 'follow 목록 가져오기',
+    description: 'req : \n\
+	res : user_id[], status_code(성공:200, 실패:400)',
   })
-  @Header('access-control-allow-origin', '*')
-  @HttpCode(200)
-  patchAvatar(@Query('id') id: string, @Body() body: UpdateMypageDto) {
-    this.logger.log(`result: ${body.avatar}`);
-    this.mypageRepository.patchAvatar('sanjeon', body.avatar);
-    return;
-  }
-
-  // 닉네임 수정
-  // req : user id, (body)nickname
-  // res : status code(성공 : 200, 실패 : 400)
-  @Patch('/nickname')
-  @ApiOperation({
-    summary:
-      'req : user id, nickname \
-                res : status code(성공 : 200, 실패 : 400)',
-  })
-  @HttpCode(200)
-  @Header('access-control-allow-origin', '*')
-  f3(@Query('id') id: string) {
-    return 200;
-  }
-
-  // 2차 인증 여부 수정
-  // req : user id, (body)twoFactor
-  // res :
-  @Patch('/twoFactor')
-  @ApiOperation({ summary: 'req : user id res : ' })
-  @Header('access-control-allow-origin', '*')
-  f4(@Query('id') id: string) {
-    return 1111;
-  }
-
-  // 친구 목록 가져오기
-  // req : user id
-  // res : follow ids[]
   @Get('/follows')
-  @ApiOperation({ summary: 'req : user id, res : follows[]' })
-  @Header('access-control-allow-origin', '*')
-  f5(@Query('id') id: string) {
-    const follows = ['test1', 'test2', 'test3', 'test4'];
-    return follows;
+  @ApiOperation({ summary: 'req : user id, res : follow[]' })
+  async getFollows(@Query('id') id: string) {
+    const follows_db_result = await this.mypageRepository.getFollows(id);
+    if (follows_db_result == 400) return Object.assign({ code: 400 });
+    let follows: FollowsDto = { id: [] };
+    for (const follow_id of follows_db_result) {
+      this.logger.log(`follow_id: ${follow_id['partner_id']}`);
+      follows.id.push(follow_id['partner_id'] as string);
+    }
+    return Object.assign({ code: 200, data: follows });
   }
 
-  // 게임 전적 가져오기
-  // req : user id
-  // res : {winner, loser}[5]
-  @Get('/gameHistory')
-  @ApiOperation({
-    summary: 'req : user id, res : status code(성공: 200, 실패: 404)',
+  @ApiCreatedResponse({
+    description: '성공',
+    status: 200,
+    type: GameHistoryDto,
   })
-  @Header('access-control-allow-origin', '*')
-  f7(@Query('id') id: string) {
-    const arr = [
-      { winner: 'seungoh', loser: 'dason' },
-      { winner: 'seungoh', loser: 'dason' },
-      { winner: 'seungoh', loser: 'dason' },
-    ];
-    return arr;
+  @ApiOperation({
+    summary: '게임 전적 기록 가져오기',
+    description: 'req : \
+	res : GameHistory[], status_code(성공:200, 실패:400)',
+  })
+  @Get('/gameHistory')
+  async getGameHistory(@Query('id') id: string) {
+    const result = await this.mypageRepository.getGameHistory(id);
+    if (result == 400) return Object({ code: result });
+    return Object({ code: 200, data: result });
   }
 
-  // 게임 승패 가져오기
-  // req : user id
-  // res : wins, loses
-  @Get('/gameStat')
+  @ApiCreatedResponse({
+    description: '성공',
+    status: 200,
+    type: GameStatDto,
+  })
+  @ApiOperation({
+    summary: '게임 승패 수 가져오기',
+    description: 'req : \n\
+	res : GameStatDto, status_code(성공:200, 실패:400)',
+  })
   @ApiOperation({ summary: 'req : user id, res : wins, loses' })
-  @Header('access-control-allow-origin', '*')
-  f8(@Query('id') id: string) {
+  @Get('/gameStat')
+  async getGameStat(@Query('id') id: string) {
+    const winHistory = await this.mypageRepository.getWinHistory(id);
+    const loseHistory = await this.mypageRepository.getLoseHistory(id);
+    if (winHistory == 400 || loseHistory == 400)
+      return Object.assign({ code: 400 });
+    const gameStat: GameStatDto = {
+      wins: winHistory.length,
+      loses: loseHistory.length,
+    };
     return Object.assign({
-      wins: 9999,
-      lose: '123',
+      code: 200,
+      data: gameStat,
     });
   }
 }
