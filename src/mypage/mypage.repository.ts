@@ -20,7 +20,7 @@ export class MypageRepository {
       );
       this.logger.debug(`User Info: ${databaseResponse}`);
       if (databaseResponse.length <= 0) return '404 Not Found'; // TODO status code 뱉는 걸로 바꾸기
-      return 400;
+      return databaseResponse;
     } catch (error) {
       this.logger.error(`Error: ${error}`);
       return 400;
@@ -44,21 +44,6 @@ export class MypageRepository {
     } catch (error) {
       this.logger.error(`Error: ${error}`);
       return 500;
-    }
-  }
-
-  async patchTwoFactor(id: string, twofactor_status: boolean) {
-    try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-			  UPDATE "user"
-			  SET twofactor_status = ${twofactor_status}
-			  WHERE id='${id}';
-			`,
-      );
-    } catch (error) {
-      this.logger.error(`Error: ${error}`);
-      return 404;
     }
   }
 
