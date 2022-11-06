@@ -5,7 +5,9 @@ import { AppModule } from './app.module';
 // import * as cookieParser from 'cookie-parser'; // TODO: Encrypt cookie
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('트센 API 설계')

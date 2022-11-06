@@ -6,12 +6,21 @@ export default () => ({
     secret: process.env.FT_SECRET,
     redirect_url: process.env.FT_REDIRECT_URL,
   },
+
   jwt: {
     secret: process.env.JWT_SECRET,
     expiration_time: parseInt(process.env.JWT_EXPIRATION_TIME, 10) || 3600,
   },
+
   cookie: {
     secret: process.env.COOKIE_SECRET,
+  },
+
+  mail: {
+    host: process.env.MAIL_HOST,
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+    from: process.env.MAIL_FROM,
   },
 
   database: {
