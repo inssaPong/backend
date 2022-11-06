@@ -27,8 +27,7 @@ export class JwtSignGuard implements CanActivate {
     const access_token = this.jwtService.sign(payload);
     logger.debug(`access_token:  ${access_token}`);
     response.cookie('Authorization', access_token, {
-      httpOnly: true,
-      // signed: true, // TODO: Encrypt cookie
+      // httpOnly: true, // TODO: true일때 보안은 좋으나 클라이언트에서 접근 불가. 어떻게 하지?
     });
     const is_signup = await this.loginRepository.findUser(user.username);
     if (is_signup === undefined) {
