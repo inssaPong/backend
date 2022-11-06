@@ -20,7 +20,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         defaults: {
           from: configService.get<string>('mail.from'),
         },
-        preview: true,
       }),
     }),
   ],
