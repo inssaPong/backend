@@ -32,11 +32,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     status?: any,
   ) {
     const logger = new Logger('JwtGuard');
-    // logger.debug(`err: ${err}`);
-    // logger.debug(`user: ${user}`);
-    // logger.debug(`info: ${info}`);
-    // logger.debug(`context: ${context}`);
-    // logger.debug(`status: ${status}`);
     if (info) logger.log(`${info}`);
     if (err || !user) {
       logger.log('Unauthorized users');
