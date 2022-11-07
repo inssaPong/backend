@@ -31,7 +31,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
     status?: any,
   ) {
-    const logger = new Logger('JwtGuard');
+    const logger = new Logger(JwtAuthGuard.name);
     if (info) logger.log(`${info}`);
     if (err || !user) {
       logger.log('Unauthorized users');

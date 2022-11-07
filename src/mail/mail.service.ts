@@ -8,7 +8,7 @@ export class MailService {
     private readonly mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  logger = new Logger('MailService');
+  logger = new Logger(MailService.name);
 
   async sendMail(email: string) {
     try {

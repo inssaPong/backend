@@ -10,7 +10,7 @@ import updateBallPos from './schedules/updateBallPos.serviec';
 @WebSocketGateway({ cors: true })
 export class GameGateway {
   gameRooms: GameRoomComponent[] = [];
-  logger: Logger = new Logger('GameGameway');
+  logger: Logger = new Logger(GameGateway.name);
 
   constructor(public mainGateway: MainGateway) {}
 

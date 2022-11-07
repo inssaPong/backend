@@ -13,7 +13,7 @@ export class MainGateway {
   server: Server;
   users: UserInfo[] = [];
   enterPlayer: Socket[] = [];
-  logger: Logger = new Logger('MainGameway');
+  logger: Logger = new Logger(MainGateway.name);
 
   afterInit() {
     this.newUser('seungoh');

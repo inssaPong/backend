@@ -23,7 +23,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     profile: Profile,
     cb: VerifyCallback,
   ): Promise<any> {
-    const logger = new Logger('FtStrategy');
+    const logger = new Logger(FtStrategy.name);
     logger.debug(`42 access Token: ${accessToken} `);
     logger.debug(`42 refreshToken: ${refreshToken}`);
     const user = {

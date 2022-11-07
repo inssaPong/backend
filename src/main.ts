@@ -24,7 +24,7 @@ async function bootstrap() {
   // app.enableShutdownHooks(); // TODO: 버그
   await app.listen(PORT);
 
-  const logger = new Logger('Main');
+  const logger = new Logger(bootstrap.name);
   logger.log(`Application is running on: ${DOMAIN}:${PORT}`);
 }
 bootstrap();
