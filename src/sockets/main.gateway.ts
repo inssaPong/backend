@@ -5,8 +5,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameObject, GameRoomComponent } from 'src/games/game.component';
-import nextRound from 'src/games/schedules/nextRound.service';
 import { UserInfo } from './user.component';
 
 @WebSocketGateway({ cors: true })
@@ -14,21 +12,20 @@ export class MainGateway {
   @WebSocketServer()
   server: Server;
   users: UserInfo[] = [];
-  logger: Logger = new Logger('MainGameway');
   enterPlayer: Socket[] = [];
-  gameRooms: GameRoomComponent[] = [];
+  logger: Logger = new Logger('MainGameway');
 
-  afterInit() {}
+  afterInit() {
+    this.newUser('seungoh');
+    this.newUser('sehyan');
+  }
 
   handleConnection(client: Socket, ...args: any[]) {
-    const user = new UserInfo();
-    user.socket = client;
-    this.users.push(user);
     this.logger.log(`Client Connected : ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    this.playDisconnect(client);
+    this.userDisconnect(client);
     this.users = this.users.filter((user) => user.socket != client);
     this.enterPlayer = this.enterPlayer.filter((element) => element != client);
     this.logger.log(`Client Disconnected : ${client.id}`);
@@ -36,21 +33,41 @@ export class MainGateway {
 
   @SubscribeMessage('getUserId')
   getUserId(client: Socket, id: string) {
-    const user = this.users.find((element) => element.socket == client);
-    user.id = id;
+    let user = this.users.find((user) => user.id == id);
+    if (user == undefined) {
+      this.logger.log(
+        `[connect] ${id} : 여기 들어오면 안돼!! 뭔가 이상한거임.`,
+      );
+      return;
+    }
+    user.socket = client;
+    user.setStatusOnline();
   }
 
-  playDisconnect(client: Socket) {
-    const player = this.users.find((user) => user.socket == client);
-    if (player.gameInfo.room_id == '') return;
-    const gameRoom = this.gameRooms.find(
-      (room) => room.room_id == player.gameInfo.room_id,
-    );
-    if (gameRoom.p1_id == player.id) {
-      gameRoom.p2_score = GameObject.finalScore;
-    } else {
-      gameRoom.p1_score = GameObject.finalScore;
+  @SubscribeMessage('getUserId')
+  getUserStatus(client: Socket, id: string) {
+    const user = this.users.find((element) => element.id == id);
+    if (user == undefined) {
+      this.logger.log(
+        `[getUserId] ${id} : 여기 들어오면 안돼!! 뭔가 이상한거임.`,
+      );
+      return;
     }
-    setTimeout(nextRound, 0, gameRoom, this);
+    client.emit('getUserId', user.status);
+  }
+
+  newUser(id: string) {
+    const user = new UserInfo();
+    user.id = id;
+    this.users.push(user);
+  }
+
+  userDisconnect(client: Socket) {
+    const player = this.users.find((user) => user.socket == client);
+    if (player == undefined) {
+      this.logger.log(`[disconnect] 여기 들어오면 안돼!! 뭔가 이상한거임.`);
+      return;
+    }
+    player.setStatusOffline();
   }
 }

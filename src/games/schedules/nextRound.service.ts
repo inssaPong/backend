@@ -1,10 +1,10 @@
-import { MainGateway } from 'src/sockets/main.gateway';
 import { GameObject, GameRoomComponent } from '../game.component';
+import { GameGateway } from '../games.gateway';
 import gameOver from './gameOver.servive';
 
 export default function nextRound(
   gameRoom: GameRoomComponent,
-  mainGateway: MainGateway,
+  gameGateway: GameGateway,
 ) {
   gameRoom.nextRound();
   if (
@@ -13,7 +13,7 @@ export default function nextRound(
   ) {
     clearInterval(gameRoom.interval_ball);
     clearInterval(gameRoom.interval_move);
-    mainGateway.server
+    gameGateway.mainGateway.server
       .to(gameRoom.room_id)
       .emit(
         'game/end',
@@ -22,10 +22,9 @@ export default function nextRound(
         gameRoom.p1_score,
         gameRoom.p2_score,
       );
-    // database에 결과값 저장!!!!!!!!!!!
-    gameOver(gameRoom, mainGateway);
+    gameOver(gameRoom, gameGateway);
   }
-  mainGateway.server
+  gameGateway.mainGateway.server
     .to(gameRoom.room_id)
     .emit('game/nextRound', gameRoom.p1_score, gameRoom.p2_score);
 }

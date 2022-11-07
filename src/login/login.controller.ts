@@ -16,7 +16,7 @@ import { LoginService } from './login.service';
 import { Public } from './public.decorator';
 
 // 1-1, 1-2, 1-3, 1-4
-@Controller('/api/login')
+@Controller('/login')
 @ApiTags('로그인 API')
 export class LoginController {
   constructor(
@@ -50,7 +50,6 @@ export class LoginController {
       'req : nickname, avatar \
               res : status code(성공 : 200, 실패 : 400)',
   })
-  @Header('access-control-allow-origin', '*')
   registerAccount(@Query('id') id: string) {
     this.loginRepository.createUser('seungoh', 'seungeun', 'seungoh@naver.com');
     return 200;
@@ -66,7 +65,6 @@ export class LoginController {
   })
   @Post('/certificate')
   @HttpCode(200)
-  @Header('access-control-allow-origin', '*')
   checkTwoFactor(@Query('id') id: string) {
     return 200;
   }

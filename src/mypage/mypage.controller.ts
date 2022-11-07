@@ -68,7 +68,7 @@ export class MypageController {
   @ApiBody({
     type: UpdateUserInfoDto,
   })
-  @ApiOkResponse({
+.  @ApiOkResponse({
     description: '성공',
   })
   @Patch()
