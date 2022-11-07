@@ -6,10 +6,10 @@ import {
   IsNotEmpty,
   MinLength,
   IsArray,
-  IsAscii,
+  IsNumber,
 } from 'class-validator';
 
-export class CreateMypageDto {
+export class UserInfoDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)
@@ -18,23 +18,46 @@ export class CreateMypageDto {
   readonly nickname: string;
 
   @ApiProperty({ description: '프로필 사진' })
-  readonly avatar: File;
+  readonly avatar: string;
 
   @IsBoolean()
   @ApiProperty({ description: '2차 인증 여부' })
-  readonly twoFactor: boolean;
+  readonly twoFactor_status: boolean;
 }
 
-export class CreateFollowsDto {
+export class GameHistoryDto {
   @IsArray()
-  @IsString()
-  @ApiProperty()
-  readonly follows: string[];
+  @ApiProperty({ description: '게임 기록 리스트' })
+  readonly gameHistory: OneGameHistoryDto[];
 }
 
-export class CreateFollowsStatusDto {
-  @IsAscii()
+export class OneGameHistoryDto {
+  @IsString()
   @IsNotEmpty()
-  @ApiProperty()
-  readonly status: CharacterData;
+  @MaxLength(10)
+  @MinLength(1)
+  @ApiProperty({ description: '승자 아이디' })
+  readonly winner: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(10)
+  @MinLength(1)
+  @ApiProperty({ description: '패자 아이디' })
+  readonly loser: string;
+}
+
+export class FollowsDto {
+  @ApiProperty({ description: '팔로우 아이디 목록' })
+  id: string[] = [];
+}
+
+export class GameStatDto {
+  @IsNumber()
+  @ApiProperty({ description: '승리 수' })
+  readonly wins: number;
+
+  @IsNumber()
+  @ApiProperty({ description: '패배 수' })
+  readonly loses: number;
 }
