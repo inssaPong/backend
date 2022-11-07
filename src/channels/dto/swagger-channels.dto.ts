@@ -1,15 +1,11 @@
-import {
-  ApiOkResponse,
-  ApiProperty,
-  ApiResponseProperty,
-} from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ResponseGetChannelsListDto {
   @ApiProperty({
     description: '[Response] [{channel_id, channel_name, has_password}, ...]',
     required: true,
     default: [
-      { channel_id: 1, channel_name: 'channel 1', has_password: false }, // TODO: 질문. channel_id, channel_name 으로 통일가능?
+      { channel_id: 1, channel_name: 'channel 1', has_password: false },
       { channel_id: 2, channel_name: 'channel 2', has_password: true },
     ],
   })
@@ -28,20 +24,21 @@ export class ResponseGetEnteredChannelsListDto {
   example: Array<JSON>;
 }
 
-export class ResponseGetUserInfoInChannelDto {
-  @ApiProperty({
-    description: '[Response] [{id}, ...]',
-    required: true,
-    default: [
-      { id: 'seungoh' }, // TODO: 질문. id: '$id' 형식이어야하는지?
-      { id: 'dason' },
-      { id: 'hyson' },
-      { id: 'sehyan' },
-      { id: 'sanjeon' },
-    ],
-  })
-  example: Array<JSON>;
-}
+// TODO: 삭제. 사용하지 않는다면 삭제
+// export class ResponseGetUserInfoInChannelDto {
+//   @ApiProperty({
+//     description: '[Response] [{id}, ...]',
+//     required: true,
+//     default: [
+//       { id: 'seungoh' }, // TODO: 질문. id: '$id' 형식이어야하는지?
+//       { id: 'dason' },
+//       { id: 'hyson' },
+//       { id: 'sehyan' },
+//       { id: 'sanjeon' },
+//     ],
+//   })
+//   example: Array<JSON>;
+// }
 
 export class RequestBodyUserListInChannelDto {
   @ApiProperty({
@@ -57,11 +54,11 @@ export class ResponseUserStatusInChannelDto {
     description: '[Reponse] [{channel_id, user_status}, ...]',
     required: true,
     default: [
-      { channel_id: 'seungoh', user_status: '1' },
-      { channel_id: 'dason', user_status: '2' },
-      { channel_id: 'hyson', user_status: '3' },
-      { channel_id: 'sehyan', user_status: '2' },
-      { channel_id: 'sehyan', user_status: '1' },
+      { user_id: 'seungoh', user_status: '1' },
+      { user_id: 'dason', user_status: '2' },
+      { user_id: 'hyson', user_status: '3' },
+      { user_id: 'sehyan', user_status: '2' },
+      { user_id: 'sehyan', user_status: '1' },
     ],
   })
   example: Array<JSON>;
