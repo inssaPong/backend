@@ -37,4 +37,11 @@ export class ChannelsRepository {
       return -1;
     }
   }
+
+  async getAllChannelList() {
+    try {
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
 }

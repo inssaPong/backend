@@ -9,7 +9,7 @@ import { GamesModule } from './games/games.module';
 import { ChannelsModule } from './channels/channels.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { JwtAuthGuard } from './login/jwt/jwt.guard';
+import { JwtAuthGuard } from './login/jwt/jwt-auth.guard';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { DatabaseModule } from './database/database.module';
 import configuration from 'config/configuration';
@@ -47,10 +47,10 @@ import configuration from 'config/configuration';
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
     {
       provide: APP_INTERCEPTOR,
       useClass: CacheInterceptor,

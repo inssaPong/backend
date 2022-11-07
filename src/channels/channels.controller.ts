@@ -16,22 +16,19 @@ import {
   ApiBody,
   ApiCreatedResponse,
   ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { logger } from 'handlebars';
 import { ChannelsRepository } from './channels.repository';
 import {
   RequestBodyConnectDmDto,
   RequestBodyChannelNameAndPwDto,
-  RequestBodyUserListInChannelDto,
   ResponseChannelIdDto,
-  ResponseGetChannelsListDto,
-  ResponseGetEnteredChannelsListDto,
+  ResponseGetChannelListDto,
+  ResponseGetEnteredChannelListDto,
   ResponseUserStatusInChannelDto,
 } from './dto/swagger-channels.dto';
 
@@ -51,11 +48,11 @@ export class ChannelsController {
     type: RequestBodyChannelNameAndPwDto,
   })
   @ApiCreatedResponse({
-    description: '[Created] Channel creation successful',
+    description: '[201 Created] Channel creation successful',
     type: ResponseChannelIdDto,
   })
   @ApiBadRequestResponse({
-    description: '[Bad Request] Channel creation failed',
+    description: '[400 Bad Request] Channel creation failed',
   })
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
@@ -70,17 +67,14 @@ export class ChannelsController {
     );
     if (!isSuccess) {
       res.status(400).send();
-      return;
     }
     const channel_id = await this.channelsRepository.findChannelId(
       channel_name,
     );
     if (channel_id === -1) {
       res.status(400).send();
-      return;
     }
-    res.status(201).send();
-    return Object.assign({
+    res.status(201).send({
       channel_id: channel_id,
     });
   }
@@ -90,23 +84,23 @@ export class ChannelsController {
     summary: '전체 채널 목록 받기',
   })
   @ApiOkResponse({
-    type: ResponseGetChannelsListDto, // TODO: 생각. example을 지우는 방법이 없을까?
+    description: '[200 OK] 전체 채널 목록 반환',
+    type: ResponseGetChannelListDto, // TODO: 생각. example을 지우는 방법이 없을까?
   })
-  @ApiInternalServerErrorResponse({
-    description: '[Internal Server Error] ???',
+  @ApiBadRequestResponse({
+    description: '[400 Bad Request] 전체 채널을 찾을 수 없음',
   })
   @Get('/list')
-  GetChannelsList(@Res() res) {
+  GetChannelList(@Res() res) {
     const isSuccess = true;
     if (!isSuccess) {
       res.status(500).send();
-      return;
     }
     const arr = [
-      { channel_id: '1', channel_name: 'channel 1', channel_pw: false }, // TODO: 질문. pw를 client에 전달해주는 건가?
+      { channel_id: '1', channel_name: 'channel 1', channel_pw: false },
       { channel_id: '2', channel_name: 'channel 2', channel_pw: true },
     ];
-    return arr;
+    res.status(200).send(arr);
   }
 
   // 참여 중인 채널 목록 받기
@@ -115,15 +109,22 @@ export class ChannelsController {
   })
   @ApiResponse({
     status: 200,
-    type: ResponseGetEnteredChannelsListDto,
+    type: ResponseGetEnteredChannelListDto,
+  })
+  @ApiBadRequestResponse({
+    description: '[400 Bad Request] !!!',
   })
   @Get('/list/join')
-  getEnteredChannelsList() {
+  getEnteredChannelList(@Res() res) {
+    const isSuccess = true;
+    if (!isSuccess) {
+      res.status(400).send();
+    }
     const arr = [
       { channel_id: '1', channel_name: 'channel 1' },
       { channel_id: '2', channel_name: 'channel 2' },
     ];
-    return arr;
+    res.status(200).send(arr);
   }
 
   // 채널 입장 시 유효성 검사
@@ -131,20 +132,20 @@ export class ChannelsController {
     summary: '채널 입장 시 유효성 검사',
   })
   @ApiOkResponse({
-    description: '[OK] Access Successful',
+    description: '[200 OK] Access Successful',
   })
   @ApiForbiddenResponse({
-    description: '[Forbidden] Access Denied',
+    description: '[403 Forbidden] Access Denied',
   })
   @Get('/enter')
-  validationAtEntry(@Query('id') id: number, @Res() res) {
+  validationAtEntry(@Query('channel_id') channel_id: number, @Res() res) {
     // 채널 입장 시 유효성 검사.
     // 입력된 쿼리로 DB를 통해 권한, 비밀번호 유무 등 유효성 검사.
     const isSuccess = true;
     if (!isSuccess) {
       res.status(403).send();
     }
-    return;
+    res.status(200).send();
   }
 
   // 채널 입장
@@ -152,27 +153,25 @@ export class ChannelsController {
     summary: '채널 입장',
   })
   @ApiCreatedResponse({
-    description: '[Created] Enter',
+    description: '[201 Created] Enter',
   })
   @ApiNoContentResponse({
-    description: '[No Content] Ban',
+    description: '[204 No Content] Ban',
   })
   @ApiForbiddenResponse({
-    description: '[Forbidden] Invalid PW',
+    description: '[403 Forbidden] Invalid PW',
   })
   @Post('/enter')
-  enterChannel(@Query('id') id: number, @Res() res) {
+  enterChannel(@Query('channel_id') channel_id: number, @Res() res) {
     const isBan = true;
     if (isBan) {
       res.status(204).send();
-      return 204;
     }
     const isValidatePW = true;
     if (!isValidatePW) {
       res.status(403).send();
-      return 403;
     }
-    return 201;
+    res.status(201).send();
   }
 
   // TODO: 삭제. 삭제하지 않는다면 삭제
@@ -185,11 +184,10 @@ export class ChannelsController {
   //   type: ResponseGetUserInfoInChannelDto,
   // })
   // @Get('/room/users')
-  // getUserInfoInChannel(@Query('id') id: string, @Res() res) {
+  // getUserInfoInChannel(@Query('channel_id') channel_id: string, @Res() res) {
   //   const isSuccess = true;
   //   if (!isSuccess) {
   //     res.status(400).send();
-  //     return 400;
   //   }
   //   const arr = [
   //     { id: 'seungoh' }, // TODO: 질문. id: '$id' 형식이어야하는지?
@@ -206,30 +204,27 @@ export class ChannelsController {
   @ApiOperation({
     summary: '채널에 참가 중인 유저 상태 받기',
   })
-  @ApiBody({
-    type: RequestBodyUserListInChannelDto,
-  })
   @ApiOkResponse({
-    description: '[OK] 채널에 참가중인 유저 상태',
+    description: '[200 OK] 채널에 참가중인 유저 상태',
     type: ResponseUserStatusInChannelDto,
   })
+  @ApiBadRequestResponse({
+    description: '[400 Bad Request] !!!',
+  })
   @Get('/room/users')
-  getUserStatusInChannel(@Res() res) {
+  getUserStatusInChannel(@Query('channel_id') channel_id: string, @Res() res) {
     const isSuccess = true;
-    if (isSuccess) {
-      res.status(200).send();
-      const arr = [
-        { user_id: 'seungoh', user_status: '1' },
-        { user_id: 'dason', user_status: '2' },
-        { user_id: 'hyson', user_status: '3' },
-        { user_id: 'sehyan', user_status: '2' },
-        { user_id: 'sehyan', user_status: '1' },
-      ];
-      return arr;
-    } else {
-      res.status(500).send();
-      return;
+    if (!isSuccess) {
+      res.status(400).send();
     }
+    const arr = [
+      { user_id: 'seungoh', user_status: '0' },
+      { user_id: 'dason', user_status: '1' },
+      { user_id: 'hyson', user_status: '0' },
+      { user_id: 'sehyan', user_status: '1' },
+      { user_id: 'sanjeon', user_status: '2' },
+    ];
+    res.status(200).send(arr);
   }
 
   // 채팅방 나가기
@@ -237,20 +232,18 @@ export class ChannelsController {
     summary: '채팅방 나가기',
   })
   @ApiAcceptedResponse({
-    description: '[Accepted] Channel exit success',
+    description: '[202 Accepted] Channel exit success',
   })
   @ApiBadRequestResponse({
-    description: '[Bad Request] Channel exit falied',
+    description: '[400 Bad Request] Channel exit falied',
   })
-  @Delete('/room/exit') // TODO: 질문.
-  exitChannel(@Query('id') id: number, @Res() res) {
+  @Delete('/room/exit')
+  exitChannel(@Query('channel_id') channel_id: number, @Res() res) {
     const isSuccess = true;
-    if (isSuccess) {
-      res.status(202).send();
-    } else {
+    if (!isSuccess) {
       res.status(400).send();
     }
-    return;
+    res.status(202).send();
   }
 
   // DM 연결
@@ -261,22 +254,20 @@ export class ChannelsController {
     type: RequestBodyConnectDmDto,
   })
   @ApiOkResponse({
-    description: '[OK] DM connection successful',
+    description: '[200 OK] DM connection successful',
   })
   @ApiCreatedResponse({
-    description: '[Created] New DM connection',
+    description: '[201 Created] New DM connection',
   })
   @ApiBadRequestResponse({
-    description: '[Bad Request] DM connection failed',
+    description: '[400 Bad Request] DM connection failed',
   })
   @Put('/dm')
   connectDm(@Res() res) {
     const isSuccess = true;
-    if (isSuccess) {
-      res.status(200).send();
-    } else {
+    if (!isSuccess) {
       res.status(400).send();
     }
-    return;
+    res.status(200).send();
   }
 }

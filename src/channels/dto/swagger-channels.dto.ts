@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ResponseGetChannelsListDto {
+export class ResponseGetChannelListDto {
   @ApiProperty({
     description: '[Response] [{channel_id, channel_name, has_password}, ...]',
     required: true,
@@ -12,7 +12,7 @@ export class ResponseGetChannelsListDto {
   example: Array<JSON>;
 }
 
-export class ResponseGetEnteredChannelsListDto {
+export class ResponseGetEnteredChannelListDto {
   @ApiProperty({
     description: '[Response] [{channel_id, channel_name}, ...]',
     required: true,
@@ -39,15 +39,6 @@ export class ResponseGetEnteredChannelsListDto {
 //   })
 //   example: Array<JSON>;
 // }
-
-export class RequestBodyUserListInChannelDto {
-  @ApiProperty({
-    description: '[Request Body] 채널에 있는 유저들 리스트',
-    required: true,
-    default: ['seungoh', 'dason', 'hyson', 'sehyan', 'sanjeon'],
-  })
-  example: Array<String>;
-}
 
 export class ResponseUserStatusInChannelDto {
   @ApiProperty({
