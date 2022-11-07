@@ -33,10 +33,10 @@ export class JwtSignGuard implements CanActivate {
     if (is_signup === undefined) {
       logger.log('User does not exist in DB.');
       this.loginRepository.insertUser(user.username, user.username, user.email);
-      response.redirect('http://localhost:8080/firstlogin');
+      response.redirect('http://localhost:8080/');
     } else {
       logger.log('User is in DB.');
-      response.redirect('http://localhost:8080/home');
+      response.redirect('http://localhost:8080/editprofile');
     }
     return true;
   }
