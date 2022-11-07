@@ -40,8 +40,17 @@ export class ChannelsRepository {
 
   async getAllChannelList() {
     try {
+      const databaseResponse = this.databaseService.runQuery(
+        `
+        SELECT * FROM "channel" 
+        `,
+      );
+      const channels = databaseResponse[0];
+      this.logger.debug(`channels: ${channels}`);
+      return channels;
     } catch (error) {
       this.logger.error(error);
+      return false;
     }
   }
 }

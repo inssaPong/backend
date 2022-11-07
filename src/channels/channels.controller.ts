@@ -56,7 +56,6 @@ export class ChannelsController {
   })
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
-    console.log(req);
     const channel_name = body.channel_name;
     const channel_pw = body.channel_pw;
     this.logger.debug(`channel name: ${channel_name}`);
@@ -67,12 +66,14 @@ export class ChannelsController {
     );
     if (!isSuccess) {
       res.status(400).send();
+      return;
     }
     const channel_id = await this.channelsRepository.findChannelId(
       channel_name,
     );
     if (channel_id === -1) {
       res.status(400).send();
+      return;
     }
     res.status(201).send({
       channel_id: channel_id,
@@ -91,10 +92,11 @@ export class ChannelsController {
     description: '[400 Bad Request] 전체 채널을 찾을 수 없음',
   })
   @Get('/list')
-  GetChannelList(@Res() res) {
-    const isSuccess = true;
-    if (!isSuccess) {
+  async GetChannelList(@Res() res) {
+    const channels = await this.channelsRepository.getAllChannelList();
+    if (channels === undefined) {
       res.status(500).send();
+      return;
     }
     const arr = [
       { channel_id: '1', channel_name: 'channel 1', channel_pw: false },
@@ -119,6 +121,7 @@ export class ChannelsController {
     const isSuccess = true;
     if (!isSuccess) {
       res.status(400).send();
+      return;
     }
     const arr = [
       { channel_id: '1', channel_name: 'channel 1' },
@@ -144,6 +147,7 @@ export class ChannelsController {
     const isSuccess = true;
     if (!isSuccess) {
       res.status(403).send();
+      return;
     }
     res.status(200).send();
   }
@@ -166,10 +170,12 @@ export class ChannelsController {
     const isBan = true;
     if (isBan) {
       res.status(204).send();
+      return;
     }
     const isValidatePW = true;
     if (!isValidatePW) {
       res.status(403).send();
+      return;
     }
     res.status(201).send();
   }
@@ -216,6 +222,7 @@ export class ChannelsController {
     const isSuccess = true;
     if (!isSuccess) {
       res.status(400).send();
+      return;
     }
     const arr = [
       { user_id: 'seungoh', user_status: '0' },
@@ -242,6 +249,7 @@ export class ChannelsController {
     const isSuccess = true;
     if (!isSuccess) {
       res.status(400).send();
+      return;
     }
     res.status(202).send();
   }
@@ -267,6 +275,7 @@ export class ChannelsController {
     const isSuccess = true;
     if (!isSuccess) {
       res.status(400).send();
+      return;
     }
     res.status(200).send();
   }
