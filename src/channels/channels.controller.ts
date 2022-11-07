@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
+  Logger,
   Post,
   Put,
   Query,
@@ -21,6 +23,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { logger } from 'handlebars';
+import { ChannelsRepository } from './channels.repository';
 import {
   RequestBodyConnectDmDto,
   RequestBodyChannelNameAndPwDto,
@@ -35,7 +39,9 @@ import {
 @Controller('/channels')
 @ApiTags('채널 API')
 export class ChannelsController {
-  constructor() {}
+  constructor(private readonly channelsRepository: ChannelsRepository) {}
+
+  logger: Logger = new Logger(ChannelsController.name);
 
   // 채널 개설
   @ApiOperation({
@@ -52,18 +58,31 @@ export class ChannelsController {
     description: '[Bad Request] Channel creation failed',
   })
   @Post('/create')
-  createChannel(@Req() req, @Res() res) {
-    const isSuccess = true;
-    if (isSuccess) {
-      res.status(201).send();
-
-      return Object.assign({
-        id: '5',
-      });
-    } else {
+  async createChannel(@Req() req, @Res() res, @Body() body) {
+    console.log(req);
+    const channel_name = body.channel_name;
+    const channel_pw = body.channel_pw;
+    this.logger.debug(`channel name: ${channel_name}`);
+    this.logger.debug(`channel password: ${channel_pw}`);
+    const isSuccess = await this.channelsRepository.createChannel(
+      channel_name,
+      channel_pw,
+    );
+    if (!isSuccess) {
       res.status(400).send();
       return;
     }
+    const channel_id = await this.channelsRepository.findChannelId(
+      channel_name,
+    );
+    if (channel_id === -1) {
+      res.status(400).send();
+      return;
+    }
+    res.status(201).send();
+    return Object.assign({
+      channel_id: channel_id,
+    });
   }
 
   // 전체 채널 목록 받기
