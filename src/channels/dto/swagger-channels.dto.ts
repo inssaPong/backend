@@ -5,8 +5,8 @@ export class ResponseGetChannelListDto {
     description: '[Response] [{channel_id, channel_name, has_password}, ...]',
     required: true,
     default: [
-      { channel_id: 1, channel_name: 'channel 1', has_password: false },
-      { channel_id: 2, channel_name: 'channel 2', has_password: true },
+      { id: 1, name: 'channel 1', has_password: false },
+      { id: 2, name: 'channel 2', has_password: true },
     ],
   })
   example: Array<JSON>;
@@ -17,32 +17,16 @@ export class ResponseGetEnteredChannelListDto {
     description: '[Response] [{channel_id, channel_name}, ...]',
     required: true,
     default: [
-      { channel_id: 1, channel_name: 'channel 1' },
-      { channel_id: 2, channel_name: 'channel 2' },
+      { id: 1, name: 'channel 1' },
+      { id: 2, name: 'channel 2' },
     ],
   })
   example: Array<JSON>;
 }
 
-// TODO: 삭제. 사용하지 않는다면 삭제
-// export class ResponseGetUserInfoInChannelDto {
-//   @ApiProperty({
-//     description: '[Response] [{id}, ...]',
-//     required: true,
-//     default: [
-//       { id: 'seungoh' }, // TODO: 질문. id: '$id' 형식이어야하는지?
-//       { id: 'dason' },
-//       { id: 'hyson' },
-//       { id: 'sehyan' },
-//       { id: 'sanjeon' },
-//     ],
-//   })
-//   example: Array<JSON>;
-// }
-
 export class ResponseUserStatusInChannelDto {
   @ApiProperty({
-    description: '[Reponse] [{channel_id, user_status}, ...]',
+    description: '[Reponse] [{user_id, user_status}, ...]',
     required: true,
     default: [
       { user_id: 'seungoh', user_status: '1' },
@@ -61,14 +45,14 @@ export class RequestBodyChannelNameAndPwDto {
     required: true,
     default: 'channel 42',
   })
-  channel_name: string;
+  name: string;
 
   @ApiProperty({
     description: '[Request Body] Channel password',
     required: true,
     default: '0000',
   })
-  channel_pw: string;
+  pw: string;
 }
 
 export class ResponseChannelIdDto {
@@ -77,7 +61,7 @@ export class ResponseChannelIdDto {
     required: true,
     default: 42,
   })
-  channel_id: number;
+  id: number;
 }
 
 export class RequestBodyConnectDmDto {
