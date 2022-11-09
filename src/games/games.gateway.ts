@@ -3,6 +3,7 @@ import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
 import { GameObject, GameRoomComponent } from './game.component';
+import { GamesRepository } from './games.repository';
 import getPosition from './schedules/getPosition.service';
 import nextRound from './schedules/nextRound.service';
 import updateBallPos from './schedules/updateBallPos.serviec';
@@ -12,7 +13,10 @@ export class GameGateway {
   gameRooms: GameRoomComponent[] = [];
   logger: Logger = new Logger('GameGameway');
 
-  constructor(public mainGateway: MainGateway) {}
+  constructor(
+    public mainGateway: MainGateway,
+    public gamesRepository: GamesRepository,
+  ) {}
 
   @SubscribeMessage('game/watch')
   gameCatch(client: Socket, id: string) {
