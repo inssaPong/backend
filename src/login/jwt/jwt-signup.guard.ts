@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { MainSocketModule } from 'src/sockets/main.module';
 import { LoginRepository } from '../login.repository';
 
 @Injectable()
