@@ -22,7 +22,7 @@ export class UserInfoDto {
 
   @IsBoolean()
   @ApiProperty({ description: '2차 인증 여부' })
-  readonly twoFactor_status: boolean;
+  readonly twofactor_status: boolean;
 }
 
 export class GameHistoryDto {
@@ -49,7 +49,7 @@ export class OneGameHistoryDto {
 
 export class FollowsDto {
   @ApiProperty({ description: '팔로우 아이디 목록' })
-  id: string[] = [];
+  follow: string[] = [];
 }
 
 export class GameStatDto {

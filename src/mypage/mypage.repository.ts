@@ -19,11 +19,11 @@ export class MypageRepository {
 		`,
       );
       this.logger.debug(`User Info: ${databaseResponse}`);
-      if (databaseResponse.length <= 0) return '404 Not Found'; // TODO status code 뱉는 걸로 바꾸기
+      if (databaseResponse.length <= 0) return 400;
       return databaseResponse;
     } catch (error) {
       this.logger.error(`Error: ${error}`);
-      return 400;
+      return 500;
     }
   }
 
@@ -31,20 +31,21 @@ export class MypageRepository {
     try {
       let property: keyof typeof body;
       let databaseResponse;
-      for (property in body) {
-        databaseResponse = await this.databaseService.runQuery(
-          `
-			  UPDATE "user"
-			  SET ${property} = '${body[property]}'
-			  WHERE id='${id}' AND ${property} = '${body[property]}';
-			`,
-        );
-        return 200;
-      }
+	  this.logger.debug(`body[twofactor]: ${body['twofactor_status']}\nbody[nickname]: ${body['nickname']}`);
+	for (let [key, value] of Object.entries(body)) {
+		databaseResponse = await this.databaseService.runQuery(
+			`
+				UPDATE "user"
+				SET ${key} = '${value}'
+				WHERE id='${id}' AND ${key} != '${value}';
+			  `,
+		);
+	}
     } catch (error) {
       this.logger.error(`Error: ${error}`);
       return 500;
     }
+	return 200;
   }
 
   async getFollows(id: string) {
@@ -61,7 +62,7 @@ export class MypageRepository {
       return databaseResponse;
     } catch (error) {
       this.logger.error(`Error: ${error}`);
-      return 400;
+      return 500;
     }
   }
 
@@ -79,7 +80,7 @@ export class MypageRepository {
       return databaseResponse;
     } catch (error) {
       this.logger.error(`Error: ${error}`);
-      return 400;
+      return 500;
     }
   }
 
@@ -95,7 +96,7 @@ export class MypageRepository {
       return wins;
     } catch (error) {
       this.logger.error(`Error: ${error}`);
-      return 400;
+      return 500;
     }
   }
 
@@ -111,7 +112,7 @@ export class MypageRepository {
       return loses;
     } catch (error) {
       this.logger.error(`Error: ${error}`);
-      return 400;
+      return 500;
     }
   }
 }
