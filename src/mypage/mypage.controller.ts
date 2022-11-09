@@ -53,9 +53,10 @@ export class MypageController {
     this.logger.debug(`User Info: ${userInfo}`);
     if (userInfo == 400) {
       this.logger.error(`400`);
-      return res.status(400).send();
+      res.status(400).send();
+	  return;
     }
-    return userInfo;
+    res.status(200).send(userInfo);
   }
 
   @ApiOperation({
@@ -75,10 +76,16 @@ export class MypageController {
   async patchUserInfo(
     @Query('id') id: string,
     @Body() body: UpdateUserInfoDto,
+	@Res() res: Response,
   ) {
     this.logger.debug(`result: ${body}`);
     const result = await this.mypageRepository.patchUserInfo(id, body);
-    return Object.assign({ code: result });
+	if (result == 500){
+		this.logger.log('patchUserInfo return 500');
+		res.status(500).send();
+		return;
+	}
+	res.status(200).send(result);
   }
 
   @ApiOkResponse({
@@ -96,15 +103,16 @@ export class MypageController {
   async getFollows(@Query('id') id: string, @Res() res: Response) {
     const follows_db_result = await this.mypageRepository.getFollows(id);
     if (follows_db_result == 400) {
-      this.logger.error(`400`);
-      return res.status(400).send();
+      this.logger.error(`getFollows return 400`);
+      res.status(400).send();
+	  return;
     }
     let follows: FollowsDto = { id: [] };
     for (const follow_id of follows_db_result) {
       this.logger.debug(`follow_id: ${follow_id['partner_id']}`);
       follows.id.push(follow_id['partner_id'] as string);
     }
-    return follows;
+    res.status(200).send(follows);
   }
 
   @ApiOkResponse({
@@ -121,10 +129,11 @@ export class MypageController {
   async getGameHistory(@Query('id') id: string, @Res() res: Response) {
     const result = await this.mypageRepository.getGameHistory(id);
     if (result == 400) {
-      this.logger.error(`400`);
-      return res.status(400).send();
+      this.logger.error(`getGameHistory return 400`);
+      res.status(400).send();
+	  return;
     }
-    return result;
+    res.status(200).send(result);
   }
 
   @ApiOkResponse({
@@ -143,13 +152,14 @@ export class MypageController {
     const winHistory = await this.mypageRepository.getWinHistory(id);
     const loseHistory = await this.mypageRepository.getLoseHistory(id);
     if (winHistory == 400 || loseHistory == 400) {
-      this.logger.error(`400`);
-      return res.status(400).send();
+      this.logger.error(`getWinHistory or getLoseHistory return 400`);
+      res.status(400).send();
+	  return;
     }
     const gameStat: GameStatDto = {
       wins: winHistory.length,
       loses: loseHistory.length,
     };
-    return gameStat;
+	res.status(200).send(gameStat);
   }
 }
