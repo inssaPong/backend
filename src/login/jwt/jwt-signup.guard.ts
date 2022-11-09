@@ -5,6 +5,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { MainGateway } from 'src/sockets/main.gateway';
+import { MainSocketModule } from 'src/sockets/main.module';
 import { LoginRepository } from '../login.repository';
 
 @Injectable()
@@ -12,6 +14,7 @@ export class JwtSignGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly loginRepository: LoginRepository,
+    private mainGateway: MainGateway,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,6 +37,9 @@ export class JwtSignGuard implements CanActivate {
       logger.log('User does not exist in DB.');
       this.loginRepository.insertUser(user.username, user.username, user.email);
       response.redirect('http://localhost:8080/firstlogin');
+      // socket용 user 객체 생성함
+      this.mainGateway.newUser(user.username);
+      console.log(user.username);
     } else {
       logger.log('User is in DB.');
       response.redirect('http://localhost:8080/home');

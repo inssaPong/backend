@@ -3,5 +3,6 @@ import { MainGateway } from './main.gateway';
 
 @Module({
   providers: [MainGateway],
+  exports: [MainGateway],
 })
-export class EventsModule {}
+export class MainSocketModule {}

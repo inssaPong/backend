@@ -16,6 +16,7 @@ export class MainGateway {
   logger: Logger = new Logger('MainGameway');
 
   afterInit() {
+    // todo 회원가입 하는 곳으로 옮기기
     this.newUser('seungoh');
     this.newUser('sehyan');
   }
@@ -44,16 +45,16 @@ export class MainGateway {
     user.setStatusOnline();
   }
 
-  @SubscribeMessage('getUserId')
+  @SubscribeMessage('getUserStatus')
   getUserStatus(client: Socket, id: string) {
     const user = this.users.find((element) => element.id == id);
     if (user == undefined) {
       this.logger.log(
-        `[getUserId] ${id} : 여기 들어오면 안돼!! 뭔가 이상한거임.`,
+        `[getUserStatus] ${id} : 여기 들어오면 안돼!! 뭔가 이상한거임.`,
       );
       return;
     }
-    client.emit('getUserId', user.status);
+    client.emit('getUserStatus', user.status);
   }
 
   newUser(id: string) {
