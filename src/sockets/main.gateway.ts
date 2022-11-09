@@ -36,7 +36,7 @@ export class MainGateway {
     let user = this.users.find((user) => user.id == id);
     if (user == undefined) {
       this.logger.log(
-        `[connect] ${id} : 여기 들어오면 안돼!! 뭔가 이상한거임.`,
+        `[connect] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
       );
       return;
     }
@@ -49,7 +49,7 @@ export class MainGateway {
     const user = this.users.find((element) => element.id == id);
     if (user == undefined) {
       this.logger.log(
-        `[getUserStatus] ${id} : 여기 들어오면 안돼!! 뭔가 이상한거임.`,
+        `[getUserStatus] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
       );
       return;
     }
@@ -65,7 +65,9 @@ export class MainGateway {
   userDisconnect(client: Socket) {
     const player = this.users.find((user) => user.socket == client);
     if (player == undefined) {
-      this.logger.log(`[disconnect] 여기 들어오면 안돼!! 뭔가 이상한거임.`);
+      this.logger.log(
+        `[disconnect] 여기 들어오면 안돼!! 그치만 발생할 수도 있는 일임.`,
+      );
       return;
     }
     player.setStatusOffline();
