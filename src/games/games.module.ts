@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from 'src/database/database.module';
-import { MainGateway } from 'src/sockets/main.gateway';
+import { MainSocketModule } from 'src/sockets/main.module';
 import { GamesController } from './games.controller';
 import { GameGateway } from './games.gateway';
 import { GamesRepository } from './games.repository';
 import { GamesService } from './games.service';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, MainSocketModule],
   controllers: [GamesController],
-  providers: [GamesService, MainGateway, GameGateway, GamesRepository],
+  providers: [GamesService, GameGateway, GamesRepository],
 })
 export class GamesModule {}
