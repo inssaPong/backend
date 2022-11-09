@@ -1,7 +1,7 @@
 import { CacheInterceptor, CacheModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { EventsModule } from './sockets/main.module';
+import { MainSocketModule } from './sockets/main.module';
 import { LoginModule } from './login/login.module';
 import { MypageModule } from './mypage/mypage.module';
 import { UsersModule } from './users/users.module';
@@ -38,7 +38,7 @@ import configuration from 'config/configuration';
     UsersModule,
     GamesModule,
     ChannelsModule,
-    EventsModule,
+    MainSocketModule,
     DatabaseModule,
     CacheModule.register({
       isGlobal: true,
