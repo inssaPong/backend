@@ -5,17 +5,17 @@ import { DatabaseService } from 'src/database/database.service';
 export class ChannelsRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async insertChannel(id: string, channel_id: string) {
+  async checkPossibleChannel(id: string, channel_id: string) {
     try {
-      await this.databaseService.runQuery(
+      const databaseResponse = await this.databaseService.runQuery(
         `
-			    INSERT INTO "channel_member" (id, channel_id)
-			    VALUES ('${id}', '${channel_id}');
+          SELECT id FROM "channel_member"
+          WHERE id=${id} AND channel_id=${channel_id};
 		    `,
       );
-      return 201;
+      if (databaseResponse.length == 1) return 200;
+      else return 400;
     } catch (error) {
-      console.log('[ChannelDB]insertChannel : ' + error);
       return 500;
     }
   }
@@ -30,8 +30,37 @@ export class ChannelsRepository {
       );
       return databaseResponse;
     } catch (error) {
-      console.log('[ChannelDB]selectRoomMember : ' + error);
       return databaseResponse;
+    }
+  }
+
+  async insertMessage(channel_id: string, sender_id: string, content: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+			    INSERT INTO "message" (channel_id, sender_id, content)
+			    VALUES ('${channel_id}', '${sender_id}', '${content}');
+		    `,
+      );
+      return 201;
+    } catch (error) {
+      console.log('[ChannelDB]insertMessage : ' + error);
+      return 500;
+    }
+  }
+
+  async insertDM(sender_id: string, receive_id: string, content: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+			    INSERT INTO "message" (sender_id, receive_id, content)
+			    VALUES ('${sender_id}', '${receive_id}', '${content}');
+		    `,
+      );
+      return 201;
+    } catch (error) {
+      console.log('[ChannelDB]insertDM : ' + error);
+      return 500;
     }
   }
 }

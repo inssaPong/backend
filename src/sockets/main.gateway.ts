@@ -18,7 +18,7 @@ export class MainGateway {
   constructor(private mainSocketRepository: MainSocketRepository) {}
 
   afterInit() {
-    this.createUsers();
+    this.initUsers();
   }
 
   handleConnection(client: Socket, ...args: any[]) {
@@ -38,6 +38,7 @@ export class MainGateway {
       this.logger.log(
         `[connect] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
       );
+      this.initUsers();
       return;
     }
     user.socket = client;
@@ -51,6 +52,7 @@ export class MainGateway {
       this.logger.log(
         `[getUserStatus] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
       );
+      this.initUsers();
       return;
     }
     client.emit('getUserStatus', user.status);
@@ -68,21 +70,26 @@ export class MainGateway {
       this.logger.log(
         `[disconnect] 여기 들어오면 안돼!! 그치만 발생할 수도 있는 일임.`,
       );
+      this.initUsers();
       return;
     }
     player.setStatusOffline();
   }
 
-  printAllUser() {
-    this.users.forEach((element) => {
-      this.logger.log(element.id);
+  async initUsers() {
+    const users = await this.mainSocketRepository.getUsers();
+    if (users == undefined) {
+      this.logger.log('[mainSocketDB]getUsers : error');
+      return;
+    }
+    users.forEach((element) => {
+      this.newUser(element.id);
     });
   }
 
-  async createUsers() {
-    const users = await this.mainSocketRepository.getUsers();
-    users.forEach((element) => {
-      this.newUser(element.id);
+  printAllUser() {
+    this.users.forEach((element) => {
+      this.logger.log(element.id);
     });
   }
 }
