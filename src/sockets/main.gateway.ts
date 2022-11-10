@@ -17,11 +17,12 @@ export class MainGateway {
   logger: Logger = new Logger('MainGameway');
   constructor(private mainSocketRepository: MainSocketRepository) {}
 
-  afterInit() {
-    this.initUsers();
+  async afterInit() {
+    await this.initUsers();
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket) {
+    this.setOnline(client);
     this.logger.log(`Client Connected : ${client.id}`);
   }
 
@@ -31,12 +32,12 @@ export class MainGateway {
     this.logger.log(`Client Disconnected : ${client.id}`);
   }
 
-  @SubscribeMessage('setOnline')
-  setOnline(client: Socket, id: string) {
-    let user = this.users.find((user) => user.id == id);
+  setOnline(client: Socket) {
+    const user_id = client.handshake.query.user_id;
+    const user = this.users.find((user) => user.id == user_id);
     if (user == undefined) {
       this.logger.log(
-        `[connect] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
+        `[connect] ${user_id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
       );
       this.initUsers();
       return;
@@ -47,7 +48,7 @@ export class MainGateway {
 
   @SubscribeMessage('getUserStatus')
   getUserStatus(client: Socket, id: string) {
-    const user = this.users.find((element) => element.id == id);
+    const user = this.users.find((user) => user.id == id);
     if (user == undefined) {
       this.logger.log(
         `[getUserStatus] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,

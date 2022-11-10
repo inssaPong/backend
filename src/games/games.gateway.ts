@@ -21,6 +21,9 @@ export class GameGateway {
   @SubscribeMessage('game/watch')
   gameCatch(client: Socket, id: string) {
     const player = this.mainGateway.users.find((user) => user.id == id);
+    if (player == undefined) {
+      this.logger.log(`[gameCatch] : ${id} 이런 일은 있을 수 없음.`);
+    }
     client.join(player.gameInfo.room_id);
     client.emit(
       'game/watchStart',
@@ -38,7 +41,6 @@ export class GameGateway {
       this.mainGateway.enterPlayer.find((element) => element == client) ==
       undefined
     ) {
-      this.logger.log(`${client.id} enter!!!!!`);
       this.mainGateway.enterPlayer.push(client);
     }
     if (this.mainGateway.enterPlayer.length > 1) {
@@ -94,6 +96,14 @@ export class GameGateway {
     const p2 = this.mainGateway.users.find(
       (user) => user.socket == this.mainGateway.enterPlayer[1],
     );
+    if (p1 == undefined) {
+      this.mainGateway.enterPlayer.splice(0, 1);
+      return;
+    }
+    if (p2 == undefined) {
+      this.mainGateway.enterPlayer.splice(1, 2);
+      return;
+    }
 
     room_id = p1.id + '_' + p2.id;
     this.mainGateway.enterPlayer.splice(0, 2);

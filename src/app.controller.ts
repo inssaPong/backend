@@ -13,7 +13,7 @@ export class AppController {
   // 게임 페이지 깡통 get()
   @Get('/loginCheck')
   loginCheckGet(@Req() req) {
-    const user_id = req.user.username;
+    const user_id = req.user.id;
     return user_id;
   }
 }
