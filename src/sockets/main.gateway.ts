@@ -27,13 +27,12 @@ export class MainGateway {
 
   handleDisconnect(client: Socket) {
     this.userDisconnect(client);
-    this.users = this.users.filter((user) => user.socket != client);
     this.enterPlayer = this.enterPlayer.filter((element) => element != client);
     this.logger.log(`Client Disconnected : ${client.id}`);
   }
 
   @SubscribeMessage('setOnline')
-  getUserId(client: Socket, id: string) {
+  setOnline(client: Socket, id: string) {
     let user = this.users.find((user) => user.id == id);
     if (user == undefined) {
       this.logger.log(
