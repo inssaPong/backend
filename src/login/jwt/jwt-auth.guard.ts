@@ -10,6 +10,8 @@ import { IS_PUBLIC_KEY } from '../public.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(private reflector: Reflector) {
     super();
   }
@@ -24,6 +26,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
     return super.canActivate(context);
   }
+
   handleRequest(
     err: any,
     user: any,
@@ -31,13 +34,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
     status?: any,
   ) {
-    const logger = new Logger('JwtGuard');
-    if (info) logger.log(`${info}`);
+    if (info) {
+      this.logger.log(`${info}`);
+    }
     if (err || !user) {
-      logger.log('Unauthorized users');
+      this.logger.log('Unauthorized users');
       throw err || new UnauthorizedException();
     }
-    logger.log('Authorized user');
+    this.logger.log('Authorized user');
     return user;
   }
 }
