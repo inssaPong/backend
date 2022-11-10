@@ -19,6 +19,7 @@ import {
   UserInfoDto,
   GameStatDto,
   FollowsDto,
+  OneGameHistoryDto,
 } from './dto/create-mypage.dto';
 import { UpdateUserInfoDto } from './dto/update-mypage.dto';
 import { MypageRepository } from './mypage.repository';
@@ -49,13 +50,19 @@ export class MypageController {
   @Get()
   async getUserInfo(@Query('id') id: string, @Res() res: Response) {
     // TODO mypage 안에 모든 API 싹다 id jwt에서 추출하는 걸로 바꾸기
-    const userInfo = await this.mypageRepository.getUserInfo(id);
-    this.logger.debug(`User Info: ${userInfo}`);
-    if (userInfo == 400) {
+    const userInfo_db_result = await this.mypageRepository.getUserInfo(id);
+    this.logger.debug(`User Info: ${userInfo_db_result}`);
+    if (userInfo_db_result == 400) {
       this.logger.error(`400`);
-      return res.status(400).send();
+      res.status(400).send();
+	  return;
     }
-    return userInfo;
+	const userinfo: UserInfoDto = {
+		nickname: userInfo_db_result[0]['nickname'],
+		avatar: `${userInfo_db_result[0]['avatar']}`,
+		twofactor_status: userInfo_db_result[0]['twofactor_status'],
+	}
+    res.status(200).send(userinfo);
   }
 
   @ApiOperation({
@@ -75,10 +82,22 @@ export class MypageController {
   async patchUserInfo(
     @Query('id') id: string,
     @Body() body: UpdateUserInfoDto,
+	@Res() res: Response,
   ) {
     this.logger.debug(`result: ${body}`);
     const result = await this.mypageRepository.patchUserInfo(id, body);
-    return Object.assign({ code: result });
+	if (result == 200){
+		this.logger.debug('patchUserInfo return 200')
+		res.status(200).send();
+	}
+	if (result == 500){
+		this.logger.log('patchUserInfo return 500');
+		res.status(500).send();
+		return;
+	} else {
+		this.logger.error('Undefined error in patchUserInfo');
+		res.status(result).send();
+	}
   }
 
   @ApiOkResponse({
@@ -95,16 +114,17 @@ export class MypageController {
   @ApiOperation({ summary: 'req : user id, res : follow[]' })
   async getFollows(@Query('id') id: string, @Res() res: Response) {
     const follows_db_result = await this.mypageRepository.getFollows(id);
-    if (follows_db_result == 400) {
-      this.logger.error(`400`);
-      return res.status(400).send();
-    }
-    let follows: FollowsDto = { id: [] };
+	if (follows_db_result == 500) {
+		this.logger.error(`getFollows return 500`);
+		res.status(500).send();
+		return;
+	  }
+    const follows: FollowsDto = { follow: [] };
     for (const follow_id of follows_db_result) {
       this.logger.debug(`follow_id: ${follow_id['partner_id']}`);
-      follows.id.push(follow_id['partner_id'] as string);
+      follows.follow.push(follow_id['partner_id'] as string);
     }
-    return follows;
+    res.status(200).send(follows);
   }
 
   @ApiOkResponse({
@@ -120,11 +140,23 @@ export class MypageController {
   @Get('/gameHistory')
   async getGameHistory(@Query('id') id: string, @Res() res: Response) {
     const result = await this.mypageRepository.getGameHistory(id);
-    if (result == 400) {
-      this.logger.error(`400`);
-      return res.status(400).send();
+    if (result == 500) {
+      this.logger.error(`getGameHistory return 500`);
+      res.status(500).send();
+	  return;
     }
-    return result;
+	const gameHistory: GameHistoryDto = {
+		gameHistory: [],
+	}
+	for (const oneGameHistory_db_result of result){
+		const oneGameHistory: OneGameHistoryDto = {
+			winner: oneGameHistory_db_result['winner_id'],
+			loser: oneGameHistory_db_result['loser_id'],
+		}
+		this.logger.debug(`winner: ${oneGameHistory.winner}, loser: ${oneGameHistory.loser}`);
+		gameHistory.gameHistory.push(oneGameHistory);
+	}
+    res.status(200).send(gameHistory);
   }
 
   @ApiOkResponse({
@@ -142,14 +174,15 @@ export class MypageController {
   async getGameStat(@Query('id') id: string, @Res() res: Response) {
     const winHistory = await this.mypageRepository.getWinHistory(id);
     const loseHistory = await this.mypageRepository.getLoseHistory(id);
-    if (winHistory == 400 || loseHistory == 400) {
-      this.logger.error(`400`);
-      return res.status(400).send();
+    if (winHistory == 500 || loseHistory == 500) {
+      this.logger.error(`getWinHistory or getLoseHistory return 500`);
+      res.status(500).send();
+	  return;
     }
     const gameStat: GameStatDto = {
       wins: winHistory.length,
       loses: loseHistory.length,
     };
-    return gameStat;
+	res.status(200).send(gameStat);
   }
 }

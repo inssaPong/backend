@@ -10,6 +10,8 @@ import { LoginRepository } from '../login.repository';
 
 @Injectable()
 export class JwtSignGuard implements CanActivate {
+  private readonly logger = new Logger(JwtSignGuard.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly loginRepository: LoginRepository,
@@ -17,31 +19,29 @@ export class JwtSignGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const logger = new Logger('JwtSinupGuard');
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
-    const user = request.user;
+    const req = context.switchToHttp().getRequest();
+    const res = context.switchToHttp().getResponse();
+    const user = req.user;
     if (user === undefined) {
-      logger.log('Undefined user');
+      this.logger.log('Undefined user');
       return false;
     }
-    const payload = { username: user.username, email: user.email };
-    const access_token = this.jwtService.sign(payload);
-    logger.debug(`access_token:  ${access_token}`);
-    response.cookie('Authorization', access_token, {
+    const access_token = this.jwtService.sign(user);
+    this.logger.debug(`access_token:  ${access_token}`);
+    res.cookie('Authorization', access_token, {
       // httpOnly: true, // TODO: true일때 보안은 좋으나 클라이언트에서 접근 불가. 어떻게 하지?
     });
-    const is_signup = await this.loginRepository.findUser(user.username);
+    const is_signup = await this.loginRepository.findUser(user.id);
     if (is_signup === undefined) {
-      logger.log('User does not exist in DB.');
-      this.loginRepository.insertUser(user.username, user.username, user.email);
-      response.redirect('http://localhost:8080/firstlogin');
+      this.logger.log('User does not exist in DB.');
+      this.loginRepository.insertUser(user.id, user.id, user.email);
+      res.redirect('http://localhost:8080/firstlogin');
       // socket용 user 객체 생성함
-      this.mainGateway.newUser(user.username);
-      console.log(user.username);
+      this.mainGateway.newUser(user.id);
+      this.logger.log(`user id: ${user.id}`);
     } else {
-      logger.log('User is in DB.');
-      response.redirect('http://localhost:8080/home');
+      this.logger.log('User is in DB.');
+      res.redirect('http://localhost:8080/home');
     }
     return true;
   }
