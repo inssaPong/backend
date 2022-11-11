@@ -3,6 +3,7 @@ import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class MainSocketRepository {
+  private readonly logger: Logger = new Logger(MainSocketRepository.name);
   constructor(private readonly databaseService: DatabaseService) {}
 
   async getUsers() {

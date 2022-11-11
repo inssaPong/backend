@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class GamesRepository {
+  private readonly logger: Logger = new Logger(GamesRepository.name);
   constructor(private readonly databaseService: DatabaseService) {}
 
   async insertGameHistory(winner_id: string, loser_id: string) {

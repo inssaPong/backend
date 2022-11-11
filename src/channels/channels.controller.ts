@@ -6,6 +6,7 @@ import {
   Query,
   Post,
   Put,
+  Logger,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ChannelsService } from './channels.service';
@@ -14,7 +15,9 @@ import { ChannelsService } from './channels.service';
 @Controller('/channels')
 @ApiTags('채널 API')
 export class ChannelsController {
+  private readonly logger: Logger = new Logger(ChannelsController.name);
   constructor(private readonly channelsService: ChannelsService) {}
+
   // 참여 중인 채널 목록 받기
   // req : (body)id
   // res : { 채널명 }들
