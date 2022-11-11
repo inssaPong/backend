@@ -24,6 +24,10 @@ export class ChannelGateway {
       client.emit('channel/enterFail');
       return;
     }
+    if (status_code == 500) {
+      client.emit('channel/DBFail');
+      return;
+    }
     this.sendBeforeMessage(client, object.user_id, object.channel_id);
   }
 
@@ -63,6 +67,10 @@ export class ChannelGateway {
   async sendBeforeMessage(client: Socket, user_id: string, channel_id: string) {
     const message = await this.channelsRepository.selectAllMessage(channel_id);
     const block_users = await this.getBlockUsers(client, user_id, channel_id);
+
+    if (message == undefined) {
+      return;
+    }
     message.forEach((element) => {
       const user = block_users.find((user) => user == element.sender_id);
       if (user == undefined) {
@@ -80,11 +88,7 @@ export class ChannelGateway {
       client.emit('channel/sendFail');
       return;
     }
-    const block_users = await this.getBlockUsers(
-      client,
-      object.sender_id,
-      object.channel_id,
-    );
+
     roomMembers.forEach((element) =>
       this.sendMessage_checkBlockUserAndSend(element, object),
     );
