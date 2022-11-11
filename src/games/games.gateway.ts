@@ -41,6 +41,7 @@ export class GameGateway {
       this.mainGateway.enterPlayer.find((element) => element == client) ==
       undefined
     ) {
+      this.logger.log(`${client.id} enter!!!!!`);
       this.mainGateway.enterPlayer.push(client);
     }
     if (this.mainGateway.enterPlayer.length > 1) {
