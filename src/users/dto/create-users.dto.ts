@@ -18,6 +18,7 @@ export class ChanageFollowStatusDto{
 
 	@IsNotEmpty()
 	@IsBoolean()
+	@ApiProperty({description: '팔로우 여부'})
 	readonly follow_status: boolean;
 }
 

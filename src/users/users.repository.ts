@@ -15,18 +15,19 @@ export class UsersRepository{
 				WHERE id='${id}';
 				`
 				)
-				if(databaseResponse.length > 0)
+				if(databaseResponse.length == 1)
 					return 200;
 				else
-					return 400;
+					throw 404;
 		} catch (error) {
-			this.logger.error(`findUser return 500 error`);
-			return 500;
+			this.logger.error(`findUser: ${error}`);
+			throw error;
 		}
 	}
 
 	async getGameHistory(id: string) {
 	  try {
+		const checkUser = await this.findUser(id);
 		const databaseResponse = await this.databaseService.runQuery(
 		  `
 		  SELECT winner_id, loser_id
@@ -38,13 +39,14 @@ export class UsersRepository{
 		this.logger.debug(`GameHistory: ${databaseResponse}`);
 		return databaseResponse;
 	  } catch (error) {
-		this.logger.error(`Error: ${error}`);
-		return 500;
+		this.logger.error(`getGameHistory: ${error}`);
+		throw error;
 	  }
 	}
 
 	async getWinHistory(id: string) {
 	  try {
+		const checkUser = await this.findUser(id);
 		const wins = await this.databaseService.runQuery(
 		  `
 		  SELECT id
@@ -54,13 +56,14 @@ export class UsersRepository{
 		);
 		return wins;
 	  } catch (error) {
-		this.logger.error(`Error: ${error}`);
-		return 500;
+		this.logger.error(`getWinHistory: ${error}`);
+		throw error;
 	  }
 	}
 
 	async getLoseHistory(id: string) {
 	  try {
+		const checkUser = await this.findUser(id);
 		const loses = await this.databaseService.runQuery(
 		  `
 		  SELECT id
@@ -70,13 +73,14 @@ export class UsersRepository{
 		);
 		return loses;
 	  } catch (error) {
-		this.logger.error(`Error: ${error}`);
-		return 500;
+		this.logger.error(`getLoseHistory: ${error}`);
+		throw error;
 	  }
 	}
 
 	async getUserInfo(id: string) {
 	  try {
+		const checkUser = await this.findUser(id);
 		const databaseResponse = await this.databaseService.runQuery(
 		  `
 		  SELECT nickname, avatar
@@ -84,48 +88,78 @@ export class UsersRepository{
 		  WHERE id='${id}';
 		  `,
 		);
-		if (databaseResponse.length <= 0) throw 400;
 		return databaseResponse;
 	  } catch (error) {
-		this.logger.error(`getUserInfo return ${error}`);
+			this.logger.error(`getUserInfo: ${error}`);
 		throw error;
 	  }
 	}
 
 	async getFollowStatus(user_id: string, partner_id:string){
 		try {
-			const databaseResponse = this.databaseService.runQuery(
+		const databaseResponse = this.databaseService.runQuery(
 				`
-				SELECT partner_id
+				SELECT *
 				FROM "user_relation"
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}' AND block_status = false
+				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}' AND block_status = false;
 				`
 			)
 			return databaseResponse;
 		} catch (error) {
-			this.logger.error("getFollowStatus return 500");
-			throw 500;
+			this.logger.error(`getFollowStatus: ${error}`);
+			throw error;
+		}
+	}
+
+	async getBlockStatus(user_id: string, partner_id:string){
+		try {
+		const databaseResponse = this.databaseService.runQuery(
+				`
+				SELECT *
+				FROM "user_relation"
+				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}' AND block_status = true;
+				`
+			)
+			return databaseResponse;
+		} catch (error) {
+			this.logger.error(`getFollowStatus: ${error}`);
+			throw error;
 		}
 	}
 
 	async onFollowStatus(user_id: string, partner_id: string){
 		try {
-			this.databaseService.runQuery(
+		const checkUser = await this.findUser(user_id);
+		const checkBlock = await this.getBlockStatus(user_id, partner_id);
+		if (checkBlock.length == 1){
+			await this.databaseService.runQuery(
 				`
-				INSERT INTO "user_relation" (user_id, partner_id)
-				VALUES ('${user_id}', '${partner_id}');
+				UPDATE "user_relation"
+				SET block_status = false
+				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}';
 				`
 			);
-			return 200;
+		} else if (checkBlock.length == 0) {
+			await this.databaseService.runQuery(
+					`
+					INSERT INTO "user_relation" (user_id, partner_id)
+					VALUES ('${user_id}', '${partner_id}');
+					`
+				);
+		} else {
+			throw new Error(`Invalid checkBlock length: ${checkBlock.length}`);
+		}
+		return 200;
 		} catch (error) {
-			this.logger.error("onFollowStatus return 500")
-			throw 500;
+			this.logger.error(`onFollowStatus: ${error}`);
+			throw error;
 		}
 	}
 
 	async offFollowStatus(user_id: string, partner_id: string){
 		try {
-			this.databaseService.runQuery(
+		const checkUser = await this.findUser(user_id);
+		this.databaseService.runQuery(
 				`
 				DELETE FROM "user_relation"
 				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}';
@@ -133,30 +167,34 @@ export class UsersRepository{
 			);
 			return 200;
 		} catch (error) {
-			this.logger.error("offFollowStatus return 500")
-			throw 500;
+			this.logger.error(`offFollowStatus: ${error}`);
+			throw error;
 		}
 	}
 
 	async getRelationStatus(user_id: string, partner_id:string){
 		try {
-			const databaseResponse = await this.databaseService.runQuery(
+		const checkUser = await this.findUser(partner_id);
+		const databaseResponse = await this.databaseService.runQuery(
 				`
 				SELECT partner_id
 				FROM "user_relation"
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}'
+				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}';
 				`
 			)
+			if (databaseResponse.length != 1 && databaseResponse.length != 0)
+				throw 500
 			return databaseResponse;
 		} catch (error) {
-			this.logger.error("getFollowStatus return 500");
-			throw 500;
+			this.logger.error(`getRelationStatus: ${error}`);
+			throw error;
 		}
 	}
 
 	async blockFollow(user_id: string, block_id: string) {
 		try {
-			await this.databaseService.runQuery(
+		const checkUser = await this.findUser(block_id);
+		await this.databaseService.runQuery(
 				`
 				UPDATE "user_relation"
 				SET block_status = true
@@ -164,22 +202,23 @@ export class UsersRepository{
 				`
 			)
 		} catch (error) {
-			this.logger.error("blockFollow return 500")
-			throw 500;
+			this.logger.error(`blockFolow: ${error}`)
+			throw error;
 		}
 	}
 
 	async blockUnfollow(user_id: string, block_id: string) {
 		try {
-			await this.databaseService.runQuery(
+		const checkUser = await this.findUser(block_id);
+		await this.databaseService.runQuery(
 				`
 				INSERT INTO "user_relation" (user_id, partner_id, block_status)
 				VALUES ('${user_id}', '${block_id}', true);
 				`
 			)
 		} catch (error) {
-			this.logger.error("blockUnfollow return 500")
-			throw 500;
+			this.logger.error(`blockUnfollow: ${error}`)
+			throw error;
 		}
 	}
 }
