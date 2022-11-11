@@ -13,6 +13,8 @@ import {
   ApiBody,
   ApiResponse,
   ApiOkResponse,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import {
   GameHistoryDto,
@@ -40,11 +42,14 @@ export class MypageController {
   @ApiOperation({
     summary: 'mypage 유저 정보 가져오기',
     description:
-      'query로 id 보내면 CreateUserInfoDto{nickname, avatar binary code, twoFactor 여부} 반환',
+      '현재 클라이언트에 접속 중인 유저의 정보를 반환',
   })
   @ApiOkResponse({
     description: '성공',
     type: UserInfoDto,
+  })
+  @ApiInternalServerErrorResponse({
+	description: '서버 에러'
   })
   @Get()
   async getUserInfo(@Req() req, @Res() res: Response) {
@@ -75,6 +80,9 @@ export class MypageController {
   @ApiOkResponse({
     description: '성공',
   })
+  @ApiInternalServerErrorResponse({
+	description: '서버 에러'
+  })
   @Patch()
   async patchUserInfo(
     @Req() req,
@@ -89,14 +97,17 @@ export class MypageController {
   }
 }
 
-  @ApiOkResponse({
-    description: '성공',
-    type: FollowsDto,
-  })
-  @ApiOperation({
-    summary: 'follow 목록 가져오기',
+@ApiOperation({
+	summary: 'follow 목록 가져오기',
     description:
-      '해당 유저가 follow하고 있는 id 배열 반환',
+	'해당 유저가 follow하고 있는 id 배열 반환',
+})
+@ApiOkResponse({
+  description: '성공',
+  type: FollowsDto,
+})
+@ApiInternalServerErrorResponse({
+	description: '서버 에러'
   })
   @Get('/follows')
   async getFollows(@Req() req, @Res() res: Response) {
@@ -113,14 +124,17 @@ export class MypageController {
 	}
   }
 
+  @ApiOperation({
+	summary: '게임 전적 기록 가져오기',
+	description:
+	  '해당 유저의 게임 전적 기록 가져오기',
+  })
   @ApiOkResponse({
     description: '성공',
     type: GameHistoryDto,
   })
-  @ApiOperation({
-    summary: '게임 전적 기록 가져오기',
-    description:
-      '해당 유저의 게임 전적 기록 가져오기',
+  @ApiInternalServerErrorResponse({
+	description: '서버 에러'
   })
   @Get('/gameHistory')
   async getGameHistory(@Req() req, @Res() res: Response) {
@@ -143,14 +157,17 @@ export class MypageController {
 	}
   }
 
+  @ApiOperation({
+	summary: '게임 승패 수 가져오기',
+	description:
+	  '해당 유저의 게임 승 수, 패 수 가져오기',
+  })
   @ApiOkResponse({
     description: '성공',
     type: GameStatDto,
   })
-  @ApiOperation({
-    summary: '게임 승패 수 가져오기',
-    description:
-      '해당 유저의 게임 승 수, 패 수 가져오기',
+  @ApiInternalServerErrorResponse({
+	description: '서버 에러'
   })
   @Get('/gameStat')
   async getGameStat(@Req() req, @Res() res: Response) {
