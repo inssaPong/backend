@@ -24,8 +24,7 @@ export class ChannelGateway {
       client.emit('channel/enterFail');
       return;
     }
-    // 채널 사람이 맞으면 이전 메세지 전부 보내기
-    // 차단된 사람은 제외
+    this.sendBeforeMessage(client, object.user_id, object.channel_id);
   }
 
   @SubscribeMessage('channel/send')
@@ -61,24 +60,34 @@ export class ChannelGateway {
     this.sendDM_sendSenderUser(object);
   }
 
+  async sendBeforeMessage(client: Socket, user_id: string, channel_id: string) {
+    const message = await this.channelsRepository.selectAllMessage(channel_id);
+    const block_users = await this.getBlockUsers(client, user_id, channel_id);
+    message.forEach((element) => {
+      const user = block_users.find((user) => user == element.sender_id);
+      if (user == undefined) {
+        client.emit('channel/send', element.sender_id, element.content);
+      }
+    });
+  }
+
   async sendMessage_sendMember(client: Socket, object: any) {
-    const roomMember = await this.channelsRepository.selectRoomMember(
+    const roomMembers = await this.channelsRepository.selectRoomMember(
       object.channel_id,
     );
-    if (roomMember == undefined) {
+    if (roomMembers == undefined) {
       this.logger.log('[sendMessage] db error.');
       client.emit('channel/sendFail');
       return;
     }
-    // 차단한 사람 제외하고 보내기
-    roomMember.forEach((element) => {
-      const member = this.mainGateway.users.find(
-        (user) => user.id == element.id,
-      );
-      if (member != undefined && member.status == UserStatus.online) {
-        member.socket.emit('channel/send', member.id, object.message);
-      }
-    });
+    const block_users = await this.getBlockUsers(
+      client,
+      object.sender_id,
+      object.channel_id,
+    );
+    roomMembers.forEach((element) =>
+      this.sendMessage_checkBlockUserAndSend(element, object),
+    );
   }
 
   sendDM_sendReceiveUser(object: any) {
@@ -121,5 +130,40 @@ export class ChannelGateway {
     }
   }
 
-  checkBlock() {}
+  async getBlockUsers(client: Socket, user_id: string, channel_id: string) {
+    let block_user: string[] = [];
+    const roomMembers = await this.channelsRepository.selectRoomMember(
+      channel_id,
+    );
+    if (roomMembers == undefined) {
+      this.logger.log('[getBlockUsers] db error.');
+      client.emit('channel/sendFail');
+      return;
+    }
+    roomMembers.forEach(async (element) => {
+      const db_result = await this.channelsRepository.selectBlockUser(
+        user_id,
+        element.id,
+      );
+      if (db_result == true) {
+        block_user.push(element.id);
+      }
+    });
+    return block_user;
+  }
+
+  async sendMessage_checkBlockUserAndSend(element: any, object: any) {
+    const member = this.mainGateway.users.find((user) => user.id == element.id);
+    const is_block = await this.channelsRepository.selectBlockUser(
+      element.id,
+      object.sender_id,
+    );
+    if (
+      member != undefined &&
+      is_block == false &&
+      member.status == UserStatus.online
+    ) {
+      member.socket.emit('channel/send', member.id, object.message);
+    }
+  }
 }
