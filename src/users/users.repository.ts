@@ -123,7 +123,6 @@ export class UsersRepository {
 
   async onFollowStatus(user_id: string, partner_id: string) {
     try {
-      const checkUser = await this.findUser(user_id);
       const checkBlock = await this.getBlockStatus(user_id, partner_id);
       if (checkBlock.length == 1) {
         await this.databaseService.runQuery(
@@ -152,7 +151,6 @@ export class UsersRepository {
 
   async offFollowStatus(user_id: string, partner_id: string) {
     try {
-      const checkUser = await this.findUser(user_id);
       this.databaseService.runQuery(
         `
 				DELETE FROM "user_relation"
@@ -168,7 +166,6 @@ export class UsersRepository {
 
   async getRelationStatus(user_id: string, partner_id: string) {
     try {
-      const checkUser = await this.findUser(partner_id);
       const databaseResponse = await this.databaseService.runQuery(
         `
 				SELECT partner_id
@@ -187,7 +184,6 @@ export class UsersRepository {
 
   async blockFollow(user_id: string, block_id: string) {
     try {
-      const checkUser = await this.findUser(block_id);
       await this.databaseService.runQuery(
         `
 				UPDATE "user_relation"
@@ -203,7 +199,6 @@ export class UsersRepository {
 
   async blockUnfollow(user_id: string, block_id: string) {
     try {
-      const checkUser = await this.findUser(block_id);
       await this.databaseService.runQuery(
         `
 				INSERT INTO "user_relation" (user_id, partner_id, block_status)
