@@ -7,11 +7,11 @@ import { ChannelsRepository } from './channels.repository';
 
 @WebSocketGateway({ cors: true })
 export class ChannelGateway {
+  private readonly logger: Logger = new Logger(ChannelGateway.name);
   constructor(
     private mainGateway: MainGateway,
     private channelsRepository: ChannelsRepository,
   ) {}
-  logger: Logger = new Logger('ChannelGateway');
 
   @SubscribeMessage('channel/enter')
   async enterChannel(client: Socket, data: string) {
