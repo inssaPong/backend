@@ -18,11 +18,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   app.useGlobalPipes(
-	new ValidationPipe({
-		whitelist: true, // entity 
-		forbidNonWhitelisted: true,
-		transform: true
-	})
+    new ValidationPipe({
+      whitelist: true, // entity
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
   );
   // app.use(cookieParser(process.env.COOKIE_SECRET)); // TODO: Env config. Encrypt cookie
   const DOMAIN = process.env.DOMAIN;
