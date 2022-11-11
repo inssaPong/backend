@@ -49,7 +49,7 @@ export class OneGameHistoryDto {
 
 export class FollowsDto {
   @ApiProperty({ description: '팔로우 아이디 목록' })
-  follow: string[] = [];
+  readonly follow: string[];
 }
 
 export class GameStatDto {
