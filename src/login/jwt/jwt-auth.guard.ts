@@ -40,7 +40,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
     if (err || !user) {
       this.logger.log('Unauthorized users');
-      res.redirect('http://localhost:8080');
       throw err || new UnauthorizedException();
     }
     this.logger.log('Authorized user');
