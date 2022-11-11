@@ -11,23 +11,9 @@ export class AppController {
   }
 
   // 게임 페이지 깡통 get()
-  @Get('/app')
-  appPageGet(@Req() req) {
-    const user_id = req.user.username;
-    return user_id;
-  }
-
-  // 게임 페이지 깡통 get()
-  @Get('/home')
-  homePageGet(@Req() req) {
-    const user_id = req.user.username;
-    return user_id;
-  }
-
-  // 게임 페이지 깡통 get()
-  @Get('/game')
-  gamePageGet(@Req() req) {
-    const user_id = req.user.username;
-    return user_id;
+  @Get('/loginCheck')
+  loginCheckGet(@Req() req) {
+    const user_id = req.user.id;
+   return user_id;
   }
 }

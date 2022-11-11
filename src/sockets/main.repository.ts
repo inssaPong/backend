@@ -6,8 +6,9 @@ export class MainSocketRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async getUsers() {
+    let databaseResponse: any[];
     try {
-      const databaseResponse = await this.databaseService.runQuery(
+      databaseResponse = await this.databaseService.runQuery(
         `
 		      SELECT id
 		      FROM "user";
@@ -15,7 +16,8 @@ export class MainSocketRepository {
       );
       return databaseResponse;
     } catch (error) {
-      return;
+      console.log(`[MainSocketRepository] error`);
+      return databaseResponse;
     }
   }
 }

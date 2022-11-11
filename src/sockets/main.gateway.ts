@@ -17,11 +17,12 @@ export class MainGateway {
   logger: Logger = new Logger('MainGameway');
   constructor(private mainSocketRepository: MainSocketRepository) {}
 
-  afterInit() {
-    this.createUsers();
+  async afterInit() {
+    await this.initUsers();
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket) {
+    this.setOnline(client);
     this.logger.log(`Client Connected : ${client.id}`);
   }
 
@@ -31,13 +32,14 @@ export class MainGateway {
     this.logger.log(`Client Disconnected : ${client.id}`);
   }
 
-  @SubscribeMessage('setOnline')
-  setOnline(client: Socket, id: string) {
-    let user = this.users.find((user) => user.id == id);
+  setOnline(client: Socket) {
+    const user_id = client.handshake.query.user_id;
+    const user = this.users.find((user) => user.id == user_id);
     if (user == undefined) {
       this.logger.log(
-        `[connect] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
+        `[connect] ${user_id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
       );
+      this.initUsers();
       return;
     }
     user.socket = client;
@@ -46,11 +48,12 @@ export class MainGateway {
 
   @SubscribeMessage('getUserStatus')
   getUserStatus(client: Socket, id: string) {
-    const user = this.users.find((element) => element.id == id);
+    const user = this.users.find((user) => user.id == id);
     if (user == undefined) {
       this.logger.log(
         `[getUserStatus] ${id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
       );
+      this.initUsers();
       return;
     }
     client.emit('getUserStatus', user.status);
@@ -68,21 +71,26 @@ export class MainGateway {
       this.logger.log(
         `[disconnect] 여기 들어오면 안돼!! 그치만 발생할 수도 있는 일임.`,
       );
+      this.initUsers();
       return;
     }
     player.setStatusOffline();
   }
 
-  printAllUser() {
-    this.users.forEach((element) => {
-      this.logger.log(element.id);
+  async initUsers() {
+    const users = await this.mainSocketRepository.getUsers();
+    if (users == undefined) {
+      this.logger.log('[mainSocketDB]getUsers : error');
+      return;
+    }
+    users.forEach((element) => {
+      this.newUser(element.id);
     });
   }
 
-  async createUsers() {
-    const users = await this.mainSocketRepository.getUsers();
-    users.forEach((element) => {
-      this.newUser(element.id);
+  printAllUser() {
+    this.users.forEach((element) => {
+      this.logger.log(element.id);
     });
   }
 }

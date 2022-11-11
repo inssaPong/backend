@@ -34,11 +34,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
     status?: any,
   ) {
+    const res = context.switchToHttp().getResponse();
     if (info) {
       this.logger.log(`${info}`);
     }
     if (err || !user) {
       this.logger.log('Unauthorized users');
+      res.redirect('http://localhost:8080');
       throw err || new UnauthorizedException();
     }
     this.logger.log('Authorized user');
