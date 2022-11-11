@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Post, HttpCode, Header } from '@nestjs/common';
+import { Controller, Get, Query, HttpCode, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { GamesService } from './games.service';
 
@@ -6,7 +6,9 @@ import { GamesService } from './games.service';
 @Controller('/games')
 @ApiTags('게임 API')
 export class GamesController {
+  private readonly logger: Logger = new Logger(GamesController.name);
   constructor(private readonly gameService: GamesService) {}
+  
   // 게임 초대
   // req: 상대방 id
   // res: 상태코드(200, 404)
