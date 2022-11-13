@@ -90,6 +90,7 @@ export class ChannelsController {
       // Description: channel_member 테이블에 추가
       const userId: string = req.user.id;
       await this.channelsRepository.insertChannelMember(userId, channelId);
+      this.logger.log('channel_member 테이블에 추가했습니다.');
       return res.status(201).send({
         id: channelId,
       });
@@ -120,9 +121,7 @@ export class ChannelsController {
         this.logger.log('한 개의 채널도 존재하지 않습니다.');
         return res.status(400).send;
       }
-      this.logger.log(
-        `전체 채널 목록을 가져오는데 성공했습니다: ${channels.length}`,
-      );
+      this.logger.log('전체 채널 목록을 가져옵니다.');
       return res.status(200).send(channels);
     } catch (error) {
       this.logger.error(error);
@@ -130,7 +129,7 @@ export class ChannelsController {
     }
   }
 
-  // 참여 중인 채널 목록 받기
+  // 참가 중인 채널 목록 받기
   @ApiOperation({
     summary: '참여 중인 채널 목록 받기',
     description:
@@ -155,9 +154,10 @@ export class ChannelsController {
       joinedChannelList =
         await this.channelsRepository.getJoinedChannelListByUserId(user.id);
       if (joinedChannelList.length === 0) {
-        this.logger.log('참여중인 채널을 찾을 수 없습니다.');
+        this.logger.log('참가중인 채널을 찾을 수 없습니다.');
         return res.status(400).send();
       }
+      this.logger.log('참가 중인 채널 목록을 가져옵니다.');
       return res.status(200).send(joinedChannelList);
     } catch (error) {
       this.logger.error(error);
@@ -184,9 +184,6 @@ export class ChannelsController {
     @Req() req,
     @Res() res,
   ) {
-    // 채널 입장 시 유효성 검사.
-    // 입력된 쿼리로 DB를 통해 권한, 비밀번호 유무 등 유효성 검사.
-    // 참가중인 서버인지 체크
     const channelId = Number(channel_id); // TODO: 수정. dto를 통해 변환하기. class-transformer
     try {
       const isJoined = await this.channelsRepository.isJoinedChannel(
@@ -194,10 +191,12 @@ export class ChannelsController {
         channelId,
       );
       if (isJoined === false) {
+        this.logger.log('참가 중인 채널이 아닙니다.');
         return res.status(403).send();
       }
       const channelName =
         await this.channelsRepository.getChannelNameByChannelId(channelId);
+      this.logger.log('참가 중인 채널입니다.');
       return res.status(200).send(channelName);
     } catch (error) {
       this.logger.error(error);
@@ -229,13 +228,14 @@ export class ChannelsController {
     const channelId: number = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
     const inputPassword: string = body.pw;
 
-    // Description: 밴 여뷰 확인
+    // Description: 밴 여부 확인
     try {
       const isBanned = await this.channelsRepository.isBannedChannel(
         userId,
         channelId,
       );
       if (isBanned === true) {
+        this.logger.log('밴 당한 채널입니다.');
         return res.status(204).send();
       }
     } catch (error) {
@@ -243,7 +243,7 @@ export class ChannelsController {
       return res.status(500).send();
     }
 
-    // Description: 유효한 비밀번호인지?
+    // Description: 유효한 비밀번호인지 확인
     try {
       const isValidPassword =
         await this.channelsRepository.isValidPasswordForChannel(
@@ -251,6 +251,7 @@ export class ChannelsController {
           inputPassword,
         );
       if (isValidPassword === false) {
+        this.logger.log('유효하지 않은 채널 비밀번호입니다.');
         return res.status(403).send();
       }
     } catch (error) {
@@ -268,6 +269,7 @@ export class ChannelsController {
     }
   }
 
+  // TODO: 질문. user_satatus를 어떻게 가져오지?
   // 채널에 참가 중인 유저 상태 받기
   @ApiOperation({
     summary: '채널에 참가 중인 유저 상태 받기',
@@ -277,23 +279,33 @@ export class ChannelsController {
     type: ResponseUserStatusInChannelDto,
   })
   @ApiBadRequestResponse({
-    description: '[400 Bad Request] !!!',
+    description: '[400 Bad Request] 잘못된 request',
+  })
+  @ApiInternalServerErrorResponse({
+    description: '[500 Internal Server Error] DB에 문제',
   })
   @Get('/room/users')
-  getUserStatusInChannel(@Query('channel_id') channel_id: string, @Res() res) {
-    const isSuccess = true;
-    if (!isSuccess) {
-      res.status(400).send();
-      return;
+  getUserStatusInChannel(@Query('channel_id') channel_id: number, @Res() res) {
+    const channelId = Number(channel_id); // TODO: 수정. dto를 통해 number로 변환
+    try {
+      const isSuccess =
+        this.channelsRepository.getUsersStatusInJoinedChannel(channel_id);
+      if (!isSuccess) {
+        res.status(400).send();
+        return;
+      }
+      const arr = [
+        { user_id: 'seungoh', user_status: '0' },
+        { user_id: 'dason', user_status: '1' },
+        { user_id: 'hyson', user_status: '0' },
+        { user_id: 'sehyan', user_status: '1' },
+        { user_id: 'sanjeon', user_status: '2' },
+      ];
+      res.status(200).send(arr);
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
-    const arr = [
-      { user_id: 'seungoh', user_status: '0' },
-      { user_id: 'dason', user_status: '1' },
-      { user_id: 'hyson', user_status: '0' },
-      { user_id: 'sehyan', user_status: '1' },
-      { user_id: 'sanjeon', user_status: '2' },
-    ];
-    res.status(200).send(arr);
   }
 
   // 채팅방 나가기
@@ -306,14 +318,32 @@ export class ChannelsController {
   @ApiBadRequestResponse({
     description: '[400 Bad Request] Channel exit falied',
   })
+  @ApiInternalServerErrorResponse({
+    description: '[500 Internal Server Error] DB에 문제',
+  })
   @Delete('/room/exit')
-  exitChannel(@Query('channel_id') channel_id: number, @Res() res) {
-    const isSuccess = true;
-    if (!isSuccess) {
-      res.status(400).send();
-      return;
+  async exitChannel(
+    @Query('channel_id') channel_id: number,
+    @Req() req,
+    @Res() res,
+  ) {
+    const channelId = Number(channel_id); // TODO: 수정. dto를 통한 number 변환
+    const userId = req.user.id;
+    try {
+      const isSuccess = await this.channelsRepository.exitChannel(
+        userId,
+        channelId,
+      );
+      if (isSuccess === false) {
+        this.logger.log('잘못된 request입니다.');
+        return res.status(400).send();
+      }
+      this.logger.log('채널 삭제에 성공했습니다.');
+      res.status(200).send();
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
-    res.status(200).send();
   }
 
   // DM 연결

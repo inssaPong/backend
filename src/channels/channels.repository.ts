@@ -28,7 +28,8 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT id FROM "channel" WHERE name='${channel_name}';
+        SELECT id FROM "channel"
+        WHERE name='${channel_name}';
         `,
       );
       const channelId: number = databaseResponse[0].id;
@@ -44,7 +45,8 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT name FROM "channel" WHERE id='${channel_id}'
+        SELECT name FROM "channel"
+        WHERE id='${channel_id}';
         `,
       );
       return databaseResponse[0].name;
@@ -75,7 +77,7 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT * FROM "channel" 
+        SELECT * FROM "channel";
         `,
       );
       const channels = databaseResponse;
@@ -92,7 +94,8 @@ export class ChannelsRepository {
       let channelIdAndNameList = [];
       const channelIdList = await this.databaseService.runQuery(
         `
-        SELECT channel_id FROM "channel_member" WHERE id='${user_id}';
+        SELECT channel_id FROM "channel_member"
+        WHERE id='${user_id}';
         `,
       );
 
@@ -116,15 +119,14 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT channel_id FROM "channel_member" WHERE id='${user_id}'
+        SELECT channel_id FROM "channel_member"
+        WHERE id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
-      for (const channelObject of databaseResponse) {
-        if (channelObject.channel_id === channel_id) {
-          return true;
-        }
+      if (databaseResponse.length === 0) {
+        return false;
       }
-      return false;
+      return true;
     } catch (error) {
       throw `isJoinedChannel: ${error}`;
     }
@@ -136,7 +138,8 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT channel_id, ban_status FROM "channel_member" WHERE id='${user_id}'
+        SELECT channel_id, ban_status FROM "channel_member"
+        WHERE id='${user_id}';
         `,
       );
       for (const channelObject of databaseResponse) {
@@ -161,7 +164,8 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT password FROM "channel" WHERE id='${channel_id}'
+        SELECT password FROM "channel"
+        WHERE id='${channel_id}';
         `,
       );
       if (databaseResponse.length === 0) {
@@ -175,6 +179,62 @@ export class ChannelsRepository {
       return false;
     } catch (error) {
       throw `isValidPasswordForChannel: ${error}`;
+    }
+  }
+
+  async getUsersStatusInJoinedChannel(channel_id: number) {
+    try {
+      // const databaseResponse = await this.databaseService.runQuery(
+      //   `
+      //   SELECT * FROM ;
+      //   `,
+      // );
+    } catch (error) {
+      throw `getUsersStatusInJoinedChannel: ${error}`;
+    }
+  }
+
+  async exitChannel(user_id: string, channel_id: number): Promise<boolean> {
+    try {
+      // Description: 내가 이 채널에서 어떤 권한을 가지고 있는지 확인
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT channel_id, authority FROM "channel_member"
+        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        `,
+      );
+      if (databaseResponse.length === 0) {
+        return false;
+      }
+      const authority = databaseResponse[0].authority;
+
+      // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
+      await this.databaseService.runQuery(
+        `
+        DELETE FROM "channel_member"
+        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        `,
+      );
+
+      // Description: 내가 채널장인 경우 channel_member 테이블에서 해당 채널 모두 삭제. channel 테이블에서 채널 삭제
+      if (authority === '1') {
+        await this.databaseService.runQuery(
+          `
+          DELETE FROM "channel_member"
+          WHERE channel_id='${channel_id}';
+          `,
+        );
+
+        await this.databaseService.runQuery(
+          `
+          DELETE FROM "channel"
+          WHERE id='${channel_id}';
+          `,
+        );
+      }
+      return true;
+    } catch (error) {
+      throw `exitChannel: ${error}`;
     }
   }
 }
