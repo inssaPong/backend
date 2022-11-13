@@ -8,7 +8,8 @@ export class ChannelsRepository {
 
   private readonly logger = new Logger(ChannelsRepository.name);
 
-  async createChannel(channel: any) {
+  // TODO: 채널 생성
+  async createChannel(channel: any): Promise<void> {
     // TODO: dto
     try {
       await this.databaseService.runQuery(
@@ -22,7 +23,8 @@ export class ChannelsRepository {
     }
   }
 
-  async getChannelIdByChannelName(channel_name: string) {
+  // TODO: 채널 이름을 통해 채널 ID를 가져오기
+  async getChannelIdByChannelName(channel_name: string): Promise<number> {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -37,6 +39,7 @@ export class ChannelsRepository {
     }
   }
 
+  // TODO: 채널 ID를 통해 채널 이름을 가져오기
   async getChannelNameByChannelId(channel_id: number): Promise<string> {
     try {
       const databaseResponse = await this.databaseService.runQuery(
@@ -50,7 +53,11 @@ export class ChannelsRepository {
     }
   }
 
-  async insertChannelMember(user_id: string, channel_id: number) {
+  // TODO: 채널 멤버에 추가 (채널 생성 or 채널 입장)
+  async insertChannelMember(
+    user_id: string,
+    channel_id: number,
+  ): Promise<void> {
     try {
       const databaseResponse = this.databaseService.runQuery(
         `
@@ -63,7 +70,8 @@ export class ChannelsRepository {
     }
   }
 
-  async getChannelList() {
+  // Description: 전체 채널 목록 가져오기
+  async getChannelList(): Promise<Object[]> {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -78,7 +86,8 @@ export class ChannelsRepository {
     }
   }
 
-  async getJoinedChannelListByUserId(user_id: string) {
+  // Description: 유저 ID를 통해 참가 중인 채널 목록 가져오기
+  async getJoinedChannelListByUserId(user_id: string): Promise<Object[]> {
     try {
       let channelIdAndNameList = [];
       const channelIdList = await this.databaseService.runQuery(
@@ -102,6 +111,7 @@ export class ChannelsRepository {
     }
   }
 
+  // Description: 참가 중인 채널인지 확인
   async isJoinedChannel(user_id: string, channel_id: number): Promise<boolean> {
     try {
       const databaseResponse = await this.databaseService.runQuery(
@@ -117,6 +127,54 @@ export class ChannelsRepository {
       return false;
     } catch (error) {
       throw `isJoinedChannel: ${error}`;
+    }
+  }
+
+  // Description: 접근하려는 채널의 밴 여부 확인
+  async isBannedChannel(user_id: string, channel_id: number): Promise<boolean> {
+    // 1. 밴 여부 확인
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT channel_id, ban_status FROM "channel_member" WHERE id='${user_id}'
+        `,
+      );
+      for (const channelObject of databaseResponse) {
+        if (channelObject.channel_id === channel_id) {
+          const isBanned = channelObject.ban_status;
+          if (isBanned === true) {
+            return true;
+          }
+        }
+      }
+      return false;
+    } catch (error) {
+      throw `isBannedChannel: ${error}`;
+    }
+  }
+
+  // Description: 접근하려고 하는 채널의 비밀번호가 맞는지
+  async isValidPasswordForChannel(
+    channel_id: number,
+    input_password: string,
+  ): Promise<boolean> {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT password FROM "channel" WHERE id='${channel_id}'
+        `,
+      );
+      if (databaseResponse.length === 0) {
+        return false;
+      }
+      const channelPassword = databaseResponse[0].password;
+      if (channelPassword === input_password) {
+        // TODO: 수정. 암호화 해서 비교하기 bcrypt 모듈 사용
+        return true;
+      }
+      return false;
+    } catch (error) {
+      throw `isValidPasswordForChannel: ${error}`;
     }
   }
 }

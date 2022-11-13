@@ -210,7 +210,7 @@ export class ChannelsController {
     summary: '채널 입장',
   })
   @ApiCreatedResponse({
-    description: '[201 Created] Enter',
+    description: '[201 Created] Enter', // TODO: 질문. 왜 Created 였지?
   })
   @ApiNoContentResponse({
     description: '[204 No Content] Ban',
@@ -219,22 +219,55 @@ export class ChannelsController {
     description: '[403 Forbidden] Invalid PW',
   })
   @Post('/enter')
-  enterChannel(@Query('channel_id') channel_id: number, @Res() res) {
-    const channelId = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
-    const isBan = true;
-    if (isBan) {
-      res.status(204).send();
-      return;
+  async enterChannel(
+    @Query('channel_id') channel_id: number,
+    @Req() req,
+    @Res() res,
+    @Body() body,
+  ) {
+    const userId: string = req.user.id;
+    const channelId: number = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
+    const inputPassword: string = body.pw;
+
+    // Description: 밴 여뷰 확인
+    try {
+      const isBanned = await this.channelsRepository.isBannedChannel(
+        userId,
+        channelId,
+      );
+      if (isBanned === true) {
+        return res.status(204).send();
+      }
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
-    const isValidatePW = true;
-    if (!isValidatePW) {
-      res.status(403).send();
-      return;
+
+    // Description: 유효한 비밀번호인지?
+    try {
+      const isValidPassword =
+        await this.channelsRepository.isValidPasswordForChannel(
+          channelId,
+          inputPassword,
+        );
+      if (isValidPassword === false) {
+        return res.status(403).send();
+      }
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
-    res.status(201).send();
+
+    // Description: DB channel_member 테이블에 추가
+    try {
+      await this.channelsRepository.insertChannelMember(userId, channelId);
+      res.status(201).send();
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
+    }
   }
 
-  // TODO: 질문. req시 body에 데이터를 넣지 못하는데 어떻게 처리를 할 것인지?
   // 채널에 참가 중인 유저 상태 받기
   @ApiOperation({
     summary: '채널에 참가 중인 유저 상태 받기',
