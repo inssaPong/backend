@@ -11,17 +11,17 @@ import {
   Res,
 } from '@nestjs/common';
 import {
-  ApiAcceptedResponse,
   ApiBadRequestResponse,
   ApiBody,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { join } from 'path';
 import { ChannelsRepository } from './channels.repository';
 import {
   RequestBodyConnectDmDto,
@@ -38,7 +38,7 @@ import {
 export class ChannelsController {
   constructor(private readonly channelsRepository: ChannelsRepository) {}
 
-  logger: Logger = new Logger(ChannelsController.name);
+  private readonly logger = new Logger(ChannelsController.name);
 
   // 채널 개설
   @ApiOperation({
@@ -48,36 +48,55 @@ export class ChannelsController {
     type: RequestBodyChannelNameAndPwDto,
   })
   @ApiCreatedResponse({
-    description: '[201 Created] Channel creation successful',
+    description: '[201 Created] 채널 생성 성공',
     type: ResponseChannelIdDto,
   })
   @ApiBadRequestResponse({
-    description: '[400 Bad Request] Channel creation failed',
+    description: '[400 Bad Request] 유효하지 않은 값이 들어와서 채널 생성 실패',
+  })
+  @ApiInternalServerErrorResponse({
+    description: '[500 Internal Server Error] DB에서 채널 생성 실패',
   })
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
-    const channel_name = body.channel_name;
-    const channel_pw = body.channel_pw;
-    this.logger.debug(`channel name: ${channel_name}`);
-    this.logger.debug(`channel password: ${channel_pw}`);
-    const isSuccess = await this.channelsRepository.createChannel(
-      channel_name,
-      channel_pw,
-    );
-    if (!isSuccess) {
-      res.status(400).send();
-      return;
+    Logger.log('/create', 'Channels API');
+
+    const channel = {
+      name: body.channel_name, // TODO: 구현. dto를 통한 유효성사검사
+      password: body.channel_pw, // TODO: 구현. 암호화해서 DB에 넣기
+    };
+    this.logger.debug(`channel name: ${channel.name}`);
+
+    // Description: req로 받은 channel의 name이 유효한지 검사
+    if (channel.name === '') {
+      this.logger.error('유효하지 않은 채널 이름입니다.');
+      return res.status(400).send();
     }
-    const channel_id = await this.channelsRepository.findChannelId(
-      channel_name,
-    );
-    if (channel_id === -1) {
-      res.status(400).send();
-      return;
+
+    try {
+      // Description: 채널 생성
+      await this.channelsRepository.createChannel(channel);
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
-    res.status(201).send({
-      channel_id: channel_id,
-    });
+
+    try {
+      // Description: 생성된 채널 id 가져오기
+      const channelId: number =
+        await this.channelsRepository.getChannelIdByChannelName(channel.name);
+      this.logger.log(`생성된 채널 id를 가져오는데 성공했습니다: ${channelId}`);
+
+      // Description: channel_member 테이블에 추가
+      const userId: string = req.user.id;
+      await this.channelsRepository.insertChannelMember(userId, channelId);
+      return res.status(201).send({
+        id: channelId,
+      });
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
+    }
   }
 
   // 전체 채널 목록 받기
@@ -92,42 +111,58 @@ export class ChannelsController {
     description: '[400 Bad Request] 전체 채널을 찾을 수 없음',
   })
   @Get('/list')
-  async GetChannelList(@Res() res) {
-    const channels = await this.channelsRepository.getAllChannelList();
-    if (channels === undefined) {
-      res.status(500).send();
-      return;
+  async GetAllChannelList(@Res() res) {
+    Logger.log('/list', 'Channels API');
+    // Description: 전체 채널 목록 가져오기
+    try {
+      const channels = await this.channelsRepository.getChannelList();
+      if (channels.length === 0) {
+        this.logger.log('한 개의 채널도 존재하지 않습니다.');
+        return res.status(400).send;
+      }
+      this.logger.log(
+        `전체 채널 목록을 가져오는데 성공했습니다: ${channels.length}`,
+      );
+      return res.status(200).send(channels);
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
-    const arr = [
-      { channel_id: '1', channel_name: 'channel 1', channel_pw: false },
-      { channel_id: '2', channel_name: 'channel 2', channel_pw: true },
-    ];
-    res.status(200).send(arr);
   }
 
   // 참여 중인 채널 목록 받기
   @ApiOperation({
     summary: '참여 중인 채널 목록 받기',
+    description:
+      '전달 받은 jwt를 읽고 user_id를 가져와서 channel_member에 있는 참여중인 채널 목록 가져오기',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
+    description: '[200 OK] 참여 중인 채널 목록 반환',
     type: ResponseGetEnteredChannelListDto,
   })
   @ApiBadRequestResponse({
     description: '[400 Bad Request] !!!',
   })
   @Get('/list/join')
-  getEnteredChannelList(@Res() res) {
-    const isSuccess = true;
-    if (!isSuccess) {
-      res.status(400).send();
-      return;
+  async getEnteredChannelList(@Req() req, @Res() res) {
+    Logger.log('/list/join', 'channels API');
+    const user = req.user;
+    if (user === undefined) {
+      console.log('test');
     }
-    const arr = [
-      { channel_id: '1', channel_name: 'channel 1' },
-      { channel_id: '2', channel_name: 'channel 2' },
-    ];
-    res.status(200).send(arr);
+    let joinedChannelList;
+    try {
+      joinedChannelList =
+        await this.channelsRepository.getJoinedChannelListByUserId(user.id);
+      if (joinedChannelList.length === 0) {
+        this.logger.log('참여중인 채널을 찾을 수 없습니다.');
+        return res.status(400).send();
+      }
+      return res.status(200).send(joinedChannelList);
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
+    }
   }
 
   // 채널 입장 시 유효성 검사
@@ -140,16 +175,34 @@ export class ChannelsController {
   @ApiForbiddenResponse({
     description: '[403 Forbidden] Access Denied',
   })
+  @ApiInternalServerErrorResponse({
+    description: '[500 Internal Server Error] DB에 문제',
+  })
   @Get('/enter')
-  validationAtEntry(@Query('channel_id') channel_id: number, @Res() res) {
+  async validationAtEntry(
+    @Query('channel_id') channel_id: number,
+    @Req() req,
+    @Res() res,
+  ) {
     // 채널 입장 시 유효성 검사.
     // 입력된 쿼리로 DB를 통해 권한, 비밀번호 유무 등 유효성 검사.
-    const isSuccess = true;
-    if (!isSuccess) {
-      res.status(403).send();
-      return;
+    // 참가중인 서버인지 체크
+    const channelId = Number(channel_id); // TODO: 수정. dto를 통해 변환하기. class-transformer
+    try {
+      const isJoined = await this.channelsRepository.isJoinedChannel(
+        req.user.id,
+        channelId,
+      );
+      if (isJoined === false) {
+        return res.status(403).send();
+      }
+      const channelName =
+        await this.channelsRepository.getChannelNameByChannelId(channelId);
+      return res.status(200).send(channelName);
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
-    res.status(200).send();
   }
 
   // 채널 입장
@@ -167,6 +220,7 @@ export class ChannelsController {
   })
   @Post('/enter')
   enterChannel(@Query('channel_id') channel_id: number, @Res() res) {
+    const channelId = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
     const isBan = true;
     if (isBan) {
       res.status(204).send();
@@ -179,31 +233,6 @@ export class ChannelsController {
     }
     res.status(201).send();
   }
-
-  // TODO: 삭제. 삭제하지 않는다면 삭제
-  // 채널에 참가 중인 유저 리스트 가져오기
-  // @ApiOperation({
-  //   summary: '채널에 참가 중인 유저 리스트 가져오기',
-  // })
-  // @ApiOkResponse({
-  //   description: '[OK] 채널에 참가 중인 유저 리스트',
-  //   type: ResponseGetUserInfoInChannelDto,
-  // })
-  // @Get('/room/users')
-  // getUserInfoInChannel(@Query('channel_id') channel_id: string, @Res() res) {
-  //   const isSuccess = true;
-  //   if (!isSuccess) {
-  //     res.status(400).send();
-  //   }
-  //   const arr = [
-  //     { id: 'seungoh' }, // TODO: 질문. id: '$id' 형식이어야하는지?
-  //     { id: 'dason' },
-  //     { id: 'hyson' },
-  //     { id: 'sehyan' },
-  //     { id: 'sanjeon' },
-  //   ];
-  //   return arr;
-  // }
 
   // TODO: 질문. req시 body에 데이터를 넣지 못하는데 어떻게 처리를 할 것인지?
   // 채널에 참가 중인 유저 상태 받기
@@ -238,8 +267,8 @@ export class ChannelsController {
   @ApiOperation({
     summary: '채팅방 나가기',
   })
-  @ApiAcceptedResponse({
-    description: '[202 Accepted] Channel exit success',
+  @ApiOkResponse({
+    description: '[200 Accepted] Channel exit success',
   })
   @ApiBadRequestResponse({
     description: '[400 Bad Request] Channel exit falied',
@@ -251,7 +280,7 @@ export class ChannelsController {
       res.status(400).send();
       return;
     }
-    res.status(202).send();
+    res.status(200).send();
   }
 
   // DM 연결
