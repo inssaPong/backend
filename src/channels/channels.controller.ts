@@ -21,7 +21,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { join } from 'path';
 import { ChannelsRepository } from './channels.repository';
 import {
   RequestBodyConnectDmDto,
@@ -65,8 +64,6 @@ export class ChannelsController {
       name: body.channel_name, // TODO: 구현. dto를 통한 유효성사검사
       password: body.channel_pw, // TODO: 구현. 암호화해서 DB에 넣기
     };
-    this.logger.debug(`channel name: ${channel.name}`);
-
     // Description: req로 받은 channel의 name이 유효한지 검사
     if (channel.name === '') {
       this.logger.error('유효하지 않은 채널 이름입니다.');
@@ -346,6 +343,8 @@ export class ChannelsController {
     }
   }
 
+  // TODO: 질문. 왜 Put이지?
+  // TODO: content는 NOT NULL인데 어떻게 추가해야하지
   // DM 연결
   @ApiOperation({
     summary: 'DM 연결',
@@ -363,7 +362,7 @@ export class ChannelsController {
     description: '[400 Bad Request] DM connection failed',
   })
   @Put('/dm')
-  connectDm(@Res() res) {
+  async connectDm(@Res() res) {
     const isSuccess = true;
     if (!isSuccess) {
       res.status(400).send();

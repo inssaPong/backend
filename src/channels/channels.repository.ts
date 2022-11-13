@@ -237,4 +237,11 @@ export class ChannelsRepository {
       throw `exitChannel: ${error}`;
     }
   }
+
+  async connectDm(sender_id: string, reciever_id: string) {
+    try {
+    } catch (error) {
+      throw `connectDm: ${error}`;
+    }
+  }
 }
