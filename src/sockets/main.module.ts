@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
+import { DatabaseModule } from 'src/database/database.module';
 import { MainGateway } from './main.gateway';
+import { MainSocketRepository } from './main.repository';
 
 @Module({
-  providers: [MainGateway],
+  imports: [DatabaseModule],
+  providers: [MainGateway, MainSocketRepository],
+  exports: [MainGateway],
 })
-export class EventsModule {}
+export class MainSocketModule {}

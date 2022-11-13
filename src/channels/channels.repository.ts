@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { channel } from 'diagnostic_channel';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()

@@ -1,7 +1,8 @@
-import { GameRoomComponent } from '../game.component';
+import { GameObject, GameRoomComponent } from '../game.component';
 import { GameGateway } from '../games.gateway';
+import failSaveResult from './failSaveResult';
 
-export default function gameOver(
+export default async function gameOver(
   gameRoom: GameRoomComponent,
   gameGateway: GameGateway,
 ) {
@@ -21,4 +22,20 @@ export default function gameOver(
     p2.setStatusOnline();
   }
   // database에 결과값 저장!!!!!!!!!!!
+  let winner_id;
+  let loser_id;
+  if (gameRoom.p1_score == GameObject.finalScore) {
+    winner_id = gameRoom.p1_id;
+    loser_id = gameRoom.p2_id;
+  } else {
+    winner_id = gameRoom.p2_id;
+    loser_id = gameRoom.p1_id;
+  }
+  const status_code = await gameGateway.gamesRepository.insertGameHistory(
+    winner_id,
+    loser_id,
+  );
+  if (status_code == 500) {
+    failSaveResult(gameRoom, gameGateway);
+  }
 }

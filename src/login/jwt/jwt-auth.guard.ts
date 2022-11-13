@@ -6,12 +6,16 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+<<<<<<< HEAD
 import { DatabaseService } from 'src/database/database.service';
 import { LoginRepository } from '../login.repository';
+=======
+>>>>>>> main
 import { IS_PUBLIC_KEY } from '../public.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+<<<<<<< HEAD
   constructor(
     private readonly reflector: Reflector,
     private readonly loginRepository: LoginRepository,
@@ -21,6 +25,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   private readonly logger = new Logger(JwtAuthGuard.name);
 
+=======
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
+  constructor(private reflector: Reflector) {
+    super();
+  }
+
+>>>>>>> main
   canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -45,6 +57,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
     if (err || !user) {
       this.logger.log('Unauthorized users');
+<<<<<<< HEAD
       res.redirect('http://localhost:8080');
       throw err || new UnauthorizedException();
     }
@@ -60,6 +73,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     } catch (error) {
       this.logger.error(error);
       res.redirect('http://localhost:8080');
+=======
+>>>>>>> main
       throw err || new UnauthorizedException();
     }
     this.logger.log('Authorized user');
