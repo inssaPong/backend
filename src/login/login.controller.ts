@@ -1,24 +1,19 @@
 import {
   Controller,
   Get,
+  HttpCode,
   Logger,
   Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FtAuthGuard } from './ft_oauth/ft.guard';
 import { JwtSignGuard } from './jwt/jwt-signup.guard';
 import { Public } from './public.decorator';
+import { TwoFactorDto } from './dto/swagger-login.dto';
 import { MailService } from 'src/mail/mail.service';
-import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';
 
 // 1-1, 1-2, 1-3, 1-4
 @Controller('/login')
@@ -63,12 +58,14 @@ export class LoginController {
   @ApiOperation({
     summary: '2차 인증 성공 여부',
   })
-  @ApiBody({ type: RequestBodyInputTwoFactorCodeDto })
-  @ApiOkResponse({
-    description: '[OK] Authentication successful',
+  @ApiBody({ type: TwoFactorDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Authentication successful',
   })
-  @ApiBadRequestResponse({
-    description: '[Bad Request] Authentication failed',
+  @ApiResponse({
+    status: 400,
+    description: 'Authentication failed',
   })
   @Post('/twofactor')
   async confirmCertificationNumber(@Req() req, @Res() res) {

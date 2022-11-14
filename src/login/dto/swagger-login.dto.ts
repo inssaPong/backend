@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class RequestBodyInputTwoFactorCodeDto {
+export class TwoFactorDto {
   @ApiProperty({
-    description: '[Request Body] 유저가 입력한 2차 인증 코드',
-    required: true,
+    description: 'Certified number',
     default: '',
+    required: true,
   })
   CertificationNumber: string;
 }
