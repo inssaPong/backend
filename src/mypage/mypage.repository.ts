@@ -19,21 +19,18 @@ export class MypageRepository {
 		`,
       );
       this.logger.debug(`User Info: ${databaseResponse}`);
-      if (databaseResponse.length <= 0) return 400;
+      if (databaseResponse.length <= 0) throw 404;
       return databaseResponse;
     } catch (error) {
-      this.logger.error(`Error: ${error}`);
-      return 500;
+      this.logger.error(`getUserInfo: ${error}`);
+      throw error;
     }
   }
 
   async patchUserInfo(id: string, body: UpdateUserInfoDto) {
     try {
-      let property: keyof typeof body;
-      let databaseResponse;
-	  this.logger.debug(`body[twofactor]: ${body['twofactor_status']}\nbody[nickname]: ${body['nickname']}`);
 	for (let [key, value] of Object.entries(body)) {
-		databaseResponse = await this.databaseService.runQuery(
+		await this.databaseService.runQuery(
 			`
 				UPDATE "user"
 				SET ${key} = '${value}'
@@ -41,11 +38,11 @@ export class MypageRepository {
 			  `,
 		);
 	}
-    } catch (error) {
-      this.logger.error(`Error: ${error}`);
-      return 500;
-    }
 	return 200;
+    } catch (error) {
+      this.logger.error(`patchUserInfo: ${error}`);
+      throw error;
+    }
   }
 
   async getFollows(id: string) {
@@ -61,8 +58,8 @@ export class MypageRepository {
       this.logger.debug(`Follows: ${databaseResponse}`);
       return databaseResponse;
     } catch (error) {
-      this.logger.error(`Error: ${error}`);
-      return 500;
+      this.logger.error(`getFollows: ${error}`);
+      throw error;
     }
   }
 
@@ -79,8 +76,8 @@ export class MypageRepository {
       this.logger.debug(`GameHistory: ${databaseResponse}`);
       return databaseResponse;
     } catch (error) {
-      this.logger.error(`Error: ${error}`);
-      return 500;
+      this.logger.error(`getGameHistory: ${error}`);
+      throw error;
     }
   }
 
@@ -95,8 +92,8 @@ export class MypageRepository {
       );
       return wins;
     } catch (error) {
-      this.logger.error(`Error: ${error}`);
-      return 500;
+      this.logger.error(`getWinHistory: ${error}`);
+      throw error;
     }
   }
 
@@ -111,8 +108,8 @@ export class MypageRepository {
       );
       return loses;
     } catch (error) {
-      this.logger.error(`Error: ${error}`);
-      return 500;
+      this.logger.error(`getLoseHistory: ${error}`);
+      throw error;
     }
   }
 }
