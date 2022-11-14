@@ -81,7 +81,10 @@ export class ChannelsController {
 
       // Description: channel_member 테이블에 추가
       const userId: string = req.user.id;
-      await this.channelsRepository.insertChannelMember(userId, channelId);
+      await this.channelsRepository.insertAdminToChannelMember(
+        userId,
+        channelId,
+      );
       this.logger.log('channel_member 테이블에 추가했습니다.');
       return res.status(201).send({
         id: channelId,
