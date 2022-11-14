@@ -53,7 +53,7 @@ export class ChannelsRepository {
     }
   }
 
-  // Description: 채널 멤버에 추가 (채널 생성 or 채널 입장)
+  // Description: 채널 멤버에 추가 (채널 생성)
   async insertChannelMember(
     user_id: string,
     channel_id: number,
