@@ -113,84 +113,72 @@ export class ChannelsRepository {
   }
 
   // Description: 참가 중인 채널인지 확인
-  async isJoinedChannel(user_id: string, channel_id: number): Promise<boolean> {
-    try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-        SELECT channel_id FROM "channel_member"
-        WHERE id='${user_id}' AND channel_id='${channel_id}';
-        `,
-      );
-      if (databaseResponse.length === 0) {
-        return false;
-      }
-      return true;
-    } catch (error) {
-      throw `isJoinedChannel: ${error}`;
-    }
-  }
+  // async isJoinedChannel(user_id: string, channel_id: number): Promise<boolean> {
+  //   try {
+  //     const databaseResponse = await this.databaseService.runQuery(
+  //       `
+  //       SELECT channel_id FROM "channel_member"
+  //       WHERE id='${user_id}' AND channel_id='${channel_id}';
+  //       `,
+  //     );
+  //     if (databaseResponse.length === 0) {
+  //       return false;
+  //     }
+  //     return true;
+  //   } catch (error) {
+  //     throw `isJoinedChannel: ${error}`;
+  //   }
+  // }
 
   // Description: 접근하려는 채널의 밴 여부 확인
-  async isBannedChannel(user_id: string, channel_id: number): Promise<boolean> {
-    // 1. 밴 여부 확인
-    try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-        SELECT channel_id, ban_status FROM "channel_member"
-        WHERE id='${user_id}';
-        `,
-      );
-      for (const channelObject of databaseResponse) {
-        if (channelObject.channel_id === channel_id) {
-          const isBanned = channelObject.ban_status;
-          if (isBanned === true) {
-            return true;
-          }
-        }
-      }
-      return false;
-    } catch (error) {
-      throw `isBannedChannel: ${error}`;
-    }
-  }
+  // async isBannedChannel(user_id: string, channel_id: number): Promise<boolean> {
+  //   // 1. 밴 여부 확인
+  //   try {
+  //     const databaseResponse = await this.databaseService.runQuery(
+  //       `
+  //       SELECT channel_id, ban_status FROM "channel_member"
+  //       WHERE id='${user_id}';
+  //       `,
+  //     );
+  //     for (const channelObject of databaseResponse) {
+  //       if (channelObject.channel_id === channel_id) {
+  //         const isBanned = channelObject.ban_status;
+  //         if (isBanned === true) {
+  //           return true;
+  //         }
+  //       }
+  //     }
+  //     return false;
+  //   } catch (error) {
+  //     throw `isBannedChannel: ${error}`;
+  //   }
+  // }
 
   // Description: 접근하려고 하는 채널의 비밀번호가 맞는지
-  async isValidPasswordForChannel(
-    channel_id: number,
-    input_password: string,
-  ): Promise<boolean> {
-    try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-        SELECT password FROM "channel"
-        WHERE id='${channel_id}';
-        `,
-      );
-      if (databaseResponse.length === 0) {
-        return false;
-      }
-      const channelPassword = databaseResponse[0].password;
-      if (channelPassword === input_password) {
-        // TODO: 수정. 암호화 해서 비교하기 bcrypt 모듈 사용
-        return true;
-      }
-      return false;
-    } catch (error) {
-      throw `isValidPasswordForChannel: ${error}`;
-    }
-  }
-
-  async getUsersStatusInJoinedChannel(channel_id: number) {
-    try {
-      // const databaseResponse = await this.databaseService.runQuery(
-      //   `
-      //   SELECT * FROM ;
-      //   `,
-      // );
-    } catch (error) {
-      throw `getUsersStatusInJoinedChannel: ${error}`;
-    }
-  }
+  // async isValidPasswordForChannel(
+  //   channel_id: number,
+  //   input_password: string,
+  // ): Promise<boolean> {
+  //   try {
+  //     const databaseResponse = await this.databaseService.runQuery(
+  //       `
+  //       SELECT password FROM "channel"
+  //       WHERE id='${channel_id}';
+  //       `,
+  //     );
+  //     if (databaseResponse.length === 0) {
+  //       return false;
+  //     }
+  //     const channelPassword = databaseResponse[0].password;
+  //     if (channelPassword === input_password) {
+  //       // TODO: 수정. 암호화 해서 비교하기 bcrypt 모듈 사용
+  //       return true;
+  //     }
+  //     return false;
+  //   } catch (error) {
+  //     throw `isValidPasswordForChannel: ${error}`;
+  //   }
+  // }
 
   async exitChannel(user_id: string, channel_id: number): Promise<boolean> {
     try {
@@ -233,13 +221,6 @@ export class ChannelsRepository {
       return true;
     } catch (error) {
       throw `exitChannel: ${error}`;
-    }
-  }
-
-  async connectDm(sender_id: string, reciever_id: string) {
-    try {
-    } catch (error) {
-      throw `connectDm: ${error}`;
     }
   }
 
