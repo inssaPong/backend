@@ -5,7 +5,7 @@ import { DatabaseService } from 'src/database/database.service';
 export class LoginRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  logger = new Logger('LoginRepository');
+  logger = new Logger(LoginRepository.name);
 
   async insertUser(id: string, nickname: string, email: string) {
     try {

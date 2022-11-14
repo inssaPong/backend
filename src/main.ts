@@ -33,7 +33,7 @@ async function bootstrap() {
   app.use(json({limit: '1mb'}));
   await app.listen(PORT);
 
-  const logger = new Logger('Main');
+  const logger = new Logger(bootstrap.name);
   logger.log(`Application is running on: ${DOMAIN}:${PORT}`);
 }
 bootstrap();

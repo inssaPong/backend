@@ -8,7 +8,7 @@ export class MailService {
     private readonly mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-  logger = new Logger('MailService');
+  logger = new Logger(MailService.name);
 
   async sendMail(email: string) {
     try {
@@ -23,7 +23,7 @@ export class MailService {
       await this.cacheManager.set(
         'certification_number',
         certification_number,
-        3600,
+        3600, // TODO: 수정. env로 추가
       );
       await this.mailerService.sendMail(mailOptions);
     } catch (error) {
