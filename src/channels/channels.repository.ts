@@ -7,9 +7,8 @@ export class ChannelsRepository {
 
   private readonly logger = new Logger(ChannelsRepository.name);
 
-  // TODO: 채널 생성
+  // Description: 채널 생성
   async createChannel(channel: any): Promise<void> {
-    // TODO: dto
     try {
       await this.databaseService.runQuery(
         `
@@ -22,7 +21,7 @@ export class ChannelsRepository {
     }
   }
 
-  // TODO: 채널 이름을 통해 채널 ID를 가져오기
+  // Description: 채널 이름을 통해 채널 ID를 가져오기
   async getChannelIdByChannelName(channel_name: string): Promise<number> {
     try {
       const databaseResponse = await this.databaseService.runQuery(
@@ -39,7 +38,7 @@ export class ChannelsRepository {
     }
   }
 
-  // TODO: 채널 ID를 통해 채널 이름을 가져오기
+  // Description: 채널 ID를 통해 채널 이름을 가져오기
   async getChannelNameByChannelId(channel_id: number): Promise<string> {
     try {
       const databaseResponse = await this.databaseService.runQuery(
@@ -54,7 +53,7 @@ export class ChannelsRepository {
     }
   }
 
-  // TODO: 채널 멤버에 추가 (채널 생성 or 채널 입장)
+  // Description: 채널 멤버에 추가 (채널 생성 or 채널 입장)
   async insertChannelMember(
     user_id: string,
     channel_id: number,
