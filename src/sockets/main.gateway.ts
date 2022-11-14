@@ -14,12 +14,8 @@ export class MainGateway {
   server: Server;
   users: UserInfo[] = [];
   enterPlayer: Socket[] = [];
-<<<<<<< HEAD
-  logger: Logger = new Logger(MainGateway.name);
-=======
   private readonly logger: Logger = new Logger(MainGateway.name);
   constructor(private mainSocketRepository: MainSocketRepository) {}
->>>>>>> main
 
   async afterInit() {
     await this.initUsers();

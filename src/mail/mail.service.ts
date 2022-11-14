@@ -23,7 +23,7 @@ export class MailService {
       await this.cacheManager.set(
         'certification_number',
         certification_number,
-        3600,
+        3600, // TODO: 수정. env로 추가
       );
       await this.mailerService.sendMail(mailOptions);
     } catch (error) {

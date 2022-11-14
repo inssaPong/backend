@@ -23,12 +23,10 @@ import {
 } from '@nestjs/swagger';
 import { ChannelsRepository } from './channels.repository';
 import {
-  RequestBodyConnectDmDto,
   RequestBodyChannelNameAndPwDto,
   ResponseChannelIdDto,
   ResponseGetChannelListDto,
   ResponseGetEnteredChannelListDto,
-  ResponseUserStatusInChannelDto,
 } from './dto/swagger-channels.dto';
 
 // 4-0, 4-1, 4-2, 4-3
@@ -266,45 +264,6 @@ export class ChannelsController {
     }
   }
 
-  // TODO: 질문. user_satatus를 어떻게 가져오지?
-  // 채널에 참가 중인 유저 상태 받기
-  @ApiOperation({
-    summary: '채널에 참가 중인 유저 상태 받기',
-  })
-  @ApiOkResponse({
-    description: '[200 OK] 채널에 참가중인 유저 상태',
-    type: ResponseUserStatusInChannelDto,
-  })
-  @ApiBadRequestResponse({
-    description: '[400 Bad Request] 잘못된 request',
-  })
-  @ApiInternalServerErrorResponse({
-    description: '[500 Internal Server Error] DB에 문제',
-  })
-  @Get('/room/users')
-  getUserStatusInChannel(@Query('channel_id') channel_id: number, @Res() res) {
-    const channelId = Number(channel_id); // TODO: 수정. dto를 통해 number로 변환
-    try {
-      const isSuccess =
-        this.channelsRepository.getUsersStatusInJoinedChannel(channel_id);
-      if (!isSuccess) {
-        res.status(400).send();
-        return;
-      }
-      const arr = [
-        { user_id: 'seungoh', user_status: '0' },
-        { user_id: 'dason', user_status: '1' },
-        { user_id: 'hyson', user_status: '0' },
-        { user_id: 'sehyan', user_status: '1' },
-        { user_id: 'sanjeon', user_status: '2' },
-      ];
-      res.status(200).send(arr);
-    } catch (error) {
-      this.logger.error(error);
-      return res.status(500).send();
-    }
-  }
-
   // 채팅방 나가기
   @ApiOperation({
     summary: '채팅방 나가기',
@@ -341,33 +300,5 @@ export class ChannelsController {
       this.logger.error(error);
       return res.status(500).send();
     }
-  }
-
-  // TODO: 질문. 왜 Put이지?
-  // TODO: content는 NOT NULL인데 어떻게 추가해야하지
-  // DM 연결
-  @ApiOperation({
-    summary: 'DM 연결',
-  })
-  @ApiBody({
-    type: RequestBodyConnectDmDto,
-  })
-  @ApiOkResponse({
-    description: '[200 OK] DM connection successful',
-  })
-  @ApiCreatedResponse({
-    description: '[201 Created] New DM connection',
-  })
-  @ApiBadRequestResponse({
-    description: '[400 Bad Request] DM connection failed',
-  })
-  @Put('/dm')
-  async connectDm(@Res() res) {
-    const isSuccess = true;
-    if (!isSuccess) {
-      res.status(400).send();
-      return;
-    }
-    res.status(200).send();
   }
 }
