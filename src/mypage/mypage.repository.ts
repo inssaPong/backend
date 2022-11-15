@@ -29,16 +29,16 @@ export class MypageRepository {
 
   async patchUserInfo(id: string, body: UpdateUserInfoDto) {
     try {
-	for (let [key, value] of Object.entries(body)) {
-		await this.databaseService.runQuery(
-			`
+      for (let [key, value] of Object.entries(body)) {
+        await this.databaseService.runQuery(
+          `
 				UPDATE "user"
 				SET ${key} = '${value}'
 				WHERE id='${id}' AND ${key} != '${value}';
 			  `,
-		);
-	}
-	return 200;
+        );
+      }
+      return 200;
     } catch (error) {
       this.logger.error(`patchUserInfo: ${error}`);
       throw error;
@@ -69,7 +69,9 @@ export class MypageRepository {
         `
 		SELECT winner_id, loser_id
 		FROM "game_history"
-		WHERE winner_id='${id}' OR loser_id='${id}';
+		WHERE winner_id='${id}' OR loser_id='${id}'
+		ORDER BY id DESC
+		LIMIT 5;
 		`,
       );
       this.logger.debug(`GameHistory length: ${databaseResponse.length}`);
