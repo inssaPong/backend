@@ -56,8 +56,8 @@ export class ChannelsController {
     Logger.log('/create', 'Channels API');
 
     const channel = {
-      name: body.channel_name, // TODO: 구현. dto를 통한 유효성사검사
-      password: body.channel_pw, // TODO: 구현. 암호화해서 DB에 넣기
+      name: body.name, // TODO: 구현. dto를 통한 유효성사검사
+      password: body.pw, // TODO: 구현. 암호화해서 DB에 넣기
     };
     // Description: req로 받은 channel의 name이 유효한지 검사
     if (channel.name === '') {

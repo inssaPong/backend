@@ -49,10 +49,10 @@ export class RequestBodyChannelNameAndPwDto {
 
   @ApiProperty({
     description: '[Request Body] Channel password',
-    required: true,
+    required: false,
     default: '0000',
   })
-  pw: string;
+  pw: number;
 }
 
 export class ResponseChannelIdDto {

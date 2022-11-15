@@ -28,6 +28,9 @@ export class GameGateway {
       'game/watchStart',
       player.gameInfo.p1_id,
       player.gameInfo.p2_id,
+    );
+    client.emit(
+      'game/initCanvas',
       GameObject.ball_radius,
       GameObject.bar_width,
       GameObject.bar_height,
@@ -97,10 +100,16 @@ export class GameGateway {
       (user) => user.socket == this.mainGateway.enterPlayer[1],
     );
     if (p1 == undefined) {
+      this.logger.log(
+        `[startGame] : p1(${this.mainGateway.enterPlayer[0].id}) is undifiend`,
+      );
       this.mainGateway.enterPlayer.splice(0, 1);
       return;
     }
     if (p2 == undefined) {
+      this.logger.log(
+        `[startGame] : p2(${this.mainGateway.enterPlayer[1].id}) is undifiend`,
+      );
       this.mainGateway.enterPlayer.splice(1, 2);
       return;
     }
@@ -119,12 +128,11 @@ export class GameGateway {
     gameRoom.p1_id = p1.id;
     gameRoom.p2_id = p2.id;
     this.gameRooms.push(gameRoom);
+    this.mainGateway.server.to(room_id).emit('game/start', p1.id, p2.id);
     this.mainGateway.server
       .to(room_id)
       .emit(
-        'game/start',
-        p1.id,
-        p2.id,
+        'game/initCanvas',
         GameObject.ball_radius,
         GameObject.bar_width,
         GameObject.bar_height,
