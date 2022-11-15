@@ -28,7 +28,6 @@ export class LoginRepository {
         `,
       );
       const user = databaseResponse[0];
-      this.logger.debug(`user: ${user}`);
       return user;
     } catch (error) {
       this.logger.error(error);
