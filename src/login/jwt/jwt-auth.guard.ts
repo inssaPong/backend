@@ -62,7 +62,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       res.redirect('http://localhost:8080');
       throw err || new UnauthorizedException();
     }
-    this.logger.log('Authorized user');
+    this.logger.log(`Authorized user: ${user.id}`);
     return user;
   }
 }

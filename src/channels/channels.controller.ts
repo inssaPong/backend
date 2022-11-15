@@ -12,6 +12,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -53,7 +54,7 @@ export class ChannelsController {
   })
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
-    Logger.log('/create', 'Channels API');
+    this.logger.log('POST /channels/create');
 
     const channel = {
       name: body.name, // TODO: 구현. dto를 통한 유효성사검사
@@ -62,23 +63,24 @@ export class ChannelsController {
     // Description: req로 받은 channel의 name이 유효한지 검사
     if (channel.name === '') {
       this.logger.error('유효하지 않은 채널 이름입니다.');
-      return res.status(400).send();
+      res.status(400).send();
+      return;
     }
-
     try {
       // Description: 채널 생성
       await this.channelsRepository.createChannel(channel);
     } catch (error) {
       this.logger.error(error);
-      return res.status(500).send();
+      res.status(500).send();
+      return;
     }
 
     try {
       // Description: 생성된 채널 id 가져오기
-      const channelId: number =
-        await this.channelsRepository.getChannelIdByChannelName(channel.name);
+      const channelId = await this.channelsRepository.getChannelIdByChannelName(
+        channel.name,
+      );
       this.logger.log(`생성된 채널 id를 가져오는데 성공했습니다: ${channelId}`);
-
       // Description: channel_member 테이블에 추가
       const userId: string = req.user.id;
       await this.channelsRepository.insertAdminToChannelMember(
@@ -86,45 +88,50 @@ export class ChannelsController {
         channelId,
       );
       this.logger.log('channel_member 테이블에 추가했습니다.');
-      return res.status(201).send({
+      res.status(201).send({
         id: channelId,
       });
+      return;
     } catch (error) {
       this.logger.error(error);
-      return res.status(500).send();
+      res.status(500).send();
+      return;
     }
   }
 
-  // 전체 채널 목록 받기
+  // 참여할 수 있는 채널 목록 받기
   @ApiOperation({
-    summary: '전체 채널 목록 받기',
+    summary: '참여할 수 있는 채널 목록 받기',
   })
   @ApiOkResponse({
-    description: '[200 OK] 전체 채널 목록 반환',
+    description: '[200 OK] 참여할 수 있는 채널 목록 반환',
     type: ResponseGetChannelListDto, // TODO: 생각. example을 지우는 방법이 없을까?
   })
   @ApiBadRequestResponse({
-    description: '[400 Bad Request] 전체 채널을 찾을 수 없음',
+    description: '[400 Bad Request] 참여할 수 있는 채널을 찾을 수 없음',
+  })
+  @ApiInternalServerErrorResponse({
+    description: '[500 internal Server Error] DB에 문제',
   })
   @Get('/list')
-  async GetAllChannelList(@Res() res) {
-    Logger.log('/list', 'Channels API');
-    // Description: 전체 채널 목록 가져오기
+  async GetAvailableChannelList(@Req() req, @Res() res) {
+    this.logger.log('GET /channels/list');
+    const userId = req.user.id;
+    let availableChannelList;
     try {
-      const channels = await this.channelsRepository.getChannelList();
-      if (channels.length === 0) {
-        this.logger.log('한 개의 채널도 존재하지 않습니다.');
-        return res.status(400).send;
-      }
-      this.logger.log('전체 채널 목록을 가져옵니다.');
-      return res.status(200).send(channels);
+      availableChannelList =
+        await this.channelsRepository.getAvailableChannelList(userId);
+      this.logger.log('참여할 수 있는 채널 목록을 가져옵니다.');
+      res.status(200).send(availableChannelList);
+      return;
     } catch (error) {
       this.logger.error(error);
-      return res.status(500).send();
+      res.status(500).send();
+      return;
     }
   }
 
-  // 참가 중인 채널 목록 받기
+  // 참여 중인 채널 목록 받기
   @ApiOperation({
     summary: '참여 중인 채널 목록 받기',
     description:
@@ -138,131 +145,22 @@ export class ChannelsController {
     description: '[400 Bad Request] !!!',
   })
   @Get('/list/join')
-  async getEnteredChannelList(@Req() req, @Res() res) {
-    Logger.log('/list/join', 'channels API');
-    const user = req.user;
-    if (user === undefined) {
-      console.log('test');
-    }
-    let joinedChannelList;
+  async getJoinedChannelList(@Req() req, @Res() res) {
+    this.logger.log('GET /channels/list/join');
+    const userId = req.user.id;
+    let joinedChannelList: Object[];
     try {
       joinedChannelList =
-        await this.channelsRepository.getJoinedChannelListByUserId(user.id);
-      if (joinedChannelList.length === 0) {
-        this.logger.log('참가중인 채널을 찾을 수 없습니다.');
-        return res.status(400).send();
-      }
-      this.logger.log('참가 중인 채널 목록을 가져옵니다.');
-      return res.status(200).send(joinedChannelList);
+        await this.channelsRepository.getJoinedChannelListByUserId(userId);
+      this.logger.log('참여 중인 채널 목록을 가져옵니다.');
+      res.status(200).send(joinedChannelList);
+      return;
     } catch (error) {
       this.logger.error(error);
-      return res.status(500).send();
+      res.status(500).send();
+      return;
     }
   }
-
-  // 채널 입장 시 유효성 검사
-  // @ApiOperation({
-  //   summary: '채널 입장 시 유효성 검사',
-  // })
-  // @ApiOkResponse({
-  //   description: '[200 OK] Access Successful',
-  // })
-  // @ApiForbiddenResponse({
-  //   description: '[403 Forbidden] Access Denied',
-  // })
-  // @ApiInternalServerErrorResponse({
-  //   description: '[500 Internal Server Error] DB에 문제',
-  // })
-  // @Get('/enter')
-  // async validationAtEntry(
-  //   @Query('channel_id') channel_id: number,
-  //   @Req() req,
-  //   @Res() res,
-  // ) {
-  //   const channelId = Number(channel_id); // TODO: 수정. dto를 통해 변환하기. class-transformer
-  //   try {
-  //     const isJoined = await this.channelsRepository.isJoinedChannel(
-  //       req.user.id,
-  //       channelId,
-  //     );
-  //     if (isJoined === false) {
-  //       this.logger.log('참가 중인 채널이 아닙니다.');
-  //       return res.status(403).send();
-  //     }
-  //     const channelName =
-  //       await this.channelsRepository.getChannelNameByChannelId(channelId);
-  //     this.logger.log('참가 중인 채널입니다.');
-  //     return res.status(200).send(channelName);
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     return res.status(500).send();
-  //   }
-  // }
-
-  // // 채널 입장
-  // @ApiOperation({
-  //   summary: '채널 입장',
-  // })
-  // @ApiCreatedResponse({
-  //   description: '[201 Created] Enter', // TODO: 질문. 왜 Created 였지?
-  // })
-  // @ApiNoContentResponse({
-  //   description: '[204 No Content] Ban',
-  // })
-  // @ApiForbiddenResponse({
-  //   description: '[403 Forbidden] Invalid PW',
-  // })
-  // @Post('/enter')
-  // async enterChannel(
-  //   @Query('channel_id') channel_id: number,
-  //   @Req() req,
-  //   @Res() res,
-  //   @Body() body,
-  // ) {
-  //   const userId: string = req.user.id;
-  //   const channelId: number = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
-  //   const inputPassword: string = body.pw;
-
-  //   // Description: 밴 여부 확인
-  //   try {
-  //     const isBanned = await this.channelsRepository.isBannedChannel(
-  //       userId,
-  //       channelId,
-  //     );
-  //     if (isBanned === true) {
-  //       this.logger.log('밴 당한 채널입니다.');
-  //       return res.status(204).send();
-  //     }
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     return res.status(500).send();
-  //   }
-
-  //   // Description: 유효한 비밀번호인지 확인
-  //   try {
-  //     const isValidPassword =
-  //       await this.channelsRepository.isValidPasswordForChannel(
-  //         channelId,
-  //         inputPassword,
-  //       );
-  //     if (isValidPassword === false) {
-  //       this.logger.log('유효하지 않은 채널 비밀번호입니다.');
-  //       return res.status(403).send();
-  //     }
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     return res.status(500).send();
-  //   }
-
-  //   // Description: DB channel_member 테이블에 추가
-  //   try {
-  //     await this.channelsRepository.insertChannelMember(userId, channelId);
-  //     res.status(201).send();
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     return res.status(500).send();
-  //   }
-  // }
 
   // 채팅방 나가기
   @ApiOperation({
@@ -283,6 +181,7 @@ export class ChannelsController {
     @Req() req,
     @Res() res,
   ) {
+    this.logger.log('DELETE /channels/room/exit');
     const channelId = Number(channel_id); // TODO: 수정. dto를 통한 number 변환
     const userId = req.user.id;
     try {
@@ -292,13 +191,16 @@ export class ChannelsController {
       );
       if (isSuccess === false) {
         this.logger.log('잘못된 request입니다.');
-        return res.status(400).send();
+        res.status(400).send();
+        return;
       }
       this.logger.log('채널 삭제에 성공했습니다.');
       res.status(200).send();
+      return;
     } catch (error) {
       this.logger.error(error);
-      return res.status(500).send();
+      res.status(500).send();
+      return;
     }
   }
 }
