@@ -121,28 +121,24 @@ export class ChannelsController {
     description: '[500 internal Server Error] DB에 문제',
   })
   @Get('/list')
-  async GetAllChannelList(@Res() res) {
+  async GetAvailableChannelList(@Req() req, @Res() res) {
     Logger.log('/list', 'Channels API');
-    // Description: 전체 채널 목록 가져오기
-    let channels;
+    const userId = req.user.id;
+    let availableChannelList;
     try {
-      channels = await this.channelsRepository.getChannelList();
-      if (channels.length === 0) {
-        this.logger.log('한 개의 채널도 존재하지 않습니다.');
-        res.status(400).send;
-        return;
-      }
-      this.logger.log('전체 채널 목록을 가져옵니다.');
-      res.status(200).send(channels);
+      availableChannelList =
+        await this.channelsRepository.getAvailableChannelList(userId);
+      this.logger.log('참여할 수 있는 채널 목록을 가져옵니다.');
+      res.status(200).send(availableChannelList);
+      return;
     } catch (error) {
       this.logger.error(error);
       res.status(500).send();
       return;
     }
-    console.log(channels);
   }
 
-  // 참가 중인 채널 목록 받기
+  // 참여 중인 채널 목록 받기
   @ApiOperation({
     summary: '참여 중인 채널 목록 받기',
     description:
@@ -156,22 +152,19 @@ export class ChannelsController {
     description: '[400 Bad Request] !!!',
   })
   @Get('/list/join')
-  async getEnteredChannelList(@Req() req, @Res() res) {
+  async getJoinedChannelList(@Req() req, @Res() res) {
     Logger.log('/list/join', 'channels API');
-    const user = req.user;
-    if (user === undefined) {
-      console.log('test');
-    }
-    let joinedChannelList;
+    const userId = req.user.id;
+    let joinedChannelList: Object[];
     try {
       joinedChannelList =
-        await this.channelsRepository.getJoinedChannelListByUserId(user.id);
+        await this.channelsRepository.getJoinedChannelListByUserId(userId);
       if (joinedChannelList.length === 0) {
-        this.logger.log('참가중인 채널을 찾을 수 없습니다.');
+        this.logger.log('참여 중인 채널을 찾을 수 없습니다.');
         res.status(400).send();
         return;
       }
-      this.logger.log('참가 중인 채널 목록을 가져옵니다.');
+      this.logger.log('참여 중인 채널 목록을 가져옵니다.');
       res.status(200).send(joinedChannelList);
       return;
     } catch (error) {
