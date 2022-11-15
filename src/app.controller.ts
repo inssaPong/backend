@@ -11,7 +11,7 @@ export class AppController {
   @Get('/loginCheck')
   loginCheckGet(@Req() req, @Res() res) {
     const user_id = req.user.id;
-    res.status(200).send('seungoh');
+    res.status(200).send(user_id);
     return;
   }
 }
