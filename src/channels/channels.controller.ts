@@ -54,7 +54,7 @@ export class ChannelsController {
   })
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
-    Logger.log('/create', 'Channels API');
+    this.logger.log('POST /channels/create');
 
     const channel = {
       name: body.name, // TODO: 구현. dto를 통한 유효성사검사
@@ -115,7 +115,7 @@ export class ChannelsController {
   })
   @Get('/list')
   async GetAvailableChannelList(@Req() req, @Res() res) {
-    Logger.log('/list', 'Channels API');
+    this.logger.log('GET /channels/list');
     const userId = req.user.id;
     let availableChannelList;
     try {
@@ -146,17 +146,12 @@ export class ChannelsController {
   })
   @Get('/list/join')
   async getJoinedChannelList(@Req() req, @Res() res) {
-    Logger.log('/list/join', 'channels API');
+    this.logger.log('GET /channels/list/join');
     const userId = req.user.id;
     let joinedChannelList: Object[];
     try {
       joinedChannelList =
         await this.channelsRepository.getJoinedChannelListByUserId(userId);
-      if (joinedChannelList.length === 0) {
-        this.logger.log('참여 중인 채널을 찾을 수 없습니다.');
-        res.status(400).send();
-        return;
-      }
       this.logger.log('참여 중인 채널 목록을 가져옵니다.');
       res.status(200).send(joinedChannelList);
       return;
@@ -186,7 +181,7 @@ export class ChannelsController {
     @Req() req,
     @Res() res,
   ) {
-    Logger.log('/room/exit', 'channels API');
+    this.logger.log('DELETE /channels/room/exit');
     const channelId = Number(channel_id); // TODO: 수정. dto를 통한 number 변환
     const userId = req.user.id;
     try {
