@@ -12,6 +12,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -65,7 +66,6 @@ export class ChannelsController {
       res.status(400).send();
       return;
     }
-
     try {
       // Description: 채널 생성
       await this.channelsRepository.createChannel(channel);
@@ -80,13 +80,6 @@ export class ChannelsController {
       const channelId = await this.channelsRepository.getChannelIdByChannelName(
         channel.name,
       );
-      if (channelId < 0) {
-        this.logger.log(
-          `생성된 채널 id를 가져오는데 실패했습니다: ${channelId}`,
-        );
-        res.status(400).send();
-        return;
-      }
       this.logger.log(`생성된 채널 id를 가져오는데 성공했습니다: ${channelId}`);
       // Description: channel_member 테이블에 추가
       const userId: string = req.user.id;
