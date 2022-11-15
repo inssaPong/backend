@@ -1,5 +1,6 @@
-import { Controller, Get, Logger, Req } from '@nestjs/common';
+import { Controller, Get, Logger, Req, Res } from '@nestjs/common';
 import { AppService } from './app.service';
+import { Public } from './login/public.decorator';
 
 // 2-1
 @Controller('')
@@ -9,8 +10,9 @@ export class AppController {
 
   // 게임 페이지 깡통 get()
   @Get('/loginCheck')
-  loginCheckGet(@Req() req) {
+  loginCheckGet(@Req() req, @Res() res) {
     const user_id = req.user.id;
-    return user_id;
+    res.status(200).send('seungoh');
+    return;
   }
 }

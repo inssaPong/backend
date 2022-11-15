@@ -22,6 +22,7 @@ export default function nextRound(
         gameRoom.p1_score,
         gameRoom.p2_score,
       );
+    gameGateway.mainGateway.server.to(gameRoom.room_id).emit('game/endCanvas');
     gameOver(gameRoom, gameGateway);
   }
   gameGateway.mainGateway.server

@@ -42,6 +42,7 @@ export class MainGateway {
       this.initUsers();
       return;
     }
+    this.logger.log(`[setOnline] : ${user_id}`);
     user.socket = client;
     user.setStatusOnline();
   }
