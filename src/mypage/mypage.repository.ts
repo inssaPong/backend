@@ -29,16 +29,16 @@ export class MypageRepository {
 
   async patchUserInfo(id: string, body: UpdateUserInfoDto) {
     try {
-	for (let [key, value] of Object.entries(body)) {
-		await this.databaseService.runQuery(
-			`
+      for (let [key, value] of Object.entries(body)) {
+        await this.databaseService.runQuery(
+          `
 				UPDATE "user"
 				SET ${key} = '${value}'
-				WHERE id='${id}' AND ${key} != '${value}';
+				WHERE id='${id}';
 			  `,
-		);
-	}
-	return 200;
+        );
+      }
+      return 200;
     } catch (error) {
       this.logger.error(`patchUserInfo: ${error}`);
       throw error;
