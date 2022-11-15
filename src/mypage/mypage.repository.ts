@@ -69,7 +69,9 @@ export class MypageRepository {
         `
 		SELECT winner_id, loser_id
 		FROM "game_history"
-		WHERE winner_id='${id}' OR loser_id='${id}';
+		WHERE winner_id='${id}' OR loser_id='${id}'
+		ORDER BY id DESC
+		LIMIT 5;
 		`,
       );
       this.logger.debug(`GameHistory length: ${databaseResponse.length}`);
