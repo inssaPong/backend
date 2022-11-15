@@ -34,7 +34,7 @@ export class MypageRepository {
           `
 				UPDATE "user"
 				SET ${key} = '${value}'
-				WHERE id='${id}' AND ${key} != '${value}';
+				WHERE id='${id}';
 			  `,
         );
       }
