@@ -9,7 +9,7 @@ export class ResponseGetChannelListDto {
       { id: 2, name: 'channel 2', has_password: true },
     ],
   })
-  example: Array<JSON>;
+  example: Object[];
 }
 
 export class ResponseGetEnteredChannelListDto {
@@ -21,7 +21,7 @@ export class ResponseGetEnteredChannelListDto {
       { id: 2, name: 'channel 2' },
     ],
   })
-  example: Array<JSON>;
+  example: Object[];
 }
 
 export class ResponseUserStatusInChannelDto {
@@ -36,7 +36,7 @@ export class ResponseUserStatusInChannelDto {
       { user_id: 'sehyan', user_status: '1' },
     ],
   })
-  example: Array<JSON>;
+  example: Object[];
 }
 
 export class RequestBodyChannelNameAndPwDto {
