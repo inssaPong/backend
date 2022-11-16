@@ -33,7 +33,7 @@ export class ResponseUsersIdInChannelDto {
       { id: 'dason' },
       { id: 'hyson' },
       { id: 'sehyan' },
-      { id: 'sehyan' },
+      { id: 'sanjeon' },
     ],
   })
   example: Object[];

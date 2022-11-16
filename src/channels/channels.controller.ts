@@ -187,12 +187,11 @@ export class ChannelsController {
     }
   }
 
-  // 채널에 참가 중인 유저 상태 받기
   @ApiOperation({
-    summary: '채널에 참가 중인 유저 상태 가져오기',
+    summary: '채널에 참가 중인 유저 id 가져오기',
   })
   @ApiOkResponse({
-    description: '[200 OK] 채널에 참가중인 유저 상태',
+    description: '[200 OK] 채널에 참가중인 유저 id',
     type: ResponseUsersIdInChannelDto,
   })
   @ApiInternalServerErrorResponse({
