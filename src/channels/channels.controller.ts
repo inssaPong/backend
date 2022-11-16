@@ -15,7 +15,9 @@ import {
   ApiBadRequestResponse,
   ApiBody,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -94,7 +96,7 @@ export class ChannelsController {
       this.logger.log(`생성된 채널 id를 가져오는데 성공했습니다: ${channelId}`);
       // Description: channel_member 테이블에 추가
       const userId: string = req.user.id;
-      await this.channelsRepository.insertAdminToChannelMember(
+      await this.channelsRepository.insertOwnerToChannelMember(
         userId,
         channelId,
       );
@@ -158,6 +160,72 @@ export class ChannelsController {
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException();
+    }
+  }
+
+  // 채널 입장
+  @ApiOperation({
+    summary: '채널 입장',
+  })
+  @ApiCreatedResponse({
+    description: '[201 Created] Enter', // TODO: 질문. 왜 Created 였지?
+  })
+  @ApiNoContentResponse({
+    description: '[204 No Content] Ban',
+  })
+  @ApiForbiddenResponse({
+    description: '[403 Forbidden] Invalid PW',
+  })
+  @Post('/enter')
+  async enterChannel(
+    @Query('channel_id') channel_id: number,
+    @Req() req,
+    @Res() res,
+    @Body() body,
+  ) {
+    const userId: string = req.user.id;
+    const channelId: number = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
+    const inputPassword: string = body.pw;
+
+    // Description: 밴 여뷰 확인
+    try {
+      const isBanned = await this.channelsRepository.isBannedChannel(
+        userId,
+        channelId,
+      );
+      if (isBanned === true) {
+        return res.status(204).send();
+      }
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
+    }
+
+    // Description: 유효한 비밀번호인지?
+    try {
+      const isValidPassword =
+        await this.channelsRepository.isValidPasswordForChannel(
+          channelId,
+          inputPassword,
+        );
+      if (isValidPassword === false) {
+        return res.status(403).send();
+      }
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
+    }
+
+    // Description: DB channel_member 테이블에 추가
+    try {
+      await this.channelsRepository.insertGuestToChannelMember(
+        userId,
+        channelId,
+      );
+      res.status(201).send();
+    } catch (error) {
+      this.logger.error(error);
+      return res.status(500).send();
     }
   }
 
