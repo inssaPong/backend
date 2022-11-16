@@ -53,14 +53,12 @@ export class MypageController {
   @Get()
   async getUserInfo(@Req() req, @Res() res: Response) {
     try {
-      const userInfo_db_result = await this.mypageRepository.getUserInfo(
-        req.user.id,
-      );
-      if (userInfo_db_result.length <= 0) throw new NotFoundException();
+      const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
+      if (userInfoDB.length <= 0) throw new NotFoundException();
       const userinfo: UserInfoDto = {
-        nickname: userInfo_db_result[0]['nickname'],
-        avatar: `${userInfo_db_result[0]['avatar']}`,
-        twofactor_status: userInfo_db_result[0]['twofactor_status'],
+        nickname: userInfoDB[0]['nickname'],
+        avatar: `${userInfoDB[0]['avatar']}`,
+        twofactor_status: userInfoDB[0]['twofactor_status'],
       };
       this.mypageService.printObject('userInfo', userinfo, this.logger);
       res.status(200).send(userinfo);
@@ -93,10 +91,7 @@ export class MypageController {
   ) {
     try {
       this.mypageService.printObject('UpdateUserInfo', body, this.logger);
-      const result = await this.mypageRepository.patchUserInfo(
-        req.user.id,
-        body,
-      );
+      await this.mypageRepository.patchUserInfo(req.user.id, body);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.patchUserInfo.name}] ${error}`);
@@ -118,12 +113,10 @@ export class MypageController {
   @Get('/follows')
   async getFollows(@Req() req, @Res() res: Response) {
     try {
-      const follows_db_result = await this.mypageRepository.getFollows(
-        req.user.id,
-      );
+      const followsDB = await this.mypageRepository.getFollows(req.user.id);
       const follows: FollowsDto = { follow: [] };
-      for (const follow_id of follows_db_result) {
-        follows.follow.push(follow_id['partner_id'] as string);
+      for (const element of followsDB) {
+        follows.follow.push(element['partner_id'] as string);
       }
       this.mypageService.printStringArray(
         'follows',
@@ -151,14 +144,16 @@ export class MypageController {
   @Get('/gameHistory')
   async getGameHistory(@Req() req, @Res() res: Response) {
     try {
-      const result = await this.mypageRepository.getGameHistory(req.user.id);
+      const gameHistoryDB = await this.mypageRepository.getGameHistory(
+        req.user.id,
+      );
       const gameHistory: GameHistoryDto = {
         gameHistory: [],
       };
-      for (const oneGameHistory_db_result of result) {
+      for (const element of gameHistoryDB) {
         const oneGameHistory: OneGameHistoryDto = {
-          winner: oneGameHistory_db_result['winner_id'],
-          loser: oneGameHistory_db_result['loser_id'],
+          winner: element['winner_id'],
+          loser: element['loser_id'],
         };
         this.logger.debug(
           `winner: ${oneGameHistory.winner}, loser: ${oneGameHistory.loser}`,
