@@ -277,6 +277,13 @@ export class ChannelGateway {
       req.channel_id,
     );
     if (authority == 400) return;
+    const possible_authority = await this.checkHighAuthority(
+      client,
+      req.sender_id,
+      admin_id,
+      req.channel_id,
+    );
+    if (possible_authority == false) return;
     const db_result = await this.channelsRepository.changeChannelAuthority(
       admin_id,
       req.channel_id,
@@ -323,12 +330,43 @@ export class ChannelGateway {
       req.channel_id,
     );
     if (authority == 400) return;
+    const possible_authority = await this.checkHighAuthority(
+      client,
+      req.sender_id,
+      mute_id,
+      req.channel_id,
+    );
+    if (possible_authority == false) return;
 
     await this.cacheManager.set(`mute_${mute_id}`, 'true', MUTETIME);
     client.emit('channel/send', 'server', `${mute_id}를 음소거 시킴!`);
   }
 
-  async banChannel(client: Socket, req: any, kick_id: string) {}
+  async banChannel(client: Socket, req: any, ban_id: string) {
+    const authority = await this.getAuthority(
+      client,
+      req.sender_id,
+      req.channel_id,
+    );
+    if (authority == 400) return;
+    const possible_authority = await this.checkHighAuthority(
+      client,
+      req.sender_id,
+      ban_id,
+      req.channel_id,
+    );
+    if (possible_authority == false) return;
+    const db_result = await this.channelsRepository.patchBanStatus(
+      ban_id,
+      req.channel_id,
+      true,
+    );
+    if (db_result == 500) {
+      client.emit('DBError');
+    } else {
+      client.emit('channel/send', 'server', `${ban_id}를 ban 함!`);
+    }
+  }
 
   async getAuthority(client: Socket, id: string, channel_id: number) {
     const authority = await this.channelsRepository.getAuthority(
@@ -344,5 +382,19 @@ export class ChannelGateway {
       return 400;
     }
     return authority;
+  }
+
+  async checkHighAuthority(
+    client: Socket,
+    user1: string,
+    user2: string,
+    channel_id: number,
+  ) {
+    const user1_authority = await this.getAuthority(client, user1, channel_id);
+    const user2_authority = await this.getAuthority(client, user2, channel_id);
+
+    if (user1_authority == 400 || user2_authority == 400) return false;
+    else if (user1_authority <= user2_authority) return true;
+    else false;
   }
 }

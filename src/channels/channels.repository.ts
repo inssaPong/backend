@@ -364,4 +364,24 @@ export class ChannelsRepository {
       return 500;
     }
   }
+
+  async patchBanStatus(
+    id: string,
+    channel_id: number,
+    ban_status: boolean,
+  ): Promise<number> {
+    try {
+      await this.databaseService.runQuery(
+        `
+          UPDATE "channel_member"
+          SET ban_status = ${ban_status}
+          WHERE id='${id}' AND channel_id=${channel_id};
+        `,
+      );
+      return 200;
+    } catch (err) {
+      this.logger.log(`[patchBanStatus] : ${err}`);
+      return 500;
+    }
+  }
 }
