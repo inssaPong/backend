@@ -312,4 +312,36 @@ export class ChannelsRepository {
       return 500;
     }
   }
+
+  async getAuthority(id: string, channel_id: number): Promise<number> {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+          SELECT authority FROM "channel_member"
+          WHERE id='${id}' AND channel_id='${channel_id}';
+		    `,
+      );
+      if (databaseResponse.length == 1) return databaseResponse[0].authority;
+      else return 400;
+    } catch (err) {
+      this.logger.log(`[getAuthority] : ${err}`);
+      return 500;
+    }
+  }
+
+  async changeChannelPassword(id: number, password: string): Promise<number> {
+    try {
+      await this.databaseService.runQuery(
+        `
+          UPDATE "user"
+          SET password = '${password}'
+          WHERE id=${id};
+        `,
+      );
+      return 200;
+    } catch (err) {
+      this.logger.log(`[changeChannelPassword] : ${err}`);
+      return 500;
+    }
+  }
 }

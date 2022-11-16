@@ -3,6 +3,7 @@ import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
 import { UserStatus } from 'src/sockets/user.component';
+import { ChannelAuthority, ChannelCommand } from './channels.component';
 import { ChannelsRepository } from './channels.repository';
 
 @WebSocketGateway({ cors: true })
@@ -85,6 +86,7 @@ export class ChannelGateway {
   }
 
   async sendMessageToChannel(client: Socket, req: any) {
+    if (this.isCommand(client, req) == true) return;
     const db_result = await this.channelsRepository.insertChannelMessage(
       req.channel_id,
       req.sender_id,
@@ -189,6 +191,69 @@ export class ChannelGateway {
     );
     if (is_block == 400 && member.status == UserStatus.online) {
       member.socket.emit('channel/send', member.id, req.message);
+    }
+  }
+
+  isCommand(client: Socket, req: any) {
+    if (!(req.message[0] == '[' && -1 < req.message.search(']'))) {
+      return false;
+    }
+    const keyword = req.message
+      .slice(1, req.message.search(']'))
+      .replace(/\s/g, '')
+      .toLowerCase();
+    const content = req.message
+      .slice(req.message.search(']') + 1, req.message.length)
+      .replace(/\s/g, '')
+      .toLowerCase();
+    this.logger.log(`[isCommand] : ${keyword}, ${content}`);
+
+    switch (keyword) {
+      case ChannelCommand.chpwd:
+        this.changeChannelPassword(client, req, content);
+        return true;
+      case ChannelCommand.manager:
+        return true;
+      case ChannelCommand.kick:
+        return true;
+      case ChannelCommand.mute:
+        return true;
+      case ChannelCommand.ban:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  async changeChannelPassword(client: Socket, req: any, password: string) {
+    if (password.length != 4) {
+      client.emit('channel/commandFailed', '4자리 비밀번호를 입력해주세요.');
+      return;
+    }
+    const authority = await this.channelsRepository.getAuthority(
+      req.sender_id,
+      req.channel_id,
+    );
+    if (authority == 400 || authority == 500) {
+      client.emit('DBError');
+      return;
+    }
+    if (authority == ChannelAuthority.guest) {
+      client.emit('channel/commandFailed', '권한이 없습니다.');
+      return;
+    }
+    const db_result = await this.channelsRepository.changeChannelPassword(
+      req.channel_id,
+      password,
+    );
+    if (db_result == 500) {
+      client.emit('DBError');
+    } else {
+      client.emit(
+        'channel/send',
+        'server',
+        `${password}로 비밀번호 변경 성공!`,
+      );
     }
   }
 }
