@@ -94,7 +94,7 @@ export class UsersController {
   @Get('/gameHistory')
   async getGameHistory(@Query('id') id: string, @Res() res: Response) {
     try {
-		await this.usersRepository.findUser(id);
+      await this.usersRepository.findUser(id);
       const gameHistory_db_result = await this.usersRepository.getGameHistory(
         id,
       );
@@ -137,8 +137,8 @@ export class UsersController {
   @Get('/gameStat')
   async getGameStat(@Query('id') id: string, @Res() res: Response) {
     try {
-		await this.usersRepository.findUser(id);
-		const winHistory = await this.usersRepository.getWinHistory(id);
+      await this.usersRepository.findUser(id);
+      const winHistory = await this.usersRepository.getWinHistory(id);
       const loseHistory = await this.usersRepository.getLoseHistory(id);
       const gameStat: GameStatDto = {
         wins: winHistory.length,
@@ -158,7 +158,7 @@ export class UsersController {
   @ApiOperation({
     summary: '해당 유저 정보 가져오기',
     description:
-      'query로 id 보내면 UserInfoDto{nickname, avatar binary code, follow 여부} 반환',
+      'param로 id 보내면 UserInfoDto{nickname, avatar binary code, follow 여부} 반환',
   })
   @ApiOkResponse({
     description: '성공',
