@@ -179,7 +179,6 @@ export class ChannelsController {
     try {
       const channelName =
         await this.channelsRepository.getChannelNameByChannelId(channel_id);
-      console.log(channelName);
       res.status(200).send(channelName);
     } catch (error) {
       this.logger.error(error);
