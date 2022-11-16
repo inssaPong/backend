@@ -396,7 +396,7 @@ export class ChannelGateway {
       id,
       channel_id,
     );
-    if (authority == 400 || authority == 500) {
+    if (authority == 500) {
       client.emit('DBError');
       return 400;
     }
