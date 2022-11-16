@@ -1,11 +1,19 @@
-import { Controller, Get, Patch, Body, Logger, Res, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Body,
+  Logger,
+  Res,
+  Req,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiBody,
   ApiResponse,
   ApiOkResponse,
-  ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import {
@@ -48,6 +56,7 @@ export class MypageController {
       const userInfo_db_result = await this.mypageRepository.getUserInfo(
         req.user.id,
       );
+      if (userInfo_db_result.length <= 0) throw new NotFoundException();
       const userinfo: UserInfoDto = {
         nickname: userInfo_db_result[0]['nickname'],
         avatar: `${userInfo_db_result[0]['avatar']}`,
@@ -56,12 +65,8 @@ export class MypageController {
       this.mypageService.printObject('userInfo', userinfo, this.logger);
       res.status(200).send(userinfo);
     } catch (error) {
-      this.mypageService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.getUserInfo.name,
-      );
+      this.logger.error(`[${this.getUserInfo.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -94,12 +99,8 @@ export class MypageController {
       );
       res.status(200).send();
     } catch (error) {
-      this.mypageService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.patchUserInfo.name,
-      );
+      this.logger.error(`[${this.patchUserInfo.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -131,12 +132,8 @@ export class MypageController {
       );
       res.status(200).send(follows);
     } catch (error) {
-      this.mypageService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.getFollows.name,
-      );
+      this.logger.error(`[${this.getFollows.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -170,12 +167,8 @@ export class MypageController {
       }
       res.status(200).send(gameHistory);
     } catch (error) {
-      this.mypageService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.getGameHistory.name,
-      );
+      this.logger.error(`[${this.getGameHistory.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -204,12 +197,8 @@ export class MypageController {
       this.mypageService.printObject('gameStat', gameStat, this.logger);
       res.status(200).send(gameStat);
     } catch (error) {
-      this.mypageService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.getGameStat.name,
-      );
+      this.logger.error(`[${this.getGameStat.name}] ${error}`);
+      throw error;
     }
   }
 }

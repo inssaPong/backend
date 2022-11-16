@@ -15,8 +15,7 @@ export class UsersRepository {
 				WHERE id='${id}';
 				`,
       );
-      if (databaseResponse.length == 1) return 200;
-      else throw 404;
+      return databaseResponse;
     } catch (error) {
       this.logger.error(`findUser: ${error}`);
       throw error;

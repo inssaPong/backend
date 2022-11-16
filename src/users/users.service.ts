@@ -1,22 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Response } from 'express';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
-  errorHandler(error, res: Response, logger: Logger, functionName: string) {
-    if (error == 400) {
-      logger.error(`${functionName}() Bad request return ${error}`);
-      res.status(error).send();
-    } else if (error == 404) {
-      logger.error(`${functionName}() Not found return ${error}`);
-      res.status(error).send();
-    } else if (error == 500) {
-      logger.error(`${functionName}() Database server error return ${error}`);
-      res.status(error).send();
-    } else {
-      logger.error(`${functionName}() Undefiend error: ${error}`);
-      res.status(500).send();
-    }
+  private logger = new Logger(UsersService.name);
+
+  checkUserExist(databaseResponse: any) {
+    if (databaseResponse.length == 1) return;
+    else if (databaseResponse.length == 0) throw new NotFoundException();
+    else throw new InternalServerErrorException();
   }
 
   printObject(objectName: string, object: Object, logger: Logger) {

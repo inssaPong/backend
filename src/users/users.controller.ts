@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  InternalServerErrorException,
   Logger,
   Param,
   Patch,
@@ -15,7 +16,6 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiBadRequestResponse,
-  ApiNoContentResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
@@ -43,14 +43,7 @@ export class UsersController {
 
   @ApiOperation({
     summary: '유저 검색',
-    description:
-      '유저 검색하는 API\
-	  \n결과: status code\
-	  \n(\
-		\n\t존재: 200, \
-		\n\t존재X: 404, \
-		\n\t에러: 500\
-		\n)',
+    description: '유저 검색해서 존재하는지 확인',
   })
   @ApiOkResponse({
     description: '유저 존재',
@@ -65,14 +58,11 @@ export class UsersController {
   async findUser(@Query('id') id: string, @Res() res: Response) {
     try {
       const result = await this.usersRepository.findUser(id);
-      res.status(result).send();
+      await this.usersService.checkUserExist(result);
+      res.status(200).send();
     } catch (error) {
-      this.usersService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.findUser.name,
-      );
+      this.logger.error(`[${this.findUser.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -93,7 +83,8 @@ export class UsersController {
   @Get('/gameHistory')
   async getGameHistory(@Query('id') id: string, @Res() res: Response) {
     try {
-      await this.usersRepository.findUser(id);
+      const result = await this.usersRepository.findUser(id);
+      await this.usersService.checkUserExist(result);
       const gameHistory_db_result = await this.usersRepository.getGameHistory(
         id,
       );
@@ -110,12 +101,8 @@ export class UsersController {
       }
       res.status(200).send(gameHistory);
     } catch (error) {
-      this.usersService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.getGameHistory.name,
-      );
+      this.logger.error(`[${this.getGameHistory.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -136,6 +123,8 @@ export class UsersController {
   @Get('/gameStat')
   async getGameStat(@Query('id') id: string, @Res() res: Response) {
     try {
+      const result = await this.usersRepository.findUser(id);
+      await this.usersService.checkUserExist(result);
       await this.usersRepository.findUser(id);
       const winHistory = await this.usersRepository.getWinHistory(id);
       const loseHistory = await this.usersRepository.getLoseHistory(id);
@@ -146,12 +135,8 @@ export class UsersController {
       this.usersService.printObject('gameStat', gameStat, this.logger);
       res.status(200).send(gameStat);
     } catch (error) {
-      this.usersService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.getGameStat.name,
-      );
+      this.logger.error(`[${this.getGameStat.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -177,6 +162,8 @@ export class UsersController {
     @Res() res: Response,
   ) {
     try {
+      const result = await this.usersRepository.findUser(target_id);
+      await this.usersService.checkUserExist(result);
       const userInfo_db_result = await this.usersRepository.getUserInfo(
         target_id,
       );
@@ -199,19 +186,13 @@ export class UsersController {
           true,
         );
       } else {
-        throw new Error(
-          `Undefined follow_status length: ${follow_status_db_result.length}`,
-        );
+        throw InternalServerErrorException;
       }
       this.usersService.printObject('userInfo', userInfo, this.logger);
       res.status(200).send(userInfo);
     } catch (error) {
-      this.usersService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.getUserInfo.name,
-      );
+      this.logger.error(`[${this.getUserInfo.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -232,7 +213,7 @@ export class UsersController {
     description: '실패: 잘못된 Request 형식',
   })
   @ApiNotFoundResponse({
-    description: '해당 유저 없음',
+    description: '해당 유저, 팔로우할 유저 없음',
   })
   @ApiInternalServerErrorResponse({
     description: '서버 에러',
@@ -243,6 +224,11 @@ export class UsersController {
     @Res() res: Response,
   ) {
     try {
+      const userExist = await this.usersRepository.findUser(body.user_id);
+      await this.usersService.checkUserExist(userExist);
+      const partnerExist = await this.usersRepository.findUser(body.partner_id);
+      await this.usersService.checkUserExist(partnerExist);
+
       if (body.follow_status == false) {
         this.usersRepository.offFollowStatus(body.user_id, body.partner_id);
         this.logger.debug('success unfollow');
@@ -252,12 +238,8 @@ export class UsersController {
       }
       res.status(200).send();
     } catch (error) {
-      this.usersService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.changeFollowStatus.name,
-      );
+      this.logger.error(`[${this.changeFollowStatus.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -277,7 +259,7 @@ export class UsersController {
     description: '실패: 잘못된 Request 형식',
   })
   @ApiNotFoundResponse({
-    description: '해당 유저 없음',
+    description: '해당 유저, 차단할 유저 없음',
   })
   @ApiInternalServerErrorResponse({
     description: '서버 에러',
@@ -285,6 +267,10 @@ export class UsersController {
   @Patch('block')
   async blockUser(@Body() body: ApplyBlockDto, @Res() res: Response) {
     try {
+      const UserExist = await this.usersRepository.findUser(body.user_id);
+      await this.usersService.checkUserExist(UserExist);
+      const blockUserExist = await this.usersRepository.findUser(body.block_id);
+      await this.usersService.checkUserExist(blockUserExist);
       const relation_status = await this.usersRepository.getRelationStatus(
         body.user_id,
         body.block_id,
@@ -295,12 +281,8 @@ export class UsersController {
         this.usersRepository.blockUnfollow(body.user_id, body.block_id);
       res.status(200).send();
     } catch (error) {
-      this.usersService.errorHandler(
-        error,
-        res,
-        this.logger,
-        this.blockUser.name,
-      );
+      this.logger.error(`[${this.blockUser.name}] ${error}`);
+      throw error;
     }
   }
 }

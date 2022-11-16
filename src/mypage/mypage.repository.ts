@@ -18,11 +18,9 @@ export class MypageRepository {
 		WHERE id='${id}';
 		`,
       );
-      this.logger.debug(`User Info: ${databaseResponse}`);
-      if (databaseResponse.length <= 0) throw 404;
       return databaseResponse;
     } catch (error) {
-      this.logger.error(`getUserInfo: ${error}`);
+      this.logger.error(`[${this.getUserInfo.name}] ${error}`);
       throw error;
     }
   }
@@ -54,8 +52,6 @@ export class MypageRepository {
 		WHERE user_id='${id}' AND block_status=false;
 		`,
       );
-      this.logger.debug(`Follows length: ${databaseResponse.length}`);
-      this.logger.debug(`Follows: ${databaseResponse}`);
       return databaseResponse;
     } catch (error) {
       this.logger.error(`getFollows: ${error}`);
@@ -74,11 +70,9 @@ export class MypageRepository {
 		LIMIT 5;
 		`,
       );
-      this.logger.debug(`GameHistory length: ${databaseResponse.length}`);
-      this.logger.debug(`GameHistory: ${databaseResponse}`);
       return databaseResponse;
     } catch (error) {
-      this.logger.error(`getGameHistory: ${error}`);
+      this.logger.error(`[${this.getGameHistory.name}] ${error}`);
       throw error;
     }
   }
@@ -94,7 +88,7 @@ export class MypageRepository {
       );
       return wins;
     } catch (error) {
-      this.logger.error(`getWinHistory: ${error}`);
+      this.logger.error(`[${this.getWinHistory.name}] ${error}`);
       throw error;
     }
   }
@@ -110,7 +104,7 @@ export class MypageRepository {
       );
       return loses;
     } catch (error) {
-      this.logger.error(`getLoseHistory: ${error}`);
+      this.logger.error(`[${this.getLoseHistory.name}] ${error}`);
       throw error;
     }
   }
