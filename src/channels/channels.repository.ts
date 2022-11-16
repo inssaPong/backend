@@ -290,12 +290,14 @@ export class ChannelsRepository {
     }
   }
 
-  async checkEnteredChannel(id: string, channel_id: number) {
+  ///////////////////////////////////////////////////////////////////
+
+  async checkEnteredChannel(user_id: string, channel_id: number) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-          SELECT id FROM "channel_member"
-          WHERE id='${id}' AND channel_id=${channel_id};
+          SELECT user_id FROM "channel_member"
+          WHERE user_id='${user_id}' AND channel_id=${channel_id};
 		    `,
       );
       if (databaseResponse.length == 1) return 200;
@@ -312,7 +314,7 @@ export class ChannelsRepository {
     try {
       databaseResponse = await this.databaseService.runQuery(
         `
-			    SELECT id FROM "channel_member" WHERE channel_id=${channel_id};
+			    SELECT user_id FROM "channel_member" WHERE channel_id=${channel_id};
 		    `,
       );
       return databaseResponse;
@@ -388,6 +390,94 @@ export class ChannelsRepository {
       else return 400;
     } catch (err) {
       this.logger.log(`[isBlockedUser] : ${err}`);
+      return 500;
+    }
+  }
+
+  async getAuthority(user_id: string, channel_id: number): Promise<number> {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+          SELECT authority FROM "channel_member"
+          WHERE user_id='${user_id}' AND channel_id='${channel_id}';
+		    `,
+      );
+      return databaseResponse[0].authority;
+    } catch (err) {
+      this.logger.log(`[getAuthority] : ${err}`);
+      return 500;
+    }
+  }
+
+  async changeChannelPassword(id: number, password: string): Promise<number> {
+    try {
+      await this.databaseService.runQuery(
+        `
+          UPDATE "channel"
+          SET password = '${password}'
+          WHERE id=${id};
+        `,
+      );
+      return 200;
+    } catch (err) {
+      this.logger.log(`[changeChannelPassword] : ${err}`);
+      return 500;
+    }
+  }
+
+  async changeChannelAuthority(
+    user_id: string,
+    channel_id: number,
+    authority: number,
+  ): Promise<number> {
+    try {
+      await this.databaseService.runQuery(
+        `
+          UPDATE "channel_member"
+          SET authority = '${authority}'
+          WHERE user_id='${user_id}' AND channel_id=${channel_id};
+        `,
+      );
+      return 200;
+    } catch (err) {
+      this.logger.log(`[changeChannelAuthority] : ${err}`);
+      return 500;
+    }
+  }
+
+  async patchBanStatus(
+    user_id: string,
+    channel_id: number,
+    ban_status: boolean,
+  ): Promise<number> {
+    try {
+      await this.databaseService.runQuery(
+        `
+          UPDATE "channel_member"
+          SET ban_status = ${ban_status}
+          WHERE user_id='${user_id}' AND channel_id=${channel_id};
+        `,
+      );
+      return 200;
+    } catch (err) {
+      this.logger.log(`[patchBanStatus] : ${err}`);
+      return 500;
+    }
+  }
+
+  async isUserExist(id: string) {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+				SELECT *
+				FROM "user"
+				WHERE id='${id}';
+				`,
+      );
+      if (databaseResponse.length == 1) return 200;
+      else return 404;
+    } catch (err) {
+      this.logger.error(`[isUserExist] : ${err}`);
       return 500;
     }
   }
