@@ -57,7 +57,7 @@ export class MainGateway {
       this.initUsers();
       return;
     }
-    client.emit('getUserStatus', user.status);
+    client.emit(`getUserStatus_${id}`, user.status);
   }
 
   newUser(id: string) {

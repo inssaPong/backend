@@ -231,7 +231,7 @@ export class ChannelGateway {
         this.insertChannelAdmin(client, req, content);
         return true;
       case CHANNELCOMMAND.kick:
-        // this.kickChannel(client, req, content);
+        this.kickChannel(client, req, content);
         return true;
       case CHANNELCOMMAND.mute:
         this.muteChannel(client, req, content);
@@ -300,28 +300,28 @@ export class ChannelGateway {
     }
   }
 
-  // async kickChannel(client: Socket, req: any, kick_id: string) {
-  // const authority = await this.getAuthority(
-  //   client,
-  //   req.sender_id,
-  //   req.channel_id,
-  // );
-  // if (authority == 400) return;
-  //   const db_result = await this.channelsRepository.changeChannelAuthority(
-  //     admin_id,
-  //     req.channel_id,
-  //     CHANNELAUTHORITY.admin,
-  //   );
-  //   if (db_result == 500) {
-  //     client.emit('DBError');
-  //   } else {
-  //     client.emit(
-  //       'channel/send',
-  //       'server',
-  //       `${admin_id}를 관리자로 등록 완료!`,
-  //     );
-  //   }
-  // }
+  async kickChannel(client: Socket, req: any, kick_id: string) {
+    const authority = await this.getAuthority(
+      client,
+      req.sender_id,
+      req.channel_id,
+    );
+    if (authority == 400) return;
+    const possible_authority = await this.checkHighAuthority(
+      client,
+      req.sender_id,
+      kick_id,
+      req.channel_id,
+    );
+    if (possible_authority == false) return;
+
+    try {
+      await this.channelsRepository.exitChannel(kick_id, req.channel_id);
+      client.emit('channel/send', 'server', `${kick_id}를 kick 완료!`);
+    } catch {
+      client.emit('DBError');
+    }
+  }
 
   async muteChannel(client: Socket, req: any, mute_id: string) {
     const authority = await this.getAuthority(
