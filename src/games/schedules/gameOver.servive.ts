@@ -1,4 +1,4 @@
-import { GameObject, GameRoomComponent } from '../game.component';
+import { GAMEOBJECT, GameRoomComponent } from '../game.component';
 import { GameGateway } from '../games.gateway';
 import failSaveResult from './failSaveResult';
 
@@ -24,7 +24,7 @@ export default async function gameOver(
   // database에 결과값 저장!!!!!!!!!!!
   let winner_id;
   let loser_id;
-  if (gameRoom.p1_score == GameObject.finalScore) {
+  if (gameRoom.p1_score == GAMEOBJECT.finalScore) {
     winner_id = gameRoom.p1_id;
     loser_id = gameRoom.p2_id;
   } else {

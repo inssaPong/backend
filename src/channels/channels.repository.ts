@@ -364,24 +364,4 @@ export class ChannelsRepository {
       return 500;
     }
   }
-
-  async patchMuteChannel(
-    id: string,
-    channel_id: number,
-    mute_date: string,
-  ): Promise<number> {
-    try {
-      await this.databaseService.runQuery(
-        `
-          UPDATE "channel_member"
-          SET mute_date = '${mute_date}'
-          WHERE id='${id}' AND channel_id=${channel_id};
-        `,
-      );
-      return 200;
-    } catch (err) {
-      this.logger.log(`[patchMuteChannel] : ${err}`);
-      return 500;
-    }
-  }
 }

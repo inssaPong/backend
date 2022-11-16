@@ -1,4 +1,4 @@
-export const GameObject = {
+export const GAMEOBJECT = {
   canvas_width: 300,
   canvas_height: 150,
   ball_radius: 3,
@@ -59,11 +59,11 @@ export class GameRoomComponent {
   nextRound() {
     this.ball_x_dir = 1;
     this.ball_y_dir = 1;
-    this.ball_x = GameObject.canvas_width / 2;
-    this.ball_y = GameObject.canvas_height / 2;
-    this.p1_x = GameObject.margin;
-    this.p1_y = GameObject.canvas_height / 2 - GameObject.bar_height / 2;
-    this.p2_x = GameObject.canvas_width - GameObject.margin;
-    this.p2_y = GameObject.canvas_height / 2 - GameObject.bar_height / 2;
+    this.ball_x = GAMEOBJECT.canvas_width / 2;
+    this.ball_y = GAMEOBJECT.canvas_height / 2;
+    this.p1_x = GAMEOBJECT.margin;
+    this.p1_y = GAMEOBJECT.canvas_height / 2 - GAMEOBJECT.bar_height / 2;
+    this.p2_x = GAMEOBJECT.canvas_width - GAMEOBJECT.margin;
+    this.p2_y = GAMEOBJECT.canvas_height / 2 - GAMEOBJECT.bar_height / 2;
   }
 }

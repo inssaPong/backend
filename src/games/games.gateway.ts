@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { GameObject, GameRoomComponent } from './game.component';
+import { GAMEOBJECT, GameRoomComponent } from './game.component';
 import { GamesRepository } from './games.repository';
 import getPosition from './schedules/getPosition.service';
 import nextRound from './schedules/nextRound.service';
@@ -31,9 +31,9 @@ export class GameGateway {
     );
     client.emit(
       'game/initCanvas',
-      GameObject.ball_radius,
-      GameObject.bar_width,
-      GameObject.bar_height,
+      GAMEOBJECT.ball_radius,
+      GAMEOBJECT.bar_width,
+      GAMEOBJECT.bar_height,
     );
   }
 
@@ -66,19 +66,19 @@ export class GameGateway {
     }
     if (
       (gameRoom.p1_y > 0 || value == 1) &&
-      (gameRoom.p1_y < GameObject.canvas_height - GameObject.bar_height ||
+      (gameRoom.p1_y < GAMEOBJECT.canvas_height - GAMEOBJECT.bar_height ||
         value == -1) &&
       gameRoom.p1_id == player.id
     ) {
-      gameRoom.p1_y += value * GameObject.move_pixel;
+      gameRoom.p1_y += value * GAMEOBJECT.move_pixel;
     }
     if (
       (gameRoom.p2_y > 0 || value == 1) &&
-      (gameRoom.p2_y < GameObject.canvas_height - GameObject.bar_height ||
+      (gameRoom.p2_y < GAMEOBJECT.canvas_height - GAMEOBJECT.bar_height ||
         value == -1) &&
       gameRoom.p2_id == player.id
     ) {
-      gameRoom.p2_y += value * GameObject.move_pixel;
+      gameRoom.p2_y += value * GAMEOBJECT.move_pixel;
     }
   }
 
@@ -133,19 +133,19 @@ export class GameGateway {
       .to(room_id)
       .emit(
         'game/initCanvas',
-        GameObject.ball_radius,
-        GameObject.bar_width,
-        GameObject.bar_height,
+        GAMEOBJECT.ball_radius,
+        GAMEOBJECT.bar_width,
+        GAMEOBJECT.bar_height,
       );
     gameRoom.interval_ball = setInterval(
       updateBallPos,
-      GameObject.ballSpeed,
+      GAMEOBJECT.ballSpeed,
       gameRoom,
       this,
     );
     gameRoom.interval_move = setInterval(
       getPosition,
-      GameObject.drawUpdateTime,
+      GAMEOBJECT.drawUpdateTime,
       gameRoom,
       this.mainGateway.server,
     );
