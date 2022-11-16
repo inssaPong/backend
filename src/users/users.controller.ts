@@ -125,7 +125,6 @@ export class UsersController {
     try {
       const result = await this.usersRepository.findUser(id);
       await this.usersService.checkUserExist(result);
-      await this.usersRepository.findUser(id);
       const winHistory = await this.usersRepository.getWinHistory(id);
       const loseHistory = await this.usersRepository.getLoseHistory(id);
       const gameStat: GameStatDto = {
