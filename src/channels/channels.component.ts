@@ -1,6 +1,6 @@
 export const ChannelCommand = {
   chpwd: 'chpwd',
-  manager: 'manager',
+  admin: 'admin',
   kick: 'kick',
   mute: 'mute',
   ban: 'ban',

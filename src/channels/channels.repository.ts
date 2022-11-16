@@ -344,4 +344,24 @@ export class ChannelsRepository {
       return 500;
     }
   }
+
+  async changeChannelAuthority(
+    id: string,
+    channel_id: number,
+    authority: number,
+  ): Promise<number> {
+    try {
+      await this.databaseService.runQuery(
+        `
+          UPDATE "channel_member"
+          SET authority = '${authority}'
+          WHERE id='${id}', channel_id:${channel_id};
+        `,
+      );
+      return 200;
+    } catch (err) {
+      this.logger.log(`[changeChannelAuthority] : ${err}`);
+      return 500;
+    }
+  }
 }
