@@ -10,6 +10,7 @@ import {
 } from './channels.component';
 import { ChannelsRepository } from './channels.repository';
 import { Cache } from 'cache-manager';
+import * as bcrypt from 'bcrypt';
 
 @WebSocketGateway({ cors: true })
 export class ChannelGateway {
@@ -20,24 +21,6 @@ export class ChannelGateway {
     private channelsRepository: ChannelsRepository,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
-
-  // @SubscribeMessage('channel/enter')
-  // async enterChannel(client: Socket, data: string) {
-  //   const req = JSON.parse(data);
-  //   const status_code = await this.channelsRepository.checkPossibleChannel(
-  //     req.user_id,
-  //     req.channel_id,
-  //   );
-  //   if (status_code == 400) {
-  //     client.emit('channel/enterFail');
-  //     return;
-  //   }
-  //   if (status_code == 500) {
-  //     client.emit('channel/DBFail');
-  //     return;
-  //   }
-  //   this.sendBeforeMessage(client, req.user_id, req.channel_id);
-  // }
 
   @SubscribeMessage('channel/checkEntered')
   async checkEntered(client: Socket, data: string) {
@@ -255,6 +238,9 @@ export class ChannelGateway {
       req.channel_id,
     );
     if (authority == 400) return;
+
+    const salt = await bcrypt.genSalt();
+    password = await bcrypt.hash(password, salt);
     const db_result = await this.channelsRepository.changeChannelPassword(
       req.channel_id,
       password,
