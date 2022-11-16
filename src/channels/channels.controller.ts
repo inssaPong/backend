@@ -8,6 +8,8 @@ import {
   Req,
   Res,
   Query,
+  InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -55,24 +57,21 @@ export class ChannelsController {
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
     this.logger.log('POST /channels/create');
-
+    if (body.name === '') {
+      this.logger.error('유효하지 않은 채널 이름입니다.');
+      throw new BadRequestException();
+    }
     const channel = {
       name: body.name, // TODO: 구현. dto를 통한 유효성사검사
       password: body.pw, // TODO: 구현. 암호화해서 DB에 넣기
     };
     // Description: req로 받은 channel의 name이 유효한지 검사
-    if (channel.name === '') {
-      this.logger.error('유효하지 않은 채널 이름입니다.');
-      res.status(400).send();
-      return;
-    }
     try {
       // Description: 채널 생성
       await this.channelsRepository.createChannel(channel);
     } catch (error) {
       this.logger.error(error);
-      res.status(500).send();
-      return;
+      throw new InternalServerErrorException();
     }
 
     try {
@@ -91,11 +90,9 @@ export class ChannelsController {
       res.status(201).send({
         id: channelId,
       });
-      return;
     } catch (error) {
       this.logger.error(error);
-      res.status(500).send();
-      return;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -106,9 +103,6 @@ export class ChannelsController {
   @ApiOkResponse({
     description: '[200 OK] 참여할 수 있는 채널 목록 반환',
     type: ResponseGetChannelListDto, // TODO: 생각. example을 지우는 방법이 없을까?
-  })
-  @ApiBadRequestResponse({
-    description: '[400 Bad Request] 참여할 수 있는 채널을 찾을 수 없음',
   })
   @ApiInternalServerErrorResponse({
     description: '[500 internal Server Error] DB에 문제',
@@ -123,11 +117,9 @@ export class ChannelsController {
         await this.channelsRepository.getAvailableChannelList(userId);
       this.logger.log('참여할 수 있는 채널 목록을 가져옵니다.');
       res.status(200).send(availableChannelList);
-      return;
     } catch (error) {
       this.logger.error(error);
-      res.status(500).send();
-      return;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -141,9 +133,6 @@ export class ChannelsController {
     description: '[200 OK] 참여 중인 채널 목록 반환',
     type: ResponseGetEnteredChannelListDto,
   })
-  @ApiBadRequestResponse({
-    description: '[400 Bad Request] !!!',
-  })
   @Get('/list/join')
   async getJoinedChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list/join');
@@ -154,11 +143,9 @@ export class ChannelsController {
         await this.channelsRepository.getJoinedChannelListByUserId(userId);
       this.logger.log('참여 중인 채널 목록을 가져옵니다.');
       res.status(200).send(joinedChannelList);
-      return;
     } catch (error) {
       this.logger.error(error);
-      res.status(500).send();
-      return;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -190,17 +177,14 @@ export class ChannelsController {
         channelId,
       );
       if (isSuccess === false) {
-        this.logger.log('잘못된 request입니다.');
-        res.status(400).send();
-        return;
+        this.logger.error('잘못된 request입니다.');
+        throw new BadRequestException();
       }
       this.logger.log('채널 삭제에 성공했습니다.');
       res.status(200).send();
-      return;
     } catch (error) {
       this.logger.error(error);
-      res.status(500).send();
-      return;
+      throw new InternalServerErrorException();
     }
   }
 }
