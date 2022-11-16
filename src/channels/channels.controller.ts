@@ -30,13 +30,16 @@ import {
   ResponseGetEnteredChannelListDto,
   ResponseUsersIdInChannelDto,
 } from './dto/swagger-channels.dto';
-import * as bcrypt from 'bcrypt';
+import { ChannelsService } from './channels.service';
 
 // 4-0, 4-1, 4-2, 4-3
 @Controller('/channels')
 @ApiTags('채널 API')
 export class ChannelsController {
-  constructor(private readonly channelsRepository: ChannelsRepository) {}
+  constructor(
+    private readonly channelsService: ChannelsService,
+    private readonly channelsRepository: ChannelsRepository,
+  ) {}
 
   private readonly logger = new Logger(ChannelsController.name);
 
@@ -60,54 +63,67 @@ export class ChannelsController {
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
     this.logger.log('POST /channels/create');
-    if (body.name === '') {
-      this.logger.error('유효하지 않은 채널 이름입니다.');
-      throw new BadRequestException();
-    }
-    if (body.pw.length !== 0 && body.pw.length !== 4) {
-      this.logger.error('유효하지 않은 채널 비밀번호입니다.');
-      throw new BadRequestException();
-    }
-    let channel = {
-      name: body.name, // TODO: 구현. dto를 통한 유효성사검사
-      pw: body.pw,
-    };
-
-    // Description: 비밀번호 암호화
-    if (channel.pw.length === 4) {
-      const salt = await bcrypt.genSalt();
-      channel.pw = await bcrypt.hash(channel.pw, salt);
-    }
-    // 비교 방법: const isMatch = await bcrypt.compare(password, hash);
-
-    // Description: 채널 생성
     try {
-      await this.channelsRepository.createChannel(channel);
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
+      const user_id = req.user.id;
+      const channel_name = body.name;
+      const channel_pw = body.pw;
+      const channelId = this.channelsService.createChannel(
+        user_id,
+        channel_name,
+        channel_pw,
+      );
+      res.status(201).send(channelId);
+    } catch (exception) {
+      throw exception;
     }
+    // if (body.name === '') {
+    //   this.logger.error('유효하지 않은 채널 이름입니다.');
+    //   throw new BadRequestException();
+    // }
+    // if (body.pw.length !== 0 && body.pw.length !== 4) {
+    //   this.logger.error('유효하지 않은 채널 비밀번호입니다.');
+    //   throw new BadRequestException();
+    // }
+    // let channel = {
+    //   name: body.name, // TODO: 구현. dto를 통한 유효성사검사
+    //   pw: body.pw,
+    // };
 
-    try {
-      // Description: 생성된 채널 id 가져오기
-      const channelId = await this.channelsRepository.getChannelIdByChannelName(
-        channel.name,
-      );
-      this.logger.log(`생성된 채널 id를 가져오는데 성공했습니다: ${channelId}`);
-      // Description: channel_member 테이블에 추가
-      const userId: string = req.user.id;
-      await this.channelsRepository.insertOwnerToChannelMember(
-        userId,
-        channelId,
-      );
-      this.logger.log('channel_member 테이블에 추가했습니다.');
-      res.status(201).send({
-        id: channelId,
-      });
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
-    }
+    // // Description: 비밀번호 암호화
+    // if (channel.pw.length === 4) {
+    //   const salt = await bcrypt.genSalt();
+    //   channel.pw = await bcrypt.hash(channel.pw, salt);
+    // }
+    // // 비교 방법: const isMatch = await bcrypt.compare(password, hash);
+
+    // // Description: 채널 생성
+    // try {
+    //   await this.channelsRepository.createChannel(channel);
+    // } catch (error) {
+    //   this.logger.error(error);
+    //   throw new InternalServerErrorException();
+    // }
+
+    // try {
+    //   // Description: 생성된 채널 id 가져오기
+    //   const channelId = await this.channelsRepository.getChannelIdByChannelName(
+    //     channel.name,
+    //   );
+    //   this.logger.log(`생성된 채널 id를 가져오는데 성공했습니다: ${channelId}`);
+    //   // Description: channel_member 테이블에 추가
+    //   const userId: string = req.user.id;
+    //   await this.channelsRepository.insertOwnerToChannelMember(
+    //     userId,
+    //     channelId,
+    //   );
+    //   this.logger.log('channel_member 테이블에 추가했습니다.');
+    //   res.status(201).send({
+    //     id: channelId,
+    //   });
+    // } catch (error) {
+    //   this.logger.error(error);
+    //   throw new InternalServerErrorException();
+    // }
   }
 
   // 참여할 수 있는 채널 목록 받기

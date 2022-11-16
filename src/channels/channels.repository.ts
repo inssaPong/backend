@@ -8,16 +8,16 @@ export class ChannelsRepository {
   private readonly logger = new Logger(ChannelsRepository.name);
 
   // Description: 채널 생성
-  async createChannel(channel: any): Promise<void> {
+  async inserNameAndPwIntoChannel(channel_name, channel_pw): Promise<void> {
     try {
       await this.databaseService.runQuery(
         `
         INSERT INTO "channel" (name, password)
-        VALUES ('${channel.name}', '${channel.pw}');
+        VALUES ('${channel_name}', '${channel_pw}');
         `,
       );
     } catch (error) {
-      throw `createChannel: ${error}`;
+      throw `[createChannel] ${error}`;
     }
   }
 
@@ -235,7 +235,7 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT id FROM "channel_member"
+        SELECT user_id FROM "channel_member"
         WHERE channel_id='${channel_id}';
         `,
       );
