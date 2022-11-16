@@ -337,8 +337,7 @@ export class ChannelsRepository {
           WHERE user_id='${user_id}' AND channel_id='${channel_id}';
 		    `,
       );
-      if (databaseResponse.length == 1) return databaseResponse[0].authority;
-      else return 400;
+      return databaseResponse[0].authority;
     } catch (err) {
       this.logger.log(`[getAuthority] : ${err}`);
       return 500;
