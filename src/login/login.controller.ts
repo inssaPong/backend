@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Logger,
@@ -80,8 +81,8 @@ export class LoginController {
       this.logger.log('Secondary Authentication Successful');
       res.status(200).send();
     } else {
-      this.logger.log('Secondary authentication failed');
-      res.status(400).send();
+      this.logger.error('Secondary authentication failed');
+      throw new BadRequestException();
     }
   }
 }
