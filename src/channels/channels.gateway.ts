@@ -1,17 +1,24 @@
-import { Logger } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
 import { UserStatus } from 'src/sockets/user.component';
-import { ChannelAuthority, ChannelCommand } from './channels.component';
+import {
+  CHANNELAUTHORITY,
+  CHANNELCOMMAND,
+  MUTETIME,
+} from './channels.component';
 import { ChannelsRepository } from './channels.repository';
+import { Cache } from 'cache-manager';
 
 @WebSocketGateway({ cors: true })
 export class ChannelGateway {
+  mute_users: string[] = [];
   private readonly logger: Logger = new Logger(ChannelGateway.name);
   constructor(
     private mainGateway: MainGateway,
     private channelsRepository: ChannelsRepository,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   // @SubscribeMessage('channel/enter')
@@ -113,6 +120,15 @@ export class ChannelGateway {
   }
 
   async broadcastToChannel(client: Socket, req: any) {
+    const is_mute = await this.cacheManager.get(`mute_${req.sender_id}`);
+    if (is_mute != undefined) {
+      client.emit(
+        'channel/send',
+        'server',
+        `음소거 중! 메세지를 보낼 수 없습니다.`,
+      );
+      return;
+    }
     const roomMembers = await this.channelsRepository.getRoomMembers(
       req.channel_id,
     );
@@ -206,20 +222,22 @@ export class ChannelGateway {
       .slice(req.message.search(']') + 1, req.message.length)
       .replace(/\s/g, '')
       .toLowerCase();
-    this.logger.log(`[isCommand] : ${keyword}, ${content}`);
 
     switch (keyword) {
-      case ChannelCommand.chpwd:
+      case CHANNELCOMMAND.chpwd:
         this.changeChannelPassword(client, req, content);
         return true;
-      case ChannelCommand.admin:
+      case CHANNELCOMMAND.admin:
         this.insertChannelAdmin(client, req, content);
         return true;
-      case ChannelCommand.kick:
+      case CHANNELCOMMAND.kick:
+        // this.kickChannel(client, req, content);
         return true;
-      case ChannelCommand.mute:
+      case CHANNELCOMMAND.mute:
+        this.muteChannel(client, req, content);
         return true;
-      case ChannelCommand.ban:
+      case CHANNELCOMMAND.ban:
+        this.banChannel(client, req, content);
         return true;
       default:
         return false;
@@ -231,18 +249,12 @@ export class ChannelGateway {
       client.emit('channel/commandFailed', '4자리 비밀번호를 입력해주세요.');
       return;
     }
-    const authority = await this.channelsRepository.getAuthority(
+    const authority = await this.getAuthority(
+      client,
       req.sender_id,
       req.channel_id,
     );
-    if (authority == 400 || authority == 500) {
-      client.emit('DBError');
-      return;
-    }
-    if (authority == ChannelAuthority.guest) {
-      client.emit('channel/commandFailed', '권한이 없습니다.');
-      return;
-    }
+    if (authority == 400) return;
     const db_result = await this.channelsRepository.changeChannelPassword(
       req.channel_id,
       password,
@@ -259,22 +271,16 @@ export class ChannelGateway {
   }
 
   async insertChannelAdmin(client: Socket, req: any, admin_id: string) {
-    const authority = await this.channelsRepository.getAuthority(
+    const authority = await this.getAuthority(
+      client,
       req.sender_id,
       req.channel_id,
     );
-    if (authority == 400 || authority == 500) {
-      client.emit('DBError');
-      return;
-    }
-    if (authority == ChannelAuthority.guest) {
-      client.emit('channel/commandFailed', '권한이 없습니다.');
-      return;
-    }
+    if (authority == 400) return;
     const db_result = await this.channelsRepository.changeChannelAuthority(
       admin_id,
       req.channel_id,
-      ChannelAuthority.admin,
+      CHANNELAUTHORITY.admin,
     );
     if (db_result == 500) {
       client.emit('DBError');
@@ -288,22 +294,16 @@ export class ChannelGateway {
   }
 
   // async kickChannel(client: Socket, req: any, kick_id: string) {
-  //   const authority = await this.channelsRepository.getAuthority(
-  //     req.sender_id,
-  //     req.channel_id,
-  //   );
-  //   if (authority == 400 || authority == 500) {
-  //     client.emit('DBError');
-  //     return;
-  //   }
-  //   if (authority == ChannelAuthority.guest) {
-  //     client.emit('channel/commandFailed', '권한이 없습니다.');
-  //     return;
-  //   }
+  // const authority = await this.getAuthority(
+  //   client,
+  //   req.sender_id,
+  //   req.channel_id,
+  // );
+  // if (authority == 400) return;
   //   const db_result = await this.channelsRepository.changeChannelAuthority(
   //     admin_id,
   //     req.channel_id,
-  //     ChannelAuthority.admin,
+  //     CHANNELAUTHORITY.admin,
   //   );
   //   if (db_result == 500) {
   //     client.emit('DBError');
@@ -315,4 +315,34 @@ export class ChannelGateway {
   //     );
   //   }
   // }
+
+  async muteChannel(client: Socket, req: any, mute_id: string) {
+    const authority = await this.getAuthority(
+      client,
+      req.sender_id,
+      req.channel_id,
+    );
+    if (authority == 400) return;
+
+    await this.cacheManager.set(`mute_${mute_id}`, 'true', MUTETIME);
+    client.emit('channel/send', 'server', `${mute_id}를 음소거 시킴!`);
+  }
+
+  async banChannel(client: Socket, req: any, kick_id: string) {}
+
+  async getAuthority(client: Socket, id: string, channel_id: number) {
+    const authority = await this.channelsRepository.getAuthority(
+      id,
+      channel_id,
+    );
+    if (authority == 400 || authority == 500) {
+      client.emit('DBError');
+      return 400;
+    }
+    if (authority == CHANNELAUTHORITY.guest) {
+      client.emit('channel/commandFailed', '권한이 없습니다.');
+      return 400;
+    }
+    return authority;
+  }
 }
