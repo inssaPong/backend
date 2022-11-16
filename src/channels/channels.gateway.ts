@@ -286,4 +286,33 @@ export class ChannelGateway {
       );
     }
   }
+
+  // async kickChannel(client: Socket, req: any, kick_id: string) {
+  //   const authority = await this.channelsRepository.getAuthority(
+  //     req.sender_id,
+  //     req.channel_id,
+  //   );
+  //   if (authority == 400 || authority == 500) {
+  //     client.emit('DBError');
+  //     return;
+  //   }
+  //   if (authority == ChannelAuthority.guest) {
+  //     client.emit('channel/commandFailed', '권한이 없습니다.');
+  //     return;
+  //   }
+  //   const db_result = await this.channelsRepository.changeChannelAuthority(
+  //     admin_id,
+  //     req.channel_id,
+  //     ChannelAuthority.admin,
+  //   );
+  //   if (db_result == 500) {
+  //     client.emit('DBError');
+  //   } else {
+  //     client.emit(
+  //       'channel/send',
+  //       'server',
+  //       `${admin_id}를 관리자로 등록 완료!`,
+  //     );
+  //   }
+  // }
 }
