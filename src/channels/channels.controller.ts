@@ -8,6 +8,7 @@ import {
   Req,
   Res,
   Query,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -25,6 +26,7 @@ import {
   ResponseChannelIdDto,
   ResponseGetChannelListDto,
   ResponseGetEnteredChannelListDto,
+  ResponseUsersIdInChannelDto,
 } from './dto/swagger-channels.dto';
 
 // 4-0, 4-1, 4-2, 4-3
@@ -71,7 +73,7 @@ export class ChannelsController {
       await this.channelsRepository.createChannel(channel);
     } catch (error) {
       this.logger.error(error);
-      res.status(500).send();
+      throw new InternalServerErrorException();
       return;
     }
 
@@ -159,6 +161,55 @@ export class ChannelsController {
       this.logger.error(error);
       res.status(500).send();
       return;
+    }
+  }
+
+  // Description: 채널 이름 가져오기
+  @ApiOperation({
+    summary: '채널 이름 가져오기',
+  })
+  @ApiOkResponse({
+    description: '[200 OK] 채널 이름 반환',
+  })
+  @ApiBadRequestResponse({
+    description: '[500 Internal Server Error] DB에 문제',
+  })
+  @Get('/room/name')
+  async getChannelName(@Query('channel_id') channel_id: number, @Res() res) {
+    try {
+      const channelName =
+        await this.channelsRepository.getChannelNameByChannelId(channel_id);
+      res.status(200).send(channelName);
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  @ApiOperation({
+    summary: '채널에 참가 중인 유저 id 가져오기',
+  })
+  @ApiOkResponse({
+    description: '[200 OK] 채널에 참가중인 유저 id',
+    type: ResponseUsersIdInChannelDto,
+  })
+  @ApiInternalServerErrorResponse({
+    description: '[500 Internal Server Error] DB에 문제',
+  })
+  @Get('/room/users')
+  async getUserIdInChannel(
+    @Query('channel_id') channel_id: number,
+    @Res() res,
+  ) {
+    this.logger.log('GET /channels/room/users');
+    try {
+      const usersId = await this.channelsRepository.getUsersIdInChannelMember(
+        channel_id,
+      );
+      res.status(200).send(usersId);
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 

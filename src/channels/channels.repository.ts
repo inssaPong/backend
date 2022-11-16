@@ -166,6 +166,20 @@ export class ChannelsRepository {
     }
   }
 
+  async getUsersIdInChannelMember(channel_id: number): Promise<Object[]> {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT id FROM "channel_member"
+        WHERE channel_id='${channel_id}';
+        `,
+      );
+      return databaseResponse;
+    } catch (error) {
+      throw `getUsersStatusInJoinedChannel: ${error}`;
+    }
+  }
+
   // Description: 채널 나가기
   async exitChannel(user_id: string, channel_id: number): Promise<boolean> {
     try {
