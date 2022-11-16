@@ -73,8 +73,8 @@ export class ChannelsController {
 
     // Description: 비밀번호 암호화
     if (channel.pw.length === 4) {
-      const saltOrRounds = await bcrypt.genSalt();
-      channel.pw = await bcrypt.hash(channel.pw, saltOrRounds);
+      const salt = await bcrypt.genSalt();
+      channel.pw = await bcrypt.hash(channel.pw, salt);
     }
     // 비교 방법: const isMatch = await bcrypt.compare(password, hash);
 
