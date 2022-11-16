@@ -13,7 +13,7 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
         INSERT INTO "channel" (name, password)
-        VALUES ('${channel.name}', '${channel.password}');
+        VALUES ('${channel.name}', '${channel.pw}');
         `,
       );
     } catch (error) {
