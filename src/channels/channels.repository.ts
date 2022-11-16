@@ -225,12 +225,14 @@ export class ChannelsRepository {
     }
   }
 
-  async checkEnteredChannel(id: string, channel_id: number) {
+  ///////////////////////////////////////////////////////////////////
+
+  async checkEnteredChannel(user_id: string, channel_id: number) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-          SELECT id FROM "channel_member"
-          WHERE id='${id}' AND channel_id=${channel_id};
+          SELECT user_id FROM "channel_member"
+          WHERE user_id='${user_id}' AND channel_id=${channel_id};
 		    `,
       );
       if (databaseResponse.length == 1) return 200;
@@ -247,7 +249,7 @@ export class ChannelsRepository {
     try {
       databaseResponse = await this.databaseService.runQuery(
         `
-			    SELECT id FROM "channel_member" WHERE channel_id=${channel_id};
+			    SELECT user_id FROM "channel_member" WHERE channel_id=${channel_id};
 		    `,
       );
       return databaseResponse;
@@ -327,12 +329,12 @@ export class ChannelsRepository {
     }
   }
 
-  async getAuthority(id: string, channel_id: number): Promise<number> {
+  async getAuthority(user_id: string, channel_id: number): Promise<number> {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
           SELECT authority FROM "channel_member"
-          WHERE id='${id}' AND channel_id='${channel_id}';
+          WHERE user_id='${user_id}' AND channel_id='${channel_id}';
 		    `,
       );
       if (databaseResponse.length == 1) return databaseResponse[0].authority;
@@ -347,7 +349,7 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-          UPDATE "user"
+          UPDATE "channel"
           SET password = '${password}'
           WHERE id=${id};
         `,
@@ -360,7 +362,7 @@ export class ChannelsRepository {
   }
 
   async changeChannelAuthority(
-    id: string,
+    user_id: string,
     channel_id: number,
     authority: number,
   ): Promise<number> {
@@ -369,7 +371,7 @@ export class ChannelsRepository {
         `
           UPDATE "channel_member"
           SET authority = '${authority}'
-          WHERE id='${id}' AND channel_id=${channel_id};
+          WHERE user_id='${user_id}' AND channel_id=${channel_id};
         `,
       );
       return 200;
@@ -380,7 +382,7 @@ export class ChannelsRepository {
   }
 
   async patchBanStatus(
-    id: string,
+    user_id: string,
     channel_id: number,
     ban_status: boolean,
   ): Promise<number> {
@@ -389,12 +391,29 @@ export class ChannelsRepository {
         `
           UPDATE "channel_member"
           SET ban_status = ${ban_status}
-          WHERE id='${id}' AND channel_id=${channel_id};
+          WHERE user_id='${user_id}' AND channel_id=${channel_id};
         `,
       );
       return 200;
     } catch (err) {
       this.logger.log(`[patchBanStatus] : ${err}`);
+      return 500;
+    }
+  }
+
+  async isUserExist(id: string) {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+				SELECT *
+				FROM "user"
+				WHERE id='${id}';
+				`,
+      );
+      if (databaseResponse.length == 1) return 200;
+      else return 404;
+    } catch (err) {
+      this.logger.error(`[isUserExist] : ${err}`);
       return 500;
     }
   }
