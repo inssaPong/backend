@@ -62,16 +62,21 @@ export class ChannelsController {
       this.logger.error('유효하지 않은 채널 이름입니다.');
       throw new BadRequestException();
     }
+    if (body.pw.length !== 0 && body.pw.length !== 4) {
+      this.logger.error('유효하지 않은 채널 비밀번호입니다.');
+      throw new BadRequestException();
+    }
     let channel = {
       name: body.name, // TODO: 구현. dto를 통한 유효성사검사
       pw: body.pw,
     };
 
     // Description: 비밀번호 암호화
-    if (channel.pw.length !== 0) {
+    if (channel.pw.length === 4) {
       const saltOrRounds = await bcrypt.genSalt();
       channel.pw = await bcrypt.hash(channel.pw, saltOrRounds);
     }
+    // 비교 방법: const isMatch = await bcrypt.compare(password, hash);
 
     // Description: 채널 생성
     try {
