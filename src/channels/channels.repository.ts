@@ -211,7 +211,7 @@ export class ChannelsRepository {
     }
   }
 
-  async checkPossibleChannel(id: string, channel_id: string) {
+  async checkEnteredChannel(id: string, channel_id: number) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -222,12 +222,13 @@ export class ChannelsRepository {
       if (databaseResponse.length == 1) return 200;
       else return 400;
     } catch (err) {
-      this.logger.log(`[checkPossibleChannel] ${err}`);
+      this.logger.log(`[checkEnteredChannel] : ${err}`);
       return 500;
     }
   }
 
-  async selectRoomMember(channel_id: string) {
+  async getRoomMembers(channel_id: number) {
+    // todo any 형식 dto로 변경
     let databaseResponse: any[];
     try {
       databaseResponse = await this.databaseService.runQuery(
@@ -237,12 +238,16 @@ export class ChannelsRepository {
       );
       return databaseResponse;
     } catch (err) {
-      this.logger.log(`[selectRoomMember] ${err}`);
+      this.logger.log(`[getRoomMembers] : ${err}`);
       return databaseResponse;
     }
   }
 
-  async insertMessage(channel_id: string, sender_id: string, content: string) {
+  async insertChannelMessage(
+    channel_id: string,
+    sender_id: string,
+    content: string,
+  ) {
     try {
       await this.databaseService.runQuery(
         `
@@ -252,7 +257,7 @@ export class ChannelsRepository {
       );
       return 201;
     } catch (err) {
-      this.logger.log(`[insertMessage] ${err}`);
+      this.logger.log(`[insertChannelMessage] : ${err}`);
       return 500;
     }
   }
@@ -267,12 +272,13 @@ export class ChannelsRepository {
       );
       return 201;
     } catch (err) {
-      this.logger.log(`[insertDM] ${err}`);
+      this.logger.log(`[insertDM] : ${err}`);
       return 500;
     }
   }
 
-  async selectAllMessage(channel_id: string) {
+  async getAllMessage(channel_id: number) {
+    // todo any 형식 dto로 변경
     let databaseResponse: any[];
     try {
       databaseResponse = await this.databaseService.runQuery(
@@ -282,12 +288,12 @@ export class ChannelsRepository {
       );
       return databaseResponse;
     } catch (err) {
-      this.logger.log(`[selectAllMessage] ${err}`);
+      this.logger.log(`[getAllMessage] : ${err}`);
       return databaseResponse;
     }
   }
 
-  async selectBlockUser(user_id: string, partner_id: string) {
+  async isBlockedUser(user_id: string, partner_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -299,10 +305,10 @@ export class ChannelsRepository {
         databaseResponse.length == 1 &&
         databaseResponse[0].block_status == true
       )
-        return true;
-      else return false;
+        return 200;
+      else return 400;
     } catch (err) {
-      this.logger.log(`[selectBlockUser] ${err}`);
+      this.logger.log(`[isBlockedUser] : ${err}`);
       return 500;
     }
   }
