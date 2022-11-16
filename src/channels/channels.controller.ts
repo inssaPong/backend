@@ -14,7 +14,6 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBody,
-  ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -29,6 +28,7 @@ import {
   ResponseGetEnteredChannelListDto,
   ResponseUsersIdInChannelDto,
 } from './dto/swagger-channels.dto';
+import * as bcrypt from 'bcrypt';
 
 // 4-0, 4-1, 4-2, 4-3
 @Controller('/channels')
@@ -62,13 +62,19 @@ export class ChannelsController {
       this.logger.error('유효하지 않은 채널 이름입니다.');
       throw new BadRequestException();
     }
-    const channel = {
+    let channel = {
       name: body.name, // TODO: 구현. dto를 통한 유효성사검사
-      password: body.pw, // TODO: 구현. 암호화해서 DB에 넣기
+      pw: body.pw,
     };
-    // Description: req로 받은 channel의 name이 유효한지 검사
+
+    // Description: 비밀번호 암호화
+    if (channel.pw.length !== 0) {
+      const saltOrRounds = await bcrypt.genSalt();
+      channel.pw = await bcrypt.hash(channel.pw, saltOrRounds);
+    }
+
+    // Description: 채널 생성
     try {
-      // Description: 채널 생성
       await this.channelsRepository.createChannel(channel);
     } catch (error) {
       this.logger.error(error);
@@ -104,7 +110,7 @@ export class ChannelsController {
   })
   @ApiOkResponse({
     description: '[200 OK] 참여할 수 있는 채널 목록 반환',
-    type: ResponseGetChannelListDto, // TODO: 생각. example을 지우는 방법이 없을까?
+    type: ResponseGetChannelListDto,
   })
   @ApiInternalServerErrorResponse({
     description: '[500 internal Server Error] DB에 문제',
