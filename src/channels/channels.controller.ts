@@ -78,8 +78,7 @@ export class ChannelsController {
       await this.channelsRepository.createChannel(channel);
     } catch (error) {
       this.logger.error(error);
-      res.status(500).send();
-      return;
+      throw new InternalServerErrorException();
     }
 
     try {
