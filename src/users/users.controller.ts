@@ -65,7 +65,6 @@ export class UsersController {
   async findUser(@Query('id') id: string, @Res() res: Response) {
     try {
       const result = await this.usersRepository.findUser(id);
-      this.logger.debug(`result: ${result}`);
       res.status(result).send();
     } catch (error) {
       this.usersService.errorHandler(
@@ -144,6 +143,7 @@ export class UsersController {
         wins: winHistory.length,
         loses: loseHistory.length,
       };
+      this.usersService.printObject('gameStat', gameStat, this.logger);
       res.status(200).send(gameStat);
     } catch (error) {
       this.usersService.errorHandler(
@@ -203,6 +203,7 @@ export class UsersController {
           `Undefined follow_status length: ${follow_status_db_result.length}`,
         );
       }
+      this.usersService.printObject('userInfo', userInfo, this.logger);
       res.status(200).send(userInfo);
     } catch (error) {
       this.usersService.errorHandler(

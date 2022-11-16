@@ -34,8 +34,6 @@ export class UsersRepository {
 		  LIMIT 5;
 		  `,
       );
-      this.logger.debug(`GameHistory length: ${databaseResponse.length}`);
-      this.logger.debug(`GameHistory: ${databaseResponse}`);
       return databaseResponse;
     } catch (error) {
       this.logger.error(`getGameHistory: ${error}`);
