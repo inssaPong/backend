@@ -94,9 +94,9 @@ export class UserInfoDto {
   @IsBoolean()
   @ApiProperty({ description: '팔로우 여부' })
   readonly follow_status: boolean;
-  constructor(nickname, avatar, follow_status) {
+  constructor(nickname: string, avatar: string, follow_status: boolean) {
     this.nickname = nickname;
-    this.avatar = avatar;
+    this.avatar = `${avatar}`;
     this.follow_status = follow_status;
   }
 }
