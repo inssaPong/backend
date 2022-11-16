@@ -1,4 +1,4 @@
-import { GameObject, GameRoomComponent } from '../game.component';
+import { GAMEOBJECT, GameRoomComponent } from '../game.component';
 import { GameGateway } from '../games.gateway';
 import gameOver from './gameOver.servive';
 
@@ -8,8 +8,8 @@ export default function nextRound(
 ) {
   gameRoom.nextRound();
   if (
-    gameRoom.p1_score == GameObject.finalScore ||
-    gameRoom.p2_score == GameObject.finalScore
+    gameRoom.p1_score == GAMEOBJECT.finalScore ||
+    gameRoom.p2_score == GAMEOBJECT.finalScore
   ) {
     clearInterval(gameRoom.interval_ball);
     clearInterval(gameRoom.interval_move);
