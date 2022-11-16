@@ -24,16 +24,16 @@ export class ResponseGetEnteredChannelListDto {
   example: Object[];
 }
 
-export class ResponseUserStatusInChannelDto {
+export class ResponseUsersIdInChannelDto {
   @ApiProperty({
-    description: '[Reponse] [{user_id, user_status}, ...]',
+    description: '[Reponse] [{user_id}, ...]',
     required: true,
     default: [
-      { user_id: 'seungoh', user_status: '1' },
-      { user_id: 'dason', user_status: '2' },
-      { user_id: 'hyson', user_status: '3' },
-      { user_id: 'sehyan', user_status: '2' },
-      { user_id: 'sehyan', user_status: '1' },
+      { id: 'seungoh' },
+      { id: 'dason' },
+      { id: 'hyson' },
+      { id: 'sehyan' },
+      { id: 'sanjeon' },
     ],
   })
   example: Object[];
