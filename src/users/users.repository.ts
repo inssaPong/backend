@@ -15,8 +15,7 @@ export class UsersRepository {
 				WHERE id='${id}';
 				`,
       );
-      if (databaseResponse.length == 1) return 200;
-      else throw 404;
+      return databaseResponse;
     } catch (error) {
       this.logger.error(`findUser: ${error}`);
       throw error;
@@ -34,8 +33,6 @@ export class UsersRepository {
 		  LIMIT 5;
 		  `,
       );
-      this.logger.debug(`GameHistory length: ${databaseResponse.length}`);
-      this.logger.debug(`GameHistory: ${databaseResponse}`);
       return databaseResponse;
     } catch (error) {
       this.logger.error(`getGameHistory: ${error}`);

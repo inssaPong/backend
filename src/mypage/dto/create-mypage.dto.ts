@@ -25,6 +25,7 @@ export class UserInfoDto {
   readonly twofactor_status: boolean;
 }
 
+// TODO users의 GameHistoryDto와 마찬가지로 배열을 dto로 만드는 게 아니라 OneGameHistoryDto의 배열로 보내기
 export class GameHistoryDto {
   @IsArray()
   @ApiProperty({ description: '게임 기록 리스트' })
@@ -47,6 +48,7 @@ export class OneGameHistoryDto {
   readonly loser: string;
 }
 
+// TODO 이 부분도 굳이 배열을 Dto로 안 묶고 follow 자체를 string dto로 만들어서 그걸 배열로 보내는 걸로 바꾸기
 export class FollowsDto {
   @ApiProperty({ description: '팔로우 아이디 목록' })
   readonly follow: string[];
