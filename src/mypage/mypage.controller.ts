@@ -56,6 +56,7 @@ export class MypageController {
       const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
       if (userInfoDB.length <= 0) throw new NotFoundException();
       const userinfo: UserInfoDto = {
+        id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],
         avatar: `${userInfoDB[0]['avatar']}`,
         twofactor_status: userInfoDB[0]['twofactor_status'],

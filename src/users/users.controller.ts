@@ -141,8 +141,7 @@ export class UsersController {
 
   @ApiOperation({
     summary: '해당 유저 정보 가져오기',
-    description:
-      'param로 id 보내면 UserInfoDto{nickname, avatar binary code, follow 여부} 반환',
+    description: 'param로 id 보내면 UserInfoDto 반환',
   })
   @ApiOkResponse({
     description: '성공',
@@ -174,12 +173,14 @@ export class UsersController {
       let userInfo: UserInfoDto;
       if (follow_status_db_result.length == 0) {
         userInfo = new UserInfoDto(
+          userInfo_db_result[0]['id'],
           userInfo_db_result[0][`nickname`],
           userInfo_db_result[0][`avatar`],
           false,
         );
       } else if (follow_status_db_result.length == 1) {
         userInfo = new UserInfoDto(
+          userInfo_db_result[0]['id'],
           userInfo_db_result[0][`nickname`],
           userInfo_db_result[0][`avatar`],
           true,

@@ -13,7 +13,7 @@ export class MypageRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		SELECT nickname, avatar, twofactor_status
+		SELECT id, nickname, avatar, twofactor_status
 		FROM "user"
 		WHERE id='${id}';
 		`,
@@ -28,13 +28,14 @@ export class MypageRepository {
   async patchUserInfo(id: string, body: UpdateUserInfoDto) {
     try {
       for (let [key, value] of Object.entries(body)) {
-        await this.databaseService.runQuery(
-          `
-				UPDATE "user"
-				SET ${key} = '${value}'
-				WHERE id='${id}';
-			  `,
-        );
+        if (key != 'id')
+          await this.databaseService.runQuery(
+            `
+			UPDATE "user"
+			SET ${key} = '${value}'
+			WHERE id='${id}';
+			`,
+          );
       }
       return 200;
     } catch (error) {
