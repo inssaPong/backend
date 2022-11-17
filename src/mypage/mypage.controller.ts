@@ -6,6 +6,7 @@ import {
   Logger,
   Res,
   Req,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,7 +14,6 @@ import {
   ApiBody,
   ApiResponse,
   ApiOkResponse,
-  ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import {
@@ -41,30 +41,30 @@ export class MypageController {
 
   @ApiOperation({
     summary: 'mypage 유저 정보 가져오기',
-    description:
-      '현재 클라이언트에 접속 중인 유저의 정보를 반환',
+    description: '현재 클라이언트에 접속 중인 유저의 정보를 반환',
   })
   @ApiOkResponse({
     description: '성공',
     type: UserInfoDto,
   })
   @ApiInternalServerErrorResponse({
-	description: '서버 에러'
+    description: '서버 에러',
   })
   @Get()
   async getUserInfo(@Req() req, @Res() res: Response) {
-	try {
-		const userInfo_db_result = await this.mypageRepository.getUserInfo(req.user.id);
-		this.logger.debug(`User Info: ${userInfo_db_result}`);
-		const userinfo: UserInfoDto = {
-			nickname: userInfo_db_result[0]['nickname'],
-			avatar: `${userInfo_db_result[0]['avatar']}`,
-			twofactor_status: userInfo_db_result[0]['twofactor_status'],
-		}
-		res.status(200).send(userinfo);
-
-	} catch (error) {
-		this.mypageService.errorHandler(error, res, this.logger, this.getUserInfo.name);
+    try {
+      const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
+      if (userInfoDB.length <= 0) throw new NotFoundException();
+      const userinfo: UserInfoDto = {
+        nickname: userInfoDB[0]['nickname'],
+        avatar: `${userInfoDB[0]['avatar']}`,
+        twofactor_status: userInfoDB[0]['twofactor_status'],
+      };
+      this.mypageService.printObject('userInfo', userinfo, this.logger);
+      res.status(200).send(userinfo);
+    } catch (error) {
+      this.logger.error(`[${this.getUserInfo.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -81,107 +81,119 @@ export class MypageController {
     description: '성공',
   })
   @ApiInternalServerErrorResponse({
-	description: '서버 에러'
+    description: '서버 에러',
   })
   @Patch()
   async patchUserInfo(
     @Req() req,
     @Body() body: UpdateUserInfoDto,
-	@Res() res: Response,
+    @Res() res: Response,
   ) {
-	try {
-		const result = await this.mypageRepository.patchUserInfo(req.user.id, body);
-		res.status(200).send();
-	} catch (error) {
-		this.mypageService.errorHandler(error, res, this.logger, this.patchUserInfo.name);
-  }
-}
-
-@ApiOperation({
-	summary: 'follow 목록 가져오기',
-    description:
-	'해당 유저가 follow하고 있는 id 배열 반환',
-})
-@ApiOkResponse({
-  description: '성공',
-  type: FollowsDto,
-})
-@ApiInternalServerErrorResponse({
-	description: '서버 에러'
-  })
-  @Get('/follows')
-  async getFollows(@Req() req, @Res() res: Response) {
-	try {
-		const follows_db_result = await this.mypageRepository.getFollows(req.user.id);
-		const follows: FollowsDto = { follow: [] };
-		for (const follow_id of follows_db_result) {
-		  this.logger.debug(`follow_id: ${follow_id['partner_id']}`);
-		  follows.follow.push(follow_id['partner_id'] as string);
-		}
-		res.status(200).send(follows);
-	} catch (error) {
-		this.mypageService.errorHandler(error, res, this.logger, this.getFollows.name);
-	}
+    try {
+      this.mypageService.printObject('UpdateUserInfo', body, this.logger);
+      await this.mypageRepository.patchUserInfo(req.user.id, body);
+      res.status(200).send();
+    } catch (error) {
+      this.logger.error(`[${this.patchUserInfo.name}] ${error}`);
+      throw error;
+    }
   }
 
   @ApiOperation({
-	summary: '게임 전적 기록 가져오기',
-	description:
-	  '해당 유저의 게임 전적 기록 가져오기',
+    summary: 'follow 목록 가져오기',
+    description: '해당 유저가 follow하고 있는 id 배열 반환',
+  })
+  @ApiOkResponse({
+    description: '성공',
+    type: FollowsDto,
+  })
+  @ApiInternalServerErrorResponse({
+    description: '서버 에러',
+  })
+  @Get('/follows')
+  async getFollows(@Req() req, @Res() res: Response) {
+    try {
+      const followsDB = await this.mypageRepository.getFollows(req.user.id);
+      const follows: FollowsDto = { follow: [] };
+      for (const element of followsDB) {
+        follows.follow.push(element['partner_id'] as string);
+      }
+      this.mypageService.printStringArray(
+        'follows',
+        follows.follow,
+        this.logger,
+      );
+      res.status(200).send(follows);
+    } catch (error) {
+      this.logger.error(`[${this.getFollows.name}] ${error}`);
+      throw error;
+    }
+  }
+
+  @ApiOperation({
+    summary: '게임 전적 기록 가져오기',
+    description: '해당 유저의 게임 전적 기록 가져오기',
   })
   @ApiOkResponse({
     description: '성공',
     type: GameHistoryDto,
   })
   @ApiInternalServerErrorResponse({
-	description: '서버 에러'
+    description: '서버 에러',
   })
   @Get('/gameHistory')
   async getGameHistory(@Req() req, @Res() res: Response) {
-	  try {
-		  const result = await this.mypageRepository.getGameHistory(req.user.id);
-		  const gameHistory: GameHistoryDto = {
-			  gameHistory: [],
-		  }
-		  for (const oneGameHistory_db_result of result){
-			  const oneGameHistory: OneGameHistoryDto = {
-				  winner: oneGameHistory_db_result['winner_id'],
-				  loser: oneGameHistory_db_result['loser_id'],
-			  }
-			  this.logger.debug(`winner: ${oneGameHistory.winner}, loser: ${oneGameHistory.loser}`);
-			  gameHistory.gameHistory.push(oneGameHistory);
-		  }
-		  res.status(200).send(gameHistory);
-	} catch (error) {
-		this.mypageService.errorHandler(error, res, this.logger, this.getGameHistory.name);
-	}
+    try {
+      const gameHistoryDB = await this.mypageRepository.getGameHistory(
+        req.user.id,
+      );
+      const gameHistory: GameHistoryDto = {
+        gameHistory: [],
+      };
+      for (const element of gameHistoryDB) {
+        const oneGameHistory: OneGameHistoryDto = {
+          winner: element['winner_id'],
+          loser: element['loser_id'],
+        };
+        this.logger.debug(
+          `winner: ${oneGameHistory.winner}, loser: ${oneGameHistory.loser}`,
+        );
+        gameHistory.gameHistory.push(oneGameHistory);
+      }
+      res.status(200).send(gameHistory);
+    } catch (error) {
+      this.logger.error(`[${this.getGameHistory.name}] ${error}`);
+      throw error;
+    }
   }
 
   @ApiOperation({
-	summary: '게임 승패 수 가져오기',
-	description:
-	  '해당 유저의 게임 승 수, 패 수 가져오기',
+    summary: '게임 승패 수 가져오기',
+    description: '해당 유저의 게임 승 수, 패 수 가져오기',
   })
   @ApiOkResponse({
     description: '성공',
     type: GameStatDto,
   })
   @ApiInternalServerErrorResponse({
-	description: '서버 에러'
+    description: '서버 에러',
   })
   @Get('/gameStat')
   async getGameStat(@Req() req, @Res() res: Response) {
-	try {
-		const winHistory = await this.mypageRepository.getWinHistory(req.user.id);
-		const loseHistory = await this.mypageRepository.getLoseHistory(req.user.id);
-		const gameStat: GameStatDto = {
-		  wins: winHistory.length,
-		  loses: loseHistory.length,
-		};
-		res.status(200).send(gameStat);
-
-	} catch (error) {
-		this.mypageService.errorHandler(error, res, this.logger, this.getGameStat.name);
-	}
+    try {
+      const winHistory = await this.mypageRepository.getWinHistory(req.user.id);
+      const loseHistory = await this.mypageRepository.getLoseHistory(
+        req.user.id,
+      );
+      const gameStat: GameStatDto = {
+        wins: winHistory.length,
+        loses: loseHistory.length,
+      };
+      this.mypageService.printObject('gameStat', gameStat, this.logger);
+      res.status(200).send(gameStat);
+    } catch (error) {
+      this.logger.error(`[${this.getGameStat.name}] ${error}`);
+      throw error;
+    }
   }
 }
