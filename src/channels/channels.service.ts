@@ -14,11 +14,13 @@ export class ChannelsService {
   private readonly logger: Logger = new Logger(ChannelsService.name);
 
   // Description: 채널 생성
-  async createChannel(
+  async createChannelAndReturnChannelId(
     user_id: string,
     channel_name: string,
     channel_pw: string,
   ) {
+    this.logger.log(`Function: ${this.createChannelAndReturnChannelId.name}`);
+
     // TODO: dto 추가
     if (channel_name === '') {
       this.logger.error('유효하지 않은 채널 이름입니다.');
@@ -35,35 +37,25 @@ export class ChannelsService {
       channel_pw = await bcrypt.hash(channel_pw, salt);
     }
 
-    // Description: 채널 생성
     try {
-      await this.channelsRepository.inserNameAndPwIntoChannel(
-        channel_name,
-        channel_pw,
-      );
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
-    }
+      // Description: 채널 생성
+      await this.channelsRepository.insertChannel(channel_name, channel_pw);
+      this.logger.log('channel 생성');
 
-    try {
       // Description: 생성된 채널 id 가져오기
       const channel_id =
         await this.channelsRepository.getChannelIdByChannelName(channel_name);
-      this.logger.log(
-        `생성된 채널 id를 가져오는데 성공했습니다: ${channel_id}`,
-      );
+      this.logger.log(`생성된 채널 id: ${channel_id}`);
+
       // Description: channel_member 테이블에 추가
       await this.channelsRepository.insertOwnerToChannelMember(
         user_id,
         channel_id,
       );
-      this.logger.log('channel_member 테이블에 추가했습니다.');
-      return {
-        id: channel_id,
-      };
+      this.logger.log('channel_member 테이블에 추가');
+
+      return channel_id;
     } catch (error) {
-      this.logger.error(error);
       throw new InternalServerErrorException();
     }
   }

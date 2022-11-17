@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
@@ -8,7 +12,7 @@ export class ChannelsRepository {
   private readonly logger = new Logger(ChannelsRepository.name);
 
   // Description: 채널 생성
-  async inserNameAndPwIntoChannel(channel_name, channel_pw): Promise<void> {
+  async insertChannel(channel_name: string, channel_pw: string): Promise<void> {
     try {
       await this.databaseService.runQuery(
         `
@@ -17,7 +21,8 @@ export class ChannelsRepository {
         `,
       );
     } catch (error) {
-      throw `[createChannel] ${error}`;
+      this.logger.error(`[${this.insertChannel.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -30,11 +35,10 @@ export class ChannelsRepository {
         WHERE name='${channel_name}';
         `,
       );
-      const channelId = databaseResponse[0].id;
-      this.logger.debug(`channel_id: ${channelId}`);
-      return channelId;
+      return databaseResponse[0].id;
     } catch (error) {
-      throw `getChannelIdByChannelName: ${error}`;
+      this.logger.error(`[${this.getChannelIdByChannelName.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -49,21 +53,23 @@ export class ChannelsRepository {
       );
       return databaseResponse[0].name;
     } catch (error) {
-      throw `getChannelNameByChannelId: ${error}`;
+      this.logger.error(`[${this.getChannelNameByChannelId.name}] ${error}`);
+      throw error;
     }
   }
 
-  // Description: 유저 ID를 통해 참가 중인 채널 목록 가져오기
-  async getJoinedChannelListByUserId(user_id: string): Promise<Object[]> {
+  // Description: 유저 ID를 통해 참가 중인 채널 아이디 목록 가져오기
+  async getJoinedChannelIdListByUserId(user_id: string): Promise<Object[]> {
     try {
       let channelIdAndNameList = [];
       const channelIdList = await this.databaseService.runQuery(
         `
         SELECT channel_id FROM "channel_member"
-        WHERE id='${user_id}';
+        WHERE user_id='${user_id}';
         `,
       );
 
+      // TODO: 수정. Service로 빼기
       for (const channelObject of channelIdList) {
         const channelName = await this.getChannelNameByChannelId(
           channelObject.channel_id,
@@ -75,7 +81,8 @@ export class ChannelsRepository {
       }
       return channelIdAndNameList;
     } catch (error) {
-      throw `getJoinedChannelList: ${error}`;
+      this.logger.error(`[getJoinedChannelListByUserId] ${error}`);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -85,14 +92,15 @@ export class ChannelsRepository {
     channel_id: number,
   ): Promise<void> {
     try {
-      const databaseResponse = this.databaseService.runQuery(
+      await this.databaseService.runQuery(
         `
-        INSERT INTO "channel_member" (id, channel_id, ban_status, authority)
+        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
         VALUES ('${user_id}', '${channel_id}', 'false', '1');
         `,
       );
     } catch (error) {
-      throw `insertOwnerChannelMember: ${error}`;
+      this.logger.error(`insertOwnerToChannelMember: ${error}`);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -102,9 +110,9 @@ export class ChannelsRepository {
     channel_id: number,
   ): Promise<void> {
     try {
-      const databaseResponse = this.databaseService.runQuery(
+      await this.databaseService.runQuery(
         `
-        INSERT INTO "channel_member" (id, channel_id, ban_status, authority)
+        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
         VALUES ('${user_id}', '${channel_id}', 'false', '3');
         `,
       );
@@ -134,7 +142,7 @@ export class ChannelsRepository {
       const databaseResponse = await this.databaseService.runQuery(
         `
         SELECT channel_id FROM "channel_member"
-        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
       if (databaseResponse.length === 0) {
@@ -152,7 +160,8 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT channel_id, ban_status FROM "channel_member" WHERE id='${user_id}'
+        SELECT channel_id, ban_status FROM "channel_member"
+        WHERE user_id='${user_id}';
         `,
       );
       for (const channelObject of databaseResponse) {
@@ -252,7 +261,7 @@ export class ChannelsRepository {
       const databaseResponse = await this.databaseService.runQuery(
         `
         SELECT authority FROM "channel_member"
-        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
       if (databaseResponse.length === 0) {
@@ -264,7 +273,7 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
         DELETE FROM "channel_member"
-        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
 

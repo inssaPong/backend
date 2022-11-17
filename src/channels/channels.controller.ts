@@ -63,67 +63,20 @@ export class ChannelsController {
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
     this.logger.log('POST /channels/create');
+
     try {
-      const user_id = req.user.id;
-      const channel_name = body.name;
-      const channel_pw = body.pw;
-      const channelId = this.channelsService.createChannel(
-        user_id,
-        channel_name,
-        channel_pw,
-      );
-      res.status(201).send(channelId);
+      const channel_id =
+        await this.channelsService.createChannelAndReturnChannelId(
+          req.user.id,
+          body.name,
+          body.pw,
+        );
+      res.status(201).send({
+        id: channel_id,
+      });
     } catch (exception) {
       throw exception;
     }
-    // if (body.name === '') {
-    //   this.logger.error('유효하지 않은 채널 이름입니다.');
-    //   throw new BadRequestException();
-    // }
-    // if (body.pw.length !== 0 && body.pw.length !== 4) {
-    //   this.logger.error('유효하지 않은 채널 비밀번호입니다.');
-    //   throw new BadRequestException();
-    // }
-    // let channel = {
-    //   name: body.name, // TODO: 구현. dto를 통한 유효성사검사
-    //   pw: body.pw,
-    // };
-
-    // // Description: 비밀번호 암호화
-    // if (channel.pw.length === 4) {
-    //   const salt = await bcrypt.genSalt();
-    //   channel.pw = await bcrypt.hash(channel.pw, salt);
-    // }
-    // // 비교 방법: const isMatch = await bcrypt.compare(password, hash);
-
-    // // Description: 채널 생성
-    // try {
-    //   await this.channelsRepository.createChannel(channel);
-    // } catch (error) {
-    //   this.logger.error(error);
-    //   throw new InternalServerErrorException();
-    // }
-
-    // try {
-    //   // Description: 생성된 채널 id 가져오기
-    //   const channelId = await this.channelsRepository.getChannelIdByChannelName(
-    //     channel.name,
-    //   );
-    //   this.logger.log(`생성된 채널 id를 가져오는데 성공했습니다: ${channelId}`);
-    //   // Description: channel_member 테이블에 추가
-    //   const userId: string = req.user.id;
-    //   await this.channelsRepository.insertOwnerToChannelMember(
-    //     userId,
-    //     channelId,
-    //   );
-    //   this.logger.log('channel_member 테이블에 추가했습니다.');
-    //   res.status(201).send({
-    //     id: channelId,
-    //   });
-    // } catch (error) {
-    //   this.logger.error(error);
-    //   throw new InternalServerErrorException();
-    // }
   }
 
   // 참여할 수 있는 채널 목록 받기
@@ -170,7 +123,7 @@ export class ChannelsController {
     let joinedChannelList: Object[];
     try {
       joinedChannelList =
-        await this.channelsRepository.getJoinedChannelListByUserId(userId);
+        await this.channelsRepository.getJoinedChannelIdListByUserId(userId);
       this.logger.log('참여 중인 채널 목록을 가져옵니다.');
       res.status(200).send(joinedChannelList);
     } catch (error) {
