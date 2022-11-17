@@ -60,7 +60,7 @@ export class ChannelsRepository {
       const channelIdList = await this.databaseService.runQuery(
         `
         SELECT channel_id FROM "channel_member"
-        WHERE id='${user_id}';
+        WHERE user_id='${user_id}';
         `,
       );
 
@@ -87,8 +87,8 @@ export class ChannelsRepository {
     try {
       const databaseResponse = this.databaseService.runQuery(
         `
-        INSERT INTO "channel_member" (id, channel_id, ban_status, mute_status, authority)
-        VALUES ('${user_id}', '${channel_id}', 'false', 'false', '1');
+        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
+        VALUES ('${user_id}', '${channel_id}', 'false', '1');
         `,
       );
     } catch (error) {
@@ -117,7 +117,7 @@ export class ChannelsRepository {
       const databaseResponse = await this.databaseService.runQuery(
         `
         SELECT channel_id FROM "channel_member"
-        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
       if (databaseResponse.length === 0) {
@@ -170,7 +170,7 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT id FROM "channel_member"
+        SELECT user_id FROM "channel_member"
         WHERE channel_id='${channel_id}';
         `,
       );
@@ -187,7 +187,7 @@ export class ChannelsRepository {
       const databaseResponse = await this.databaseService.runQuery(
         `
         SELECT authority FROM "channel_member"
-        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
       if (databaseResponse.length === 0) {
@@ -199,7 +199,7 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
         DELETE FROM "channel_member"
-        WHERE id='${user_id}' AND channel_id='${channel_id}';
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
 
