@@ -162,7 +162,7 @@ export class UsersController {
       await this.usersService.checkUserExist(userExist);
       const userInfoDB = await this.usersRepository.getUserInfo(target_id);
       const followStatusDB = await this.usersRepository.getFollowStatus(
-        req.user.username,
+        req.user.id,
         target_id,
       );
       if (userInfoDB[0][`avatar`] == null)
