@@ -21,13 +21,13 @@ export class GameGateway {
   @SubscribeMessage('game/invite')
   gameInvite(client: Socket, data: string) {
     const req = JSON.parse(data);
-    this.enterInvitePlayerQueue(client);
+    // this.enterInvitePlayerQueue(client);
     const partner = this.mainGateway.users.find(
-      (user) => user.id == req.partenr_id,
+      (user) => user.id == req.partner_id,
     );
     if (partner == undefined) {
       this.logger.log(
-        `[gameInvite] : ${req.partenr_id} 이런 일은 있을 수 없음.`,
+        `[gameInvite] : ${req.partner_id} 이런 일은 있을 수 없음.`,
       );
       return;
     }
@@ -42,14 +42,14 @@ export class GameGateway {
   gameAcceptedInvite(client: Socket, data: string) {
     const req = JSON.parse(data);
     const player = this.mainGateway.users.find(
-      (user) => user.id == req.partenr_id,
+      (user) => user.id == req.user_id,
     );
     const partner = this.mainGateway.users.find(
-      (user) => user.id == req.partenr_id,
+      (user) => user.id == req.partner_id,
     );
     if (player == undefined) {
       this.logger.log(
-        `[gameInvite] : ${req.partenr_id} 이런 일은 있을 수 없음.`,
+        `[gameInvite] : ${req.partner_id} 이런 일은 있을 수 없음.`,
       );
       return;
     }
@@ -59,7 +59,7 @@ export class GameGateway {
     }
     if (partner == undefined) {
       this.logger.log(
-        `[gameInvite] : ${req.partenr_id} 이런 일은 있을 수 없음.`,
+        `[gameInvite] : ${req.partner_id} 이런 일은 있을 수 없음.`,
       );
       return;
     }
@@ -170,8 +170,6 @@ export class GameGateway {
     this.mainGateway.enterPlayer.splice(0, 2);
     p1.gameInfo.init(p1.id, p2.id, room_id);
     p2.gameInfo.init(p1.id, p2.id, room_id);
-    p1.socket.join(room_id);
-    p2.socket.join(room_id);
     p1.setStatusGaming();
     p2.setStatusGaming();
     return { p1, p2 };
@@ -183,6 +181,8 @@ export class GameGateway {
     gameRoom.room_id = room_id;
     gameRoom.p1_id = p1.id;
     gameRoom.p2_id = p2.id;
+    p1.socket.join(room_id);
+    p2.socket.join(room_id);
     this.gameRooms.push(gameRoom);
     this.mainGateway.server.to(room_id).emit('game/start', p1.id, p2.id);
     this.mainGateway.server
