@@ -17,6 +17,7 @@ export class ChannelsRepository {
 
   // Description: 채널 생성
   async insertChannel(channel_name: string, channel_pw: string): Promise<void> {
+    this.logger.log(`[${this.insertChannel.name}]`);
     try {
       await this.databaseService.runQuery(
         `
@@ -25,15 +26,14 @@ export class ChannelsRepository {
         `,
       );
     } catch (error) {
-      this.logger.error(
-        `[${this.insertChannel.name}] ${error} in "${error.table}" table`,
-      );
-      throw error;
+      this.logger.error(`${error} in "${error.table}" table`);
+      throw new InternalServerErrorException();
     }
   }
 
   // Description: 채널 이름을 통해 채널 ID를 가져오기
   async getChannelIdByChannelName(channel_name: string): Promise<number> {
+    this.logger.log(`[${this.getChannelIdByChannelName.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -43,13 +43,14 @@ export class ChannelsRepository {
       );
       return databaseResponse[0].id;
     } catch (error) {
-      this.logger.error(`[${this.getChannelIdByChannelName.name}] ${error}`);
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
   // Description: 채널 ID를 통해 채널 이름을 가져오기
   async getChannelNameByChannelId(channel_id: number): Promise<string> {
+    this.logger.log(`[${this.getChannelNameByChannelId.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -59,8 +60,8 @@ export class ChannelsRepository {
       );
       return databaseResponse[0].name;
     } catch (error) {
-      this.logger.error(`[${this.getChannelNameByChannelId.name}] ${error}`);
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -69,6 +70,7 @@ export class ChannelsRepository {
     user_id: string,
     channel_id: number,
   ): Promise<void> {
+    this.logger.log(`[${this.insertOwnerToChannelMember.name}]`);
     try {
       await this.databaseService.runQuery(
         `
@@ -77,8 +79,8 @@ export class ChannelsRepository {
         `,
       );
     } catch (error) {
-      this.logger.error(`[${this.insertOwnerToChannelMember.name}] ${error}`);
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -88,6 +90,7 @@ export class ChannelsRepository {
     channel_id: number,
   ): Promise<void> {
     try {
+      this.logger.log(`[${this.insertGuestToChannelMember.name}]`);
       await this.databaseService.runQuery(
         `
         INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
@@ -95,13 +98,14 @@ export class ChannelsRepository {
         `,
       );
     } catch (error) {
-      this.logger.error(`${this.insertGuestToChannelMember.name}] ${error}`);
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
   // Description: 전체 채널 목록 가져오기
   async getAllChannelListIncludePrivate(): Promise<ChannelTableDto[]> {
+    this.logger.log(`[${this.getAllChannelListIncludePrivate.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -110,15 +114,14 @@ export class ChannelsRepository {
       );
       return databaseResponse;
     } catch (error) {
-      this.logger.error(
-        `[${this.getAllChannelListIncludePrivate.name}] ${error}`,
-      );
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
   // Description: 참여 중인 채널인지 확인
   async isJoinedChannel(user_id: string, channel_id: number): Promise<boolean> {
+    this.logger.log(`[${this.isJoinedChannel.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -128,8 +131,8 @@ export class ChannelsRepository {
       );
       return databaseResponse.length === 0 ? false : true;
     } catch (error) {
-      this.logger.error(`[${this.isJoinedChannel.name}] ${error}`);
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
@@ -137,6 +140,9 @@ export class ChannelsRepository {
   async getJoinedChannelIdListByUserId(
     user_id: string,
   ): Promise<ChannelMemberTableDto[]> {
+    this.logger.log(
+      `Repository: [${this.getJoinedChannelIdListByUserId.name}]`,
+    );
     try {
       const databaseResopnse = await this.databaseService.runQuery(
         `
@@ -146,63 +152,50 @@ export class ChannelsRepository {
       );
       return databaseResopnse;
     } catch (error) {
-      this.logger.error(
-        `[${this.getJoinedChannelIdListByUserId.name}] ${error}`,
-      );
-      throw error;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
   // Description: 접근하려는 채널의 밴 여부 확인
   async isBannedChannel(user_id: string, channel_id: number): Promise<boolean> {
-    // 1. 밴 여부 확인
+    this.logger.log(`[${this.isBannedChannel.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT channel_id, ban_status FROM "channel_member"
-        WHERE user_id='${user_id}';
+        SELECT ban_status FROM "channel_member"
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
       );
-      for (const channelObject of databaseResponse) {
-        if (channelObject.channel_id === channel_id) {
-          const isBanned = channelObject.ban_status;
-          if (isBanned === true) {
-            return true;
-          }
-        }
+      if (databaseResponse.length === 0) {
+        return false;
       }
-      return false;
+      return databaseResponse[0].ban_status;
     } catch (error) {
-      throw `isBannedChannel: ${error}`;
+      this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
-  // Description: 접근하려고 하는 채널의 비밀번호가 맞는지
-  async isValidPasswordForChannel(
-    channel_id: number,
-    input_password: string,
-  ): Promise<boolean> {
+  // TODO: 의논. 이걸 만드는게 맞을까?
+  // Description: 채널 비밀번호 반환.
+  async getChannelPassword(channel_id: number): Promise<string> {
+    this.logger.log(`[${this.getChannelPassword.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
         SELECT password FROM "channel" WHERE id='${channel_id}'
         `,
       );
-      if (databaseResponse.length === 0) {
-        return false;
-      }
-      const channelPassword = databaseResponse[0].password;
-      if (channelPassword === input_password) {
-        // TODO: 수정. 암호화 해서 비교하기 bcrypt 모듈 사용
-        return true;
-      }
-      return false;
+      return databaseResponse[0].password;
     } catch (error) {
-      throw `isValidPasswordForChannel: ${error}`;
+      this.logger.error(error);
+      throw error;
     }
   }
 
-  async getUsersIdInChannelMember(channel_id: number): Promise<Object[]> {
+  async getUserIdListInChannelMember(channel_id: number): Promise<Object[]> {
+    this.logger.log(`[${this.getUserIdListInChannelMember.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -212,7 +205,7 @@ export class ChannelsRepository {
       );
       return databaseResponse;
     } catch (error) {
-      throw `getUsersStatusInJoinedChannel: ${error}`;
+      this.logger.error(error);
     }
   }
 

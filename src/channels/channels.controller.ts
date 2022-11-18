@@ -10,6 +10,7 @@ import {
   Query,
   InternalServerErrorException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -147,49 +148,11 @@ export class ChannelsController {
     @Body() body,
   ) {
     this.logger.log('POST /channels/enter');
-    const userId: string = req.user.id;
-    const channelId: number = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
-    const inputPassword: string = body.pw;
-
-    // Description: 밴 여뷰 확인
     try {
-      const isBanned = await this.channelsRepository.isBannedChannel(
-        userId,
-        channelId,
-      );
-      if (isBanned === true) {
-        return res.status(204).send();
-      }
-    } catch (error) {
-      this.logger.error(error);
-      return res.status(500).send();
-    }
-
-    // Description: 유효한 비밀번호인지?
-    try {
-      const isValidPassword =
-        await this.channelsRepository.isValidPasswordForChannel(
-          channelId,
-          inputPassword,
-        );
-      if (isValidPassword === false) {
-        return res.status(403).send();
-      }
-    } catch (error) {
-      this.logger.error(error);
-      return res.status(500).send();
-    }
-
-    // Description: DB channel_member 테이블에 추가
-    try {
-      await this.channelsRepository.insertGuestToChannelMember(
-        userId,
-        channelId,
-      );
+      await this.channelsService.enterChannel(req.user.id, channel_id, body.pw);
       res.status(201).send();
-    } catch (error) {
-      this.logger.error(error);
-      return res.status(500).send();
+    } catch (exception) {
+      throw exception;
     }
   }
 
@@ -232,9 +195,8 @@ export class ChannelsController {
   ) {
     this.logger.log('GET /channels/room/users');
     try {
-      const usersId = await this.channelsRepository.getUsersIdInChannelMember(
-        channel_id,
-      );
+      const usersId =
+        await this.channelsRepository.getUserIdListInChannelMember(channel_id);
       res.status(200).send(usersId);
     } catch (error) {
       this.logger.error(error);

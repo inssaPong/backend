@@ -1,5 +1,8 @@
 import {
   BadRequestException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -19,8 +22,6 @@ export class ChannelsService {
     channel_name: string,
     channel_pw: string,
   ): Promise<number> {
-    this.logger.log(`Function: ${this.createChannelAndReturnChannelId.name}`);
-
     // TODO: dto 추가
     if (channel_name === '') {
       this.logger.error(
@@ -60,8 +61,8 @@ export class ChannelsService {
       this.logger.log('channel_member 테이블에 추가');
 
       return channelId;
-    } catch (error) {
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
     }
   }
 
@@ -95,8 +96,8 @@ export class ChannelsService {
         `참여할 수 있는 ${availableChannelList.length} 개의 채널 목록을 가져옵니다: `,
       );
       return availableChannelList;
-    } catch (error) {
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
     }
   }
 
@@ -120,8 +121,45 @@ export class ChannelsService {
       }
       this.logger.log('참여 중인 채널 목록을 가져옵니다.');
       return channelIdAndNameList;
-    } catch (error) {
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
+    }
+  }
+
+  async enterChannel(user_id: string, channel_id: number, input_pw: string) {
+    try {
+      // Description: 밴 여부 확인
+      const isBanned = await this.channelsRepository.isBannedChannel(
+        user_id,
+        channel_id,
+      );
+      if (isBanned) {
+        throw new HttpException(
+          {
+            status: HttpStatus.NO_CONTENT,
+            error: 'No Conent',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      // Description: 입력 받은 비밀번호 유효성 검사
+      const channel_pw = await this.channelsRepository.getChannelPassword(
+        channel_id,
+      );
+      const isValidPw = await bcrypt.compare(input_pw, channel_pw);
+      if (isValidPw === false) {
+        this.logger.error('잘못된 채널 비밀번호입니다.');
+        throw new ForbiddenException();
+      }
+
+      // Description: DB channel_member 테이블에 추가
+      await this.channelsRepository.insertGuestToChannelMember(
+        user_id,
+        channel_id,
+      );
+    } catch (exception) {
+      throw exception;
     }
   }
 }
