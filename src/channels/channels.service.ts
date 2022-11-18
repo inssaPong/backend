@@ -23,11 +23,15 @@ export class ChannelsService {
 
     // TODO: dto 추가
     if (channel_name === '') {
-      this.logger.error('유효하지 않은 채널 이름입니다.');
+      this.logger.error(
+        `유효하지 않은 채널 이름입니다. 입력된 채널 이름: ${channel_name}`,
+      );
       throw new BadRequestException();
     }
     if (channel_pw.length !== 0 && channel_pw.length !== 4) {
-      this.logger.error('유효하지 않은 채널 비밀번호입니다.');
+      this.logger.error(
+        `유효하지 않은 채널 비밀번호입니다. 입력된 채널 비밀번호: ${channel_pw}`,
+      );
       throw new BadRequestException();
     }
 

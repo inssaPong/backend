@@ -55,10 +55,10 @@ export class ChannelsController {
     type: ResponseChannelIdDto,
   })
   @ApiBadRequestResponse({
-    description: '[400 Bad Request] 유효하지 않은 값이 들어와서 채널 생성 실패',
+    description: '[400 Bad Request] 유효하지 않은 값으로 요청 시',
   })
   @ApiInternalServerErrorResponse({
-    description: '[500 Internal Server Error] DB에서 채널 생성 실패',
+    description: '[500 Internal Server Error] DB 문제',
   })
   @Post('/create')
   async createChannel(@Req() req, @Res() res, @Body() body) {
@@ -152,6 +152,7 @@ export class ChannelsController {
     @Res() res,
     @Body() body,
   ) {
+    this.logger.log('POST /channels/enter');
     const userId: string = req.user.id;
     const channelId: number = Number(channel_id); // TODO: 수정. dto를 이용해서 number로 변환
     const inputPassword: string = body.pw;

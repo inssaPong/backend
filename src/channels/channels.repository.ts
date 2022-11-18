@@ -21,7 +21,9 @@ export class ChannelsRepository {
         `,
       );
     } catch (error) {
-      this.logger.error(`[${this.insertChannel.name}] ${error}`);
+      this.logger.error(
+        `[${this.insertChannel.name}] ${error} in "${error.table}" table`,
+      );
       throw error;
     }
   }
