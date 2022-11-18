@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { property } from 'lodash';
 import { DatabaseService } from 'src/database/database.service';
-import { GameStatDto } from './dto/create-mypage.dto';
 import { UpdateUserInfoDto } from './dto/update-mypage.dto';
 
 @Injectable()
