@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
 import { GameComponent } from 'src/games/game.component';
 
-export const UserStatus = {
+export const USERSTATUS = {
   online: 0,
   offline: 1,
   gaming: 2,
@@ -10,7 +10,7 @@ export const UserStatus = {
 export class UserInfo {
   constructor() {
     this.id = '';
-    this.status = UserStatus.offline;
+    this.status = USERSTATUS.offline;
   }
   socket: Socket;
   id: string;
@@ -18,12 +18,12 @@ export class UserInfo {
   gameInfo: GameComponent = new GameComponent();
 
   setStatusOnline() {
-    this.status = UserStatus.online;
+    this.status = USERSTATUS.online;
   }
   setStatusGaming() {
-    this.status = UserStatus.gaming;
+    this.status = USERSTATUS.gaming;
   }
   setStatusOffline() {
-    this.status = UserStatus.offline;
+    this.status = USERSTATUS.offline;
   }
 }
