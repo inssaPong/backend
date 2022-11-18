@@ -55,6 +55,8 @@ export class MypageController {
     try {
       const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
       if (userInfoDB.length <= 0) throw new NotFoundException();
+      if (userInfoDB[0][`avatar`] == null)
+        userInfoDB[0][`avatar`] = this.mypageService.getDefaultImage();
       const userinfo: UserInfoDto = {
         id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],

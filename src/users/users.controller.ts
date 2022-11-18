@@ -165,6 +165,8 @@ export class UsersController {
         req.user.username,
         target_id,
       );
+      if (userInfoDB[0][`avatar`] == null)
+        userInfoDB[0][`avatar`] = this.usersService.getDefaultImage();
       let userInfo: UserInfoDto;
       if (followStatusDB.length == 0) {
         userInfo = new UserInfoDto(
