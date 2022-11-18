@@ -25,21 +25,66 @@ export class MypageRepository {
     }
   }
 
-  async patchUserInfo(id: string, body: UpdateUserInfoDto) {
+  async updateNickname(id: string, nickname: string) {
     try {
-      for (let [key, value] of Object.entries(body)) {
-        if (key != 'id')
-          await this.databaseService.runQuery(
-            `
+      await this.databaseService.runQuery(
+        `
 			UPDATE "user"
-			SET ${key} = '${value}'
+			SET nickname = '${nickname}'
 			WHERE id='${id}';
 			`,
-          );
-      }
+      );
       return 200;
     } catch (error) {
-      this.logger.error(`patchUserInfo: ${error}`);
+      this.logger.error(`updateNickname: ${error}`);
+      throw error;
+    }
+  }
+
+  async updateAvatar(id: string, avatar: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+			UPDATE "user"
+			SET avatar = '${avatar}'
+			WHERE id='${id}';
+			`,
+      );
+      return 200;
+    } catch (error) {
+      this.logger.error(`updateAvatar: ${error}`);
+      throw error;
+    }
+  }
+
+  async deleteAvatar(id: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+			UPDATE "user"
+			SET avatar = null
+			WHERE id='${id}';
+			`,
+      );
+      return 200;
+    } catch (error) {
+      this.logger.error(`deleteAvatar: ${error}`);
+      throw error;
+    }
+  }
+
+  async updateTwofactor(id: string, twofactor: boolean) {
+    try {
+      await this.databaseService.runQuery(
+        `
+		UPDATE "user"
+		SET twofactor_status = ${twofactor}
+		WHERE id='${id}';
+		`,
+      );
+      return 200;
+    } catch (error) {
+      this.logger.error(`updateTwofactor: ${error}`);
       throw error;
     }
   }
