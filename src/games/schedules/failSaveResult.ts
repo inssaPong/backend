@@ -5,5 +5,16 @@ export default function failSaveResult(
   gameRoom: GameRoomComponent,
   gameGateway: GameGateway,
 ) {
-  gameGateway.mainGateway.server.to(gameRoom.room_id).emit('game/failSave');
+  const p1 = gameGateway.mainGateway.users.find(
+    (user) => user.id == gameRoom.p1_id,
+  );
+  if (p1 != undefined) {
+    p1.socket.emit('DBError');
+  }
+  const p2 = gameGateway.mainGateway.users.find(
+    (user) => user.id == gameRoom.p2_id,
+  );
+  if (p2 != undefined) {
+    p2.socket.emit('DBError');
+  }
 }
