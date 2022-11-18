@@ -63,4 +63,39 @@ export class ChannelsService {
       throw new InternalServerErrorException();
     }
   }
+
+  // TODO: 수정. dto
+  async GetAvailableChannelList(user_id: string): Promise<Object[]> {
+    try {
+      const allChannelList =
+        await this.channelsRepository.getAllChannelListIncludePrivate();
+      if (allChannelList.length === 0) {
+        this.logger.log('한 개의 채널도 존재하지 않습니다.');
+        return [];
+      }
+
+      let availableChannelList = [];
+      for (const channel of allChannelList) {
+        const isJoinedChannel = await this.channelsRepository.isJoinedChannel(
+          user_id,
+          channel.id,
+        );
+        if (isJoinedChannel) {
+          continue;
+        }
+        const hasPassword = channel.password ? true : false;
+        availableChannelList.push({
+          id: channel.id,
+          name: channel.name,
+          has_password: hasPassword,
+        });
+      }
+      this.logger.log(
+        `참여할 수 있는 ${availableChannelList.length} 개의 채널 목록을 가져옵니다: `,
+      );
+      return availableChannelList;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
 }

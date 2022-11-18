@@ -4,6 +4,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
+import {
+  ChannelMemberTableDto,
+  ChannelTableDto,
+} from './dto/repository-channels.dto';
 
 @Injectable()
 export class ChannelsRepository {
@@ -60,6 +64,73 @@ export class ChannelsRepository {
     }
   }
 
+  // Description: 채널 멤버에 추가 (Owner)
+  async insertOwnerToChannelMember(
+    user_id: string,
+    channel_id: number,
+  ): Promise<void> {
+    try {
+      await this.databaseService.runQuery(
+        `
+        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
+        VALUES ('${user_id}', '${channel_id}', 'false', '1');
+        `,
+      );
+    } catch (error) {
+      this.logger.error(`insertOwnerToChannelMember: ${error}`);
+      throw error;
+    }
+  }
+
+  // Description: 채널 멤버에 추가 (Owner)
+  async insertGuestToChannelMember(
+    user_id: string,
+    channel_id: number,
+  ): Promise<void> {
+    try {
+      await this.databaseService.runQuery(
+        `
+        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
+        VALUES ('${user_id}', '${channel_id}', 'false', '3');
+        `,
+      );
+    } catch (error) {
+      this.logger.error(`insertGuestChannelMember: ${error}`);
+      throw error;
+    }
+  }
+
+  // Description: 전체 채널 목록 가져오기
+  async getAllChannelListIncludePrivate(): Promise<ChannelTableDto[]> {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT id, name, password FROM "channel";
+        `,
+      );
+      return databaseResponse;
+    } catch (error) {
+      this.logger.error(`getAllChannelList: ${error}`);
+      throw error;
+    }
+  }
+
+  // Description: 참여 중인 채널인지 확인
+  async isJoinedChannel(user_id: string, channel_id: number): Promise<boolean> {
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT channel_id FROM "channel_member"
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
+        `,
+      );
+      return databaseResponse.length === 0 ? false : true;
+    } catch (error) {
+      this.logger.error(`isJoinedChannel: ${error}`);
+      throw error;
+    }
+  }
+
   // Description: 유저 ID를 통해 참가 중인 채널 아이디 목록 가져오기
   async getJoinedChannelIdListByUserId(user_id: string): Promise<Object[]> {
     try {
@@ -84,75 +155,7 @@ export class ChannelsRepository {
       return channelIdAndNameList;
     } catch (error) {
       this.logger.error(`[getJoinedChannelListByUserId] ${error}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  // Description: 채널 멤버에 추가 (Owner)
-  async insertOwnerToChannelMember(
-    user_id: string,
-    channel_id: number,
-  ): Promise<void> {
-    try {
-      await this.databaseService.runQuery(
-        `
-        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
-        VALUES ('${user_id}', '${channel_id}', 'false', '1');
-        `,
-      );
-    } catch (error) {
-      this.logger.error(`insertOwnerToChannelMember: ${error}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  // Description: 채널 멤버에 추가 (Owner)
-  async insertGuestToChannelMember(
-    user_id: string,
-    channel_id: number,
-  ): Promise<void> {
-    try {
-      await this.databaseService.runQuery(
-        `
-        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
-        VALUES ('${user_id}', '${channel_id}', 'false', '3');
-        `,
-      );
-    } catch (error) {
-      throw `insertGuestChannelMember: ${error}`;
-    }
-  }
-
-  // Description: 전체 채널 목록 가져오기
-  async getAllChannelList(): Promise<Object[]> {
-    try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-        SELECT id, name, password FROM "channel";
-        `,
-      );
-      const channels = databaseResponse;
-      return channels;
-    } catch (error) {
-      throw `getAllChannelList: ${error}`;
-    }
-  }
-
-  // Description: 참여 중인 채널인지 확인
-  async isJoinedChannel(user_id: string, channel_id: number): Promise<boolean> {
-    try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-        SELECT channel_id FROM "channel_member"
-        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
-        `,
-      );
-      if (databaseResponse.length === 0) {
-        return false;
-      }
-      return true;
-    } catch (error) {
-      throw `isJoinedChannel: ${error}`;
+      throw error;
     }
   }
 
@@ -202,43 +205,6 @@ export class ChannelsRepository {
       return false;
     } catch (error) {
       throw `isValidPasswordForChannel: ${error}`;
-    }
-  }
-
-  // Description: 참여할 수 있는 채널 리스트 반환. name, has_password
-  async getAvailableChannelList(user_id: string): Promise<Object[]> {
-    let allChannel;
-    // Description: 전체 채널 리스트 가져오기
-    try {
-      allChannel = await this.getAllChannelList();
-      if (allChannel.length === 0) {
-        this.logger.log('한 개의 채널도 존재하지 않습니다.');
-        return [];
-      }
-    } catch (error) {
-      throw `getAccessibleChannelList: ${error}`;
-    }
-
-    // Description: 전체 채널 리스트에서 참여 중인 채널을 제외한 채널들 반환
-    try {
-      let availableChannelList = [];
-      for (const channel of allChannel) {
-        const isJoinedChannel = await this.isJoinedChannel(user_id, channel.id);
-        if (isJoinedChannel === false) {
-          let hasPassword = true;
-          if (channel.password === '') {
-            hasPassword = false;
-          }
-          availableChannelList.push({
-            id: channel.id,
-            name: channel.name,
-            has_password: hasPassword,
-          });
-        }
-      }
-      return availableChannelList;
-    } catch (error) {
-      throw `getAvailableChannelList: ${error}`;
     }
   }
 

@@ -93,16 +93,12 @@ export class ChannelsController {
   @Get('/list')
   async GetAvailableChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list');
-    const userId = req.user.id;
-    let availableChannelList;
     try {
-      availableChannelList =
-        await this.channelsRepository.getAvailableChannelList(userId);
-      this.logger.log('참여할 수 있는 채널 목록을 가져옵니다.');
+      const availableChannelList =
+        await this.channelsService.GetAvailableChannelList(req.user.id);
       res.status(200).send(availableChannelList);
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
     }
   }
 
@@ -120,9 +116,8 @@ export class ChannelsController {
   async getJoinedChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list/join');
     const userId = req.user.id;
-    let joinedChannelList: Object[];
     try {
-      joinedChannelList =
+      const joinedChannelList =
         await this.channelsRepository.getJoinedChannelIdListByUserId(userId);
       this.logger.log('참여 중인 채널 목록을 가져옵니다.');
       res.status(200).send(joinedChannelList);
