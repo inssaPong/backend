@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -218,19 +219,21 @@ export class UsersController {
   @Patch('follow')
   async changeFollowStatus(
     @Body() body: ChanageFollowStatusDto,
+    @Req() req,
     @Res() res: Response,
   ) {
     try {
-      const userExist = await this.usersRepository.findUser(body.user_id);
+      const userExist = await this.usersRepository.findUser(req.user.id);
       await this.usersService.checkUserExist(userExist);
       const partnerExist = await this.usersRepository.findUser(body.partner_id);
       await this.usersService.checkUserExist(partnerExist);
 
+      if (req.user.id == body.partner_id) throw new BadRequestException();
       if (body.follow_status == false) {
-        this.usersRepository.offFollowStatus(body.user_id, body.partner_id);
+        this.usersRepository.offFollowStatus(req.user.id, body.partner_id);
         this.logger.debug('success unfollow');
       } else if (body.follow_status == true) {
-        this.usersRepository.onFollowStatus(body.user_id, body.partner_id);
+        this.usersService.onFollowStatus(req.user.id, body.partner_id);
         this.logger.debug('success follow');
       }
       res.status(200).send();

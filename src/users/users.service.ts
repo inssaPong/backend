@@ -4,10 +4,24 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
-  private logger = new Logger(UsersService.name);
+  private readonly logger = new Logger(UsersService.name);
+  constructor(private readonly usersRepository: UsersRepository) {}
+
+  async onFollowStatus(user_id: string, partner_id: string) {
+    const relation_status = await this.usersRepository.getRelationStatus(
+      user_id,
+      partner_id,
+    );
+    if (relation_status.length == 1)
+      await this.usersRepository.updateFollowStatus(user_id, partner_id);
+    else if (relation_status.length == 0)
+      await this.usersRepository.insertFollowStatus(user_id, partner_id);
+    else throw new InternalServerErrorException();
+  }
 
   checkUserExist(databaseResponse: any) {
     if (databaseResponse.length == 1) return;
