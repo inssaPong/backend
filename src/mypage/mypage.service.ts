@@ -14,12 +14,13 @@ export class MypageService {
   async updateUserInfo(id: string, body: UpdateUserInfoDto) {
     try {
       for (let [key, value] of Object.entries(body)) {
-        if (key == 'nickname') this.mypageRepository.updateNickname(id, value);
+        if (key == 'nickname')
+          await this.mypageRepository.updateNickname(id, value);
         else if (key == 'avatar') {
-          if (body.avatar == null) this.mypageRepository.deleteAvatar(id);
-          else this.mypageRepository.updateAvatar(id, value);
+          if (body.avatar == null) await this.mypageRepository.deleteAvatar(id);
+          else await this.mypageRepository.updateAvatar(id, value);
         } else if (key == 'twofactor_status')
-          this.mypageRepository.updateTwofactor(id, value);
+          await this.mypageRepository.updateTwofactor(id, value);
         else throw BadRequestException;
       }
     } catch (error) {
