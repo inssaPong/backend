@@ -169,12 +169,10 @@ export class ChannelsController {
   @Get('/room/name')
   async getChannelName(@Query('channel_id') channel_id: number, @Res() res) {
     try {
-      const channelName =
-        await this.channelsRepository.getChannelNameByChannelId(channel_id);
+      const channelName = await this.channelsService.getChannelName(channel_id);
       res.status(200).send(channelName);
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
     }
   }
 

@@ -126,7 +126,11 @@ export class ChannelsService {
     }
   }
 
-  async enterChannel(user_id: string, channel_id: number, input_pw: string) {
+  async enterChannel(
+    user_id: string,
+    channel_id: number,
+    input_pw: string,
+  ): Promise<void> {
     try {
       // Description: 밴 여부 확인
       const isBanned = await this.channelsRepository.isBannedChannel(
@@ -158,6 +162,16 @@ export class ChannelsService {
         user_id,
         channel_id,
       );
+    } catch (exception) {
+      throw exception;
+    }
+  }
+
+  async getChannelName(channel_id: number): Promise<string> {
+    try {
+      const channelName =
+        await this.channelsRepository.getChannelNameByChannelId(channel_id);
+      return channelName;
     } catch (exception) {
       throw exception;
     }
