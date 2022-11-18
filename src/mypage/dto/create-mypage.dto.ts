@@ -14,6 +14,13 @@ export class UserInfoDto {
   @IsNotEmpty()
   @MaxLength(10)
   @MinLength(1)
+  @ApiProperty({ description: '아이디' })
+  readonly id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(10)
+  @MinLength(1)
   @ApiProperty({ description: '닉네임' })
   readonly nickname: string;
 

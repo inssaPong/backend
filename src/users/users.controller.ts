@@ -57,8 +57,8 @@ export class UsersController {
   @Get()
   async findUser(@Query('id') id: string, @Res() res: Response) {
     try {
-      const result = await this.usersRepository.findUser(id);
-      await this.usersService.checkUserExist(result);
+      const userExist = await this.usersRepository.findUser(id);
+      await this.usersService.checkUserExist(userExist);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.findUser.name}] ${error}`);
@@ -83,16 +83,14 @@ export class UsersController {
   @Get('/gameHistory')
   async getGameHistory(@Query('id') id: string, @Res() res: Response) {
     try {
-      const result = await this.usersRepository.findUser(id);
-      await this.usersService.checkUserExist(result);
-      const gameHistory_db_result = await this.usersRepository.getGameHistory(
-        id,
-      );
+      const userExist = await this.usersRepository.findUser(id);
+      await this.usersService.checkUserExist(userExist);
+      const gameHistoryDB = await this.usersRepository.getGameHistory(id);
       const gameHistory: GameHistoryDto = { gameHistory: [] };
-      for (const oneGameHistory_db_result of gameHistory_db_result) {
+      for (const element of gameHistoryDB) {
         const oneGameHistory: OneGameHistoryDto = {
-          winner: oneGameHistory_db_result['winner_id'],
-          loser: oneGameHistory_db_result['loser_id'],
+          winner: element['winner_id'],
+          loser: element['loser_id'],
         };
         this.logger.debug(
           `winner: ${oneGameHistory.winner}, loser: ${oneGameHistory.loser}`,
@@ -123,13 +121,13 @@ export class UsersController {
   @Get('/gameStat')
   async getGameStat(@Query('id') id: string, @Res() res: Response) {
     try {
-      const result = await this.usersRepository.findUser(id);
-      await this.usersService.checkUserExist(result);
-      const winHistory = await this.usersRepository.getWinHistory(id);
-      const loseHistory = await this.usersRepository.getLoseHistory(id);
+      const userExist = await this.usersRepository.findUser(id);
+      await this.usersService.checkUserExist(userExist);
+      const winHistoryDB = await this.usersRepository.getWinHistory(id);
+      const loseHistoryDB = await this.usersRepository.getLoseHistory(id);
       const gameStat: GameStatDto = {
-        wins: winHistory.length,
-        loses: loseHistory.length,
+        wins: winHistoryDB.length,
+        loses: loseHistoryDB.length,
       };
       this.usersService.printObject('gameStat', gameStat, this.logger);
       res.status(200).send(gameStat);
@@ -141,8 +139,7 @@ export class UsersController {
 
   @ApiOperation({
     summary: '해당 유저 정보 가져오기',
-    description:
-      'param로 id 보내면 UserInfoDto{nickname, avatar binary code, follow 여부} 반환',
+    description: 'param로 id 보내면 UserInfoDto 반환',
   })
   @ApiOkResponse({
     description: '성공',
@@ -161,27 +158,26 @@ export class UsersController {
     @Res() res: Response,
   ) {
     try {
-      const result = await this.usersRepository.findUser(target_id);
-      await this.usersService.checkUserExist(result);
-      const userInfo_db_result = await this.usersRepository.getUserInfo(
+      const userExist = await this.usersRepository.findUser(target_id);
+      await this.usersService.checkUserExist(userExist);
+      const userInfoDB = await this.usersRepository.getUserInfo(target_id);
+      const followStatusDB = await this.usersRepository.getFollowStatus(
+        req.user.username,
         target_id,
       );
-      const follow_status_db_result =
-        await this.usersRepository.getFollowStatus(
-          req.user.username,
-          target_id,
-        );
       let userInfo: UserInfoDto;
-      if (follow_status_db_result.length == 0) {
+      if (followStatusDB.length == 0) {
         userInfo = new UserInfoDto(
-          userInfo_db_result[0][`nickname`],
-          userInfo_db_result[0][`avatar`],
+          userInfoDB[0]['id'],
+          userInfoDB[0][`nickname`],
+          userInfoDB[0][`avatar`],
           false,
         );
-      } else if (follow_status_db_result.length == 1) {
+      } else if (followStatusDB.length == 1) {
         userInfo = new UserInfoDto(
-          userInfo_db_result[0][`nickname`],
-          userInfo_db_result[0][`avatar`],
+          userInfoDB[0]['id'],
+          userInfoDB[0][`nickname`],
+          userInfoDB[0][`avatar`],
           true,
         );
       } else {

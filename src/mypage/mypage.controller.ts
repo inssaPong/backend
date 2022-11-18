@@ -56,6 +56,7 @@ export class MypageController {
       const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
       if (userInfoDB.length <= 0) throw new NotFoundException();
       const userinfo: UserInfoDto = {
+        id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],
         avatar: `${userInfoDB[0]['avatar']}`,
         twofactor_status: userInfoDB[0]['twofactor_status'],
@@ -181,13 +182,15 @@ export class MypageController {
   @Get('/gameStat')
   async getGameStat(@Req() req, @Res() res: Response) {
     try {
-      const winHistory = await this.mypageRepository.getWinHistory(req.user.id);
-      const loseHistory = await this.mypageRepository.getLoseHistory(
+      const winHistoryDB = await this.mypageRepository.getWinHistory(
+        req.user.id,
+      );
+      const loseHistoryDB = await this.mypageRepository.getLoseHistory(
         req.user.id,
       );
       const gameStat: GameStatDto = {
-        wins: winHistory.length,
-        loses: loseHistory.length,
+        wins: winHistoryDB.length,
+        loses: loseHistoryDB.length,
       };
       this.mypageService.printObject('gameStat', gameStat, this.logger);
       res.status(200).send(gameStat);

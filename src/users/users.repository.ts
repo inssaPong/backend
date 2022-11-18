@@ -76,7 +76,7 @@ export class UsersRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		  SELECT nickname, avatar
+		  SELECT id, nickname, avatar
 		  FROM "user"
 		  WHERE id='${id}';
 		  `,
