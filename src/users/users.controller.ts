@@ -225,10 +225,16 @@ export class UsersController {
       await this.usersService.checkUserExist(partnerExist);
 
       if (body.follow_status == false) {
-        this.usersRepository.offFollowStatus(body.user_id, body.partner_id);
+        await this.usersRepository.offFollowStatus(
+          body.user_id,
+          body.partner_id,
+        );
         this.logger.debug('success unfollow');
       } else if (body.follow_status == true) {
-        this.usersRepository.onFollowStatus(body.user_id, body.partner_id);
+        await this.usersRepository.onFollowStatus(
+          body.user_id,
+          body.partner_id,
+        );
         this.logger.debug('success follow');
       }
       res.status(200).send();
