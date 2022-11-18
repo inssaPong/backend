@@ -40,7 +40,7 @@ export class UsersService {
         await this.usersRepository.updateFollowStatus(user_id, partner_id);
       else if (relation_status.length == 0)
         await this.usersRepository.insertFollowStatus(user_id, partner_id);
-      else throw new InternalServerErrorException();
+      else throw InternalServerErrorException;
     } catch (error) {
       this.logger.error(`${this.onFollowStatus.name}: ${error}`);
       throw error;
@@ -52,7 +52,7 @@ export class UsersService {
       const databaseResponse = await this.usersRepository.findUser(target_id);
       if (databaseResponse.length == 1) return;
       else if (databaseResponse.length == 0) throw new NotFoundException();
-      else throw new InternalServerErrorException();
+      else throw InternalServerErrorException;
     } catch (error) {
       this.logger.error(`${this.checkUserExist.name}: ${error}`);
       throw error;
