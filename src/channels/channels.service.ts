@@ -18,7 +18,7 @@ export class ChannelsService {
     user_id: string,
     channel_name: string,
     channel_pw: string,
-  ) {
+  ): Promise<number> {
     this.logger.log(`Function: ${this.createChannelAndReturnChannelId.name}`);
 
     // TODO: dto 추가
