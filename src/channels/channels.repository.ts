@@ -77,7 +77,7 @@ export class ChannelsRepository {
         `,
       );
     } catch (error) {
-      this.logger.error(`insertOwnerToChannelMember: ${error}`);
+      this.logger.error(`[${this.insertOwnerToChannelMember.name}] ${error}`);
       throw error;
     }
   }
@@ -95,7 +95,7 @@ export class ChannelsRepository {
         `,
       );
     } catch (error) {
-      this.logger.error(`insertGuestChannelMember: ${error}`);
+      this.logger.error(`${this.insertGuestToChannelMember.name}] ${error}`);
       throw error;
     }
   }
@@ -110,7 +110,9 @@ export class ChannelsRepository {
       );
       return databaseResponse;
     } catch (error) {
-      this.logger.error(`getAllChannelList: ${error}`);
+      this.logger.error(
+        `[${this.getAllChannelListIncludePrivate.name}] ${error}`,
+      );
       throw error;
     }
   }
@@ -126,35 +128,27 @@ export class ChannelsRepository {
       );
       return databaseResponse.length === 0 ? false : true;
     } catch (error) {
-      this.logger.error(`isJoinedChannel: ${error}`);
+      this.logger.error(`[${this.isJoinedChannel.name}] ${error}`);
       throw error;
     }
   }
 
   // Description: 유저 ID를 통해 참가 중인 채널 아이디 목록 가져오기
-  async getJoinedChannelIdListByUserId(user_id: string): Promise<Object[]> {
+  async getJoinedChannelIdListByUserId(
+    user_id: string,
+  ): Promise<ChannelMemberTableDto[]> {
     try {
-      let channelIdAndNameList = [];
-      const channelIdList = await this.databaseService.runQuery(
+      const databaseResopnse = await this.databaseService.runQuery(
         `
         SELECT channel_id FROM "channel_member"
         WHERE user_id='${user_id}';
         `,
       );
-
-      // TODO: 수정. Service로 빼기
-      for (const channelObject of channelIdList) {
-        const channelName = await this.getChannelNameByChannelId(
-          channelObject.channel_id,
-        );
-        channelIdAndNameList.push({
-          id: channelObject.channel_id,
-          name: channelName,
-        });
-      }
-      return channelIdAndNameList;
+      return databaseResopnse;
     } catch (error) {
-      this.logger.error(`[getJoinedChannelListByUserId] ${error}`);
+      this.logger.error(
+        `[${this.getJoinedChannelIdListByUserId.name}] ${error}`,
+      );
       throw error;
     }
   }

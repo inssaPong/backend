@@ -105,25 +105,24 @@ export class ChannelsController {
   // 참여 중인 채널 목록 받기
   @ApiOperation({
     summary: '참여 중인 채널 목록 받기',
-    description:
-      '전달 받은 jwt를 읽고 user_id를 가져와서 channel_member에 있는 참여중인 채널 목록 가져오기',
   })
   @ApiOkResponse({
     description: '[200 OK] 참여 중인 채널 목록 반환',
     type: ResponseGetEnteredChannelListDto,
   })
+  @ApiInternalServerErrorResponse({
+    description: '[500 Internal Server Error] DB 문제',
+  })
   @Get('/list/join')
   async getJoinedChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list/join');
-    const userId = req.user.id;
     try {
-      const joinedChannelList =
-        await this.channelsRepository.getJoinedChannelIdListByUserId(userId);
-      this.logger.log('참여 중인 채널 목록을 가져옵니다.');
+      const joinedChannelList = await this.channelsService.getJoinedChannelList(
+        req.user.id,
+      );
       res.status(200).send(joinedChannelList);
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
     }
   }
 

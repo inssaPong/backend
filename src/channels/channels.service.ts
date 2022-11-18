@@ -47,18 +47,19 @@ export class ChannelsService {
       this.logger.log('channel 생성');
 
       // Description: 생성된 채널 id 가져오기
-      const channel_id =
-        await this.channelsRepository.getChannelIdByChannelName(channel_name);
-      this.logger.log(`생성된 채널 id: ${channel_id}`);
+      const channelId = await this.channelsRepository.getChannelIdByChannelName(
+        channel_name,
+      );
+      this.logger.log(`생성된 채널 id: ${channelId}`);
 
       // Description: channel_member 테이블에 추가
       await this.channelsRepository.insertOwnerToChannelMember(
         user_id,
-        channel_id,
+        channelId,
       );
       this.logger.log('channel_member 테이블에 추가');
 
-      return channel_id;
+      return channelId;
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -94,6 +95,31 @@ export class ChannelsService {
         `참여할 수 있는 ${availableChannelList.length} 개의 채널 목록을 가져옵니다: `,
       );
       return availableChannelList;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+  }
+
+  // TODO: 수정. dto
+  async getJoinedChannelList(user_id: string): Promise<Object[]> {
+    try {
+      const joinedChannelIdList =
+        await this.channelsRepository.getJoinedChannelIdListByUserId(user_id);
+
+      // TODO: 수정. dto?
+      let channelIdAndNameList = [];
+      for (const channelObject of joinedChannelIdList) {
+        const channelName =
+          await this.channelsRepository.getChannelNameByChannelId(
+            channelObject.channel_id,
+          );
+        channelIdAndNameList.push({
+          id: channelObject.channel_id,
+          name: channelName,
+        });
+      }
+      this.logger.log('참여 중인 채널 목록을 가져옵니다.');
+      return channelIdAndNameList;
     } catch (error) {
       throw new InternalServerErrorException();
     }
