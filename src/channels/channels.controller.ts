@@ -223,22 +223,11 @@ export class ChannelsController {
     @Res() res,
   ) {
     this.logger.log('DELETE /channels/room/exit');
-    const channelId = Number(channel_id); // TODO: 수정. dto를 통한 number 변환
-    const userId = req.user.id;
     try {
-      const isSuccess = await this.channelsRepository.exitChannel(
-        userId,
-        channelId,
-      );
-      if (isSuccess === false) {
-        this.logger.error('잘못된 request입니다.');
-        throw new BadRequestException();
-      }
-      this.logger.log('채널 삭제에 성공했습니다.');
+      await this.channelsService.exitChannel(req.user.id, channel_id);
       res.status(200).send();
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
     }
   }
 }

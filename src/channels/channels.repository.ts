@@ -6,7 +6,7 @@ import {
 import { DatabaseService } from 'src/database/database.service';
 import {
   ChannelMemberTableDto,
-  ChannelTableDto,
+  ChannelTableDto as ChannelDto,
 } from './dto/repository-channels.dto';
 
 @Injectable()
@@ -35,12 +35,13 @@ export class ChannelsRepository {
   async getChannelIdByChannelName(channel_name: string): Promise<number> {
     this.logger.log(`[${this.getChannelIdByChannelName.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
+      const databaseResponse: ChannelDto[] =
+        await this.databaseService.runQuery(
+          `
         SELECT id FROM "channel"
         WHERE name='${channel_name}';
         `,
-      );
+        );
       return databaseResponse[0].id;
     } catch (error) {
       this.logger.error(error);
@@ -52,12 +53,13 @@ export class ChannelsRepository {
   async getChannelNameByChannelId(channel_id: number): Promise<string> {
     this.logger.log(`[${this.getChannelNameByChannelId.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
+      const databaseResponse: ChannelDto[] =
+        await this.databaseService.runQuery(
+          `
         SELECT name FROM "channel"
         WHERE id='${channel_id}';
         `,
-      );
+        );
       return databaseResponse[0].name;
     } catch (error) {
       this.logger.error(error);
@@ -104,14 +106,15 @@ export class ChannelsRepository {
   }
 
   // Description: 전체 채널 목록 가져오기
-  async getAllChannelListIncludePrivate(): Promise<ChannelTableDto[]> {
+  async getAllChannelListIncludePrivate(): Promise<ChannelDto[]> {
     this.logger.log(`[${this.getAllChannelListIncludePrivate.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
+      const databaseResponse: ChannelDto[] =
+        await this.databaseService.runQuery(
+          `
         SELECT id, name, password FROM "channel";
         `,
-      );
+        );
       return databaseResponse;
     } catch (error) {
       this.logger.error(error);
@@ -123,12 +126,13 @@ export class ChannelsRepository {
   async isJoinedChannel(user_id: string, channel_id: number): Promise<boolean> {
     this.logger.log(`[${this.isJoinedChannel.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
+      const databaseResponse: ChannelMemberTableDto[] =
+        await this.databaseService.runQuery(
+          `
         SELECT channel_id FROM "channel_member"
         WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
-      );
+        );
       return databaseResponse.length === 0 ? false : true;
     } catch (error) {
       this.logger.error(error);
@@ -140,16 +144,15 @@ export class ChannelsRepository {
   async getJoinedChannelIdListByUserId(
     user_id: string,
   ): Promise<ChannelMemberTableDto[]> {
-    this.logger.log(
-      `Repository: [${this.getJoinedChannelIdListByUserId.name}]`,
-    );
+    this.logger.log(`[${this.getJoinedChannelIdListByUserId.name}]`);
     try {
-      const databaseResopnse = await this.databaseService.runQuery(
-        `
+      const databaseResopnse: ChannelMemberTableDto[] =
+        await this.databaseService.runQuery(
+          `
         SELECT channel_id FROM "channel_member"
         WHERE user_id='${user_id}';
         `,
-      );
+        );
       return databaseResopnse;
     } catch (error) {
       this.logger.error(error);
@@ -161,12 +164,13 @@ export class ChannelsRepository {
   async isBannedChannel(user_id: string, channel_id: number): Promise<boolean> {
     this.logger.log(`[${this.isBannedChannel.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
+      const databaseResponse: ChannelMemberTableDto[] =
+        await this.databaseService.runQuery(
+          `
         SELECT ban_status FROM "channel_member"
         WHERE user_id='${user_id}' AND channel_id='${channel_id}';
         `,
-      );
+        );
       if (databaseResponse.length === 0) {
         return false;
       }
@@ -182,11 +186,13 @@ export class ChannelsRepository {
   async getChannelPassword(channel_id: number): Promise<string> {
     this.logger.log(`[${this.getChannelPassword.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-        SELECT password FROM "channel" WHERE id='${channel_id}'
+      const databaseResponse: ChannelDto[] =
+        await this.databaseService.runQuery(
+          `
+        SELECT password FROM "channel"
+        WHERE id='${channel_id}';
         `,
-      );
+        );
       return databaseResponse[0].password;
     } catch (error) {
       this.logger.error(error);
@@ -197,17 +203,88 @@ export class ChannelsRepository {
   async getUserIdListInChannelMember(channel_id: number): Promise<Object[]> {
     this.logger.log(`[${this.getUserIdListInChannelMember.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
+      const databaseResponse: ChannelMemberTableDto[] =
+        await this.databaseService.runQuery(
+          `
         SELECT user_id FROM "channel_member"
         WHERE channel_id='${channel_id}';
         `,
-      );
+        );
       return databaseResponse;
     } catch (error) {
       this.logger.error(error);
     }
   }
+
+  async getUserAuthorityFromChannel(
+    user_id: string,
+    channel_id: number,
+  ): Promise<string> {
+    this.logger.log(`[${this.getUserAuthorityFromChannel.name}]`);
+    try {
+      const databaseResponse: ChannelMemberTableDto[] =
+        await this.databaseService.runQuery(
+          `
+        SELECT authority FROM "channel_member"
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
+        `,
+        );
+      return databaseResponse[0].authority;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async deleteOneUserInChannelMember(
+    user_id: string,
+    channel_id: number,
+  ): Promise<void> {
+    this.logger.log(`[${this.deleteOneUserInChannelMember.name}]`);
+    try {
+      this.databaseService.runQuery(
+        `
+        DELETE FROM "channel_member"
+        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
+        `,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async deleteAllUserInChannelMember(channel_id: number): Promise<void> {
+    this.logger.log(`[${this.deleteAllUserInChannelMember.name}]`);
+    try {
+      await this.databaseService.runQuery(
+        `
+        DELETE FROM "channel_member"
+        WHERE channel_id='${channel_id}';
+        `,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async deleteChannel(channel_id: number): Promise<void> {
+    this.logger.log(`[${this.deleteChannel.name}(channel_id)]`);
+    try {
+      await this.databaseService.runQuery(
+        `
+        DELETE FROM "channel"
+        WHERE id='${channel_id}';
+        `,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  ///////////////////////////////////////////////////////////////////
 
   // Description: 채널 나가기
   async exitChannel(user_id: string, channel_id: number): Promise<boolean> {
@@ -253,8 +330,6 @@ export class ChannelsRepository {
       throw `exitChannel: ${error}`;
     }
   }
-
-  ///////////////////////////////////////////////////////////////////
 
   async checkEnteredChannel(user_id: string, channel_id: number) {
     try {

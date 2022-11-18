@@ -187,4 +187,38 @@ export class ChannelsService {
       throw exception;
     }
   }
+
+  // TODO: 에러. duplicate 에러가 떴던거 같은데.. Patch or Delete
+  async exitChannel(user_id: string, channel_id: number) {
+    try {
+      // Description: 해당 채널에서 내 권한 정보 가져오기
+      const authority =
+        await this.channelsRepository.getUserAuthorityFromChannel(
+          user_id,
+          channel_id,
+        );
+      this.logger.log(`authority: ${authority}`);
+
+      // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
+      await this.channelsRepository.deleteOneUserInChannelMember(
+        user_id,
+        channel_id,
+      );
+
+      // Description: 내가 채널장인 경우 channel_member 테이블에서 해당 채널 모두 삭제. channel 테이블에서 채널 삭제
+      if (authority === '1') {
+        // Description: channel_member 테이블에서 channel_id 에 참여 중인 유저 정보 삭제
+        await this.channelsRepository.deleteAllUserInChannelMember(channel_id);
+        this.logger.log(
+          'channel_member에 존재하는 channel_id에 참여 중인 유저 정보 제거',
+        );
+
+        // Description: 채널 제거
+        await this.channelsRepository.deleteChannel(channel_id);
+        this.logger.log('채널 삭제에 성공했습니다.');
+      }
+    } catch (exception) {
+      throw exception;
+    }
+  }
 }
