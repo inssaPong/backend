@@ -10,10 +10,11 @@ export class UsersRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-				SELECT *
-				FROM "user"
-				WHERE id='${id}';
-				`,
+		SELECT *
+		FROM "user"
+		WHERE id=$1;
+		`,
+        [id],
       );
       return databaseResponse;
     } catch (error) {
@@ -28,10 +29,11 @@ export class UsersRepository {
         `
 		  SELECT winner_id, loser_id
 		  FROM "game_history"
-		  WHERE winner_id='${id}' OR loser_id='${id}'
+		  WHERE winner_id=$1 OR loser_id=$1
 		  ORDER BY id DESC
 		  LIMIT 5;
 		  `,
+        [id],
       );
       return databaseResponse;
     } catch (error) {
@@ -46,8 +48,9 @@ export class UsersRepository {
         `
 		  SELECT id
 		  FROM "game_history"
-		  WHERE winner_id='${id}';
+		  WHERE winner_id=$1;
 		  `,
+        [id],
       );
       return wins;
     } catch (error) {
@@ -60,10 +63,11 @@ export class UsersRepository {
     try {
       const loses = await this.databaseService.runQuery(
         `
-		  SELECT id
-		  FROM "game_history"
-		  WHERE loser_id='${id}';
-		  `,
+		SELECT id
+		FROM "game_history"
+		WHERE loser_id=$1;
+		`,
+        [id],
       );
       return loses;
     } catch (error) {
@@ -76,10 +80,11 @@ export class UsersRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		  SELECT id, nickname, avatar
-		  FROM "user"
-		  WHERE id='${id}';
-		  `,
+		SELECT id, nickname, avatar
+		FROM "user"
+		WHERE id=$1;
+		`,
+        [id],
       );
       return databaseResponse;
     } catch (error) {
@@ -92,10 +97,11 @@ export class UsersRepository {
     try {
       const databaseResponse = this.databaseService.runQuery(
         `
-				SELECT *
-				FROM "user_relation"
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}' AND block_status = false;
-				`,
+		SELECT *
+		FROM "user_relation"
+		WHERE user_id = $1 AND partner_id = $2 AND block_status = false;
+		`,
+        [user_id, partner_id],
       );
       return databaseResponse;
     } catch (error) {

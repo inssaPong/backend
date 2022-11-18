@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { property } from 'lodash';
 import { DatabaseService } from 'src/database/database.service';
-import { GameStatDto } from './dto/create-mypage.dto';
 import { UpdateUserInfoDto } from './dto/update-mypage.dto';
 
 @Injectable()
@@ -15,12 +13,14 @@ export class MypageRepository {
         `
 		SELECT id, nickname, avatar, twofactor_status
 		FROM "user"
-		WHERE id='${id}';
+		WHERE id=$1;
 		`,
+        [id],
       );
       return databaseResponse;
     } catch (error) {
       this.logger.error(`[${this.getUserInfo.name}] ${error}`);
+      console.log(error);
       throw error;
     }
   }
@@ -50,8 +50,9 @@ export class MypageRepository {
         `
 		SELECT partner_id
 		FROM "user_relation"
-		WHERE user_id='${id}' AND block_status=false;
+		WHERE user_id=$1 AND block_status=false;
 		`,
+        [id],
       );
       return databaseResponse;
     } catch (error) {
@@ -66,10 +67,11 @@ export class MypageRepository {
         `
 		SELECT winner_id, loser_id
 		FROM "game_history"
-		WHERE winner_id='${id}' OR loser_id='${id}'
+		WHERE winner_id=$1 OR loser_id=$1
 		ORDER BY id DESC
 		LIMIT 5;
 		`,
+        [id],
       );
       return databaseResponse;
     } catch (error) {
@@ -84,8 +86,9 @@ export class MypageRepository {
         `
 		SELECT id
 		FROM "game_history"
-		WHERE winner_id='${id}';
+		WHERE winner_id=$1;
 		`,
+        [id],
       );
       return wins;
     } catch (error) {
@@ -100,8 +103,9 @@ export class MypageRepository {
         `
 		SELECT id
 		FROM "game_history"
-		WHERE loser_id='${id}';
+		WHERE loser_id=$1;
 		`,
+        [id],
       );
       return loses;
     } catch (error) {
