@@ -210,10 +210,13 @@ export class UsersController {
 
       if (req.user.id == body.partner_id) throw new BadRequestException();
       if (body.follow_status == false) {
-        this.usersRepository.offFollowStatus(req.user.id, body.partner_id);
+        await this.usersRepository.offFollowStatus(
+          req.user.id,
+          body.partner_id,
+        );
         this.logger.debug('success unfollow');
       } else if (body.follow_status == true) {
-        this.usersService.onFollowStatus(req.user.id, body.partner_id);
+        await this.usersService.onFollowStatus(req.user.id, body.partner_id);
         this.logger.debug('success follow');
       }
       res.status(200).send();
