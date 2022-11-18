@@ -176,4 +176,15 @@ export class ChannelsService {
       throw exception;
     }
   }
+
+  // TODO: 수정. dto
+  async getUserIdListInChannel(channel_id: number): Promise<Object[]> {
+    try {
+      const userIdList =
+        await this.channelsRepository.getUserIdListInChannelMember(channel_id);
+      return userIdList;
+    } catch (exception) {
+      throw exception;
+    }
+  }
 }

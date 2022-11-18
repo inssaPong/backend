@@ -168,6 +168,7 @@ export class ChannelsController {
   })
   @Get('/room/name')
   async getChannelName(@Query('channel_id') channel_id: number, @Res() res) {
+    this.logger.log('GET /room/name');
     try {
       const channelName = await this.channelsService.getChannelName(channel_id);
       res.status(200).send(channelName);
@@ -187,7 +188,7 @@ export class ChannelsController {
     description: '[500 Internal Server Error] DB에 문제',
   })
   @Get('/room/users')
-  async getUserIdInChannel(
+  async getUserIdListInChannel(
     @Query('channel_id') channel_id: number,
     @Res() res,
   ) {
