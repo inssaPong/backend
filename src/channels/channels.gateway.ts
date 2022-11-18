@@ -192,7 +192,7 @@ export class ChannelGateway {
       req.sender_id,
     );
     if (is_block == 400 && member.status == UserStatus.online) {
-      member.socket.emit('channel/send', member.id, req.message);
+      member.socket.emit('channel/send', req.sender_id, req.message);
     }
   }
 
