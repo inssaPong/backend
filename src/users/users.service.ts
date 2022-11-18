@@ -11,6 +11,20 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(private readonly usersRepository: UsersRepository) {}
 
+  async getFollowStatus(user_id: string, partner_id: string) {
+    const followStatusDB = await this.usersRepository.getFollowStatus(
+      user_id,
+      partner_id,
+    );
+    if (followStatusDB.length == 0) {
+      return false;
+    } else if (followStatusDB.length == 1) {
+      return true;
+    } else {
+      throw InternalServerErrorException;
+    }
+  }
+
   async onFollowStatus(user_id: string, partner_id: string) {
     const relation_status = await this.usersRepository.getRelationStatus(
       user_id,
@@ -23,7 +37,8 @@ export class UsersService {
     else throw new InternalServerErrorException();
   }
 
-  checkUserExist(databaseResponse: any) {
+  async checkUserExist(target_id: string) {
+    const databaseResponse = await this.usersRepository.findUser(target_id);
     if (databaseResponse.length == 1) return;
     else if (databaseResponse.length == 0) throw new NotFoundException();
     else throw new InternalServerErrorException();
