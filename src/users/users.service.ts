@@ -12,36 +12,51 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async getFollowStatus(user_id: string, partner_id: string) {
-    const followStatusDB = await this.usersRepository.getFollowStatus(
-      user_id,
-      partner_id,
-    );
-    if (followStatusDB.length == 0) {
-      return false;
-    } else if (followStatusDB.length == 1) {
-      return true;
-    } else {
-      throw InternalServerErrorException;
+    try {
+      const followStatusDB = await this.usersRepository.getFollowStatus(
+        user_id,
+        partner_id,
+      );
+      if (followStatusDB.length == 0) {
+        return false;
+      } else if (followStatusDB.length == 1) {
+        return true;
+      } else {
+        throw InternalServerErrorException;
+      }
+    } catch (error) {
+      this.logger.error(`${this.getFollowStatus.name}: ${error}`);
+      throw error;
     }
   }
 
   async onFollowStatus(user_id: string, partner_id: string) {
-    const relation_status = await this.usersRepository.getRelationStatus(
-      user_id,
-      partner_id,
-    );
-    if (relation_status.length == 1)
-      await this.usersRepository.updateFollowStatus(user_id, partner_id);
-    else if (relation_status.length == 0)
-      await this.usersRepository.insertFollowStatus(user_id, partner_id);
-    else throw new InternalServerErrorException();
+    try {
+      const relation_status = await this.usersRepository.getRelationStatus(
+        user_id,
+        partner_id,
+      );
+      if (relation_status.length == 1)
+        await this.usersRepository.updateFollowStatus(user_id, partner_id);
+      else if (relation_status.length == 0)
+        await this.usersRepository.insertFollowStatus(user_id, partner_id);
+      else throw new InternalServerErrorException();
+    } catch (error) {
+      this.logger.error(`${this.onFollowStatus.name}: ${error}`);
+      throw error;
+    }
   }
 
   async checkUserExist(target_id: string) {
-    const databaseResponse = await this.usersRepository.findUser(target_id);
-    if (databaseResponse.length == 1) return;
-    else if (databaseResponse.length == 0) throw new NotFoundException();
-    else throw new InternalServerErrorException();
+    try {
+      const databaseResponse = await this.usersRepository.findUser(target_id);
+      if (databaseResponse.length == 1) return;
+      else if (databaseResponse.length == 0) throw new NotFoundException();
+      else throw new InternalServerErrorException();
+    } catch (error) {
+      this.logger.error(`${this.checkUserExist.name}: ${error}`);
+      throw error;
+    }
   }
 
   getDefaultImage(): string {
