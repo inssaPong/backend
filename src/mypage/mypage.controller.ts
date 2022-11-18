@@ -94,7 +94,7 @@ export class MypageController {
   ) {
     try {
       this.mypageService.printObject('UpdateUserInfo', body, this.logger);
-      await this.mypageRepository.patchUserInfo(req.user.id, body);
+      await this.mypageService.updateUserInfo(req.user.id, body);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.patchUserInfo.name}] ${error}`);
