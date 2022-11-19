@@ -8,9 +8,6 @@ import {
   Req,
   Res,
   Query,
-  InternalServerErrorException,
-  BadRequestException,
-  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -96,7 +93,7 @@ export class ChannelsController {
     this.logger.log('GET /channels/list');
     try {
       const availableChannelList =
-        await this.channelsService.GetAvailableChannelList(req.user.id);
+        await this.channelsService.getAvailableChannelList(req.user.id);
       res.status(200).send(availableChannelList);
     } catch (exception) {
       throw exception;

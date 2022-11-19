@@ -4,7 +4,6 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { ChannelsRepository } from './channels.repository';
@@ -67,7 +66,7 @@ export class ChannelsService {
   }
 
   // TODO: 수정. dto
-  async GetAvailableChannelList(user_id: string): Promise<Object[]> {
+  async getAvailableChannelList(user_id: string): Promise<Object[]> {
     try {
       const allChannelList =
         await this.channelsRepository.getAllChannelListIncludePrivate();
@@ -143,7 +142,7 @@ export class ChannelsService {
             status: HttpStatus.NO_CONTENT,
             error: 'No Conent',
           },
-          HttpStatus.NOT_FOUND,
+          HttpStatus.NO_CONTENT,
         );
       }
 
