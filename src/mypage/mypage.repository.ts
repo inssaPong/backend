@@ -6,7 +6,7 @@ export class MypageRepository {
   private readonly logger = new Logger(MypageRepository.name);
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async getUserInfo(id: string) {
+  async getUserInfo(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -14,7 +14,7 @@ export class MypageRepository {
 		FROM "user"
 		WHERE id = $1;
 		`,
-        [id],
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -24,7 +24,7 @@ export class MypageRepository {
     }
   }
 
-  async updateNickname(id: string, nickname: string) {
+  async updateNickname(user_id: string, nickname: string) {
     try {
       await this.databaseService.runQuery(
         `
@@ -32,7 +32,7 @@ export class MypageRepository {
 		SET nickname = $1
 		WHERE id = $2;
 		`,
-        [nickname, id],
+        [nickname, user_id],
       );
       return 200;
     } catch (error) {
@@ -41,7 +41,7 @@ export class MypageRepository {
     }
   }
 
-  async updateAvatar(id: string, avatar: string) {
+  async updateAvatar(user_id: string, avatar: string) {
     try {
       await this.databaseService.runQuery(
         `
@@ -49,7 +49,7 @@ export class MypageRepository {
 		SET avatar = $1
 		WHERE id = $2;
 		`,
-        [avatar, id],
+        [avatar, user_id],
       );
       return 200;
     } catch (error) {
@@ -58,7 +58,7 @@ export class MypageRepository {
     }
   }
 
-  async deleteAvatar(id: string) {
+  async deleteAvatar(user_id: string) {
     try {
       await this.databaseService.runQuery(
         `
@@ -66,7 +66,7 @@ export class MypageRepository {
 		SET avatar = null
 		WHERE id = $1;
 		`,
-        [id],
+        [user_id],
       );
       return 200;
     } catch (error) {
@@ -75,7 +75,7 @@ export class MypageRepository {
     }
   }
 
-  async updateTwofactor(id: string, twofactor: boolean) {
+  async updateTwofactor(user_id: string, twofactor: boolean) {
     try {
       await this.databaseService.runQuery(
         `
@@ -83,7 +83,7 @@ export class MypageRepository {
 		SET twofactor_status = $1
 		WHERE id = $2;
 		`,
-        [twofactor, id],
+        [twofactor, user_id],
       );
       return 200;
     } catch (error) {
@@ -92,7 +92,7 @@ export class MypageRepository {
     }
   }
 
-  async getFollows(id: string) {
+  async getFollows(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -100,7 +100,7 @@ export class MypageRepository {
 		FROM "user_relation"
 		WHERE user_id = $1 AND block_status = false;
 		`,
-        [id],
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -109,7 +109,7 @@ export class MypageRepository {
     }
   }
 
-  async getGameHistory(id: string) {
+  async getGameHistory(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -119,7 +119,7 @@ export class MypageRepository {
 		ORDER BY id DESC
 		LIMIT 5;
 		`,
-        [id],
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -128,7 +128,7 @@ export class MypageRepository {
     }
   }
 
-  async getWinHistory(id: string) {
+  async getWinHistory(user_id: string) {
     try {
       const wins = await this.databaseService.runQuery(
         `
@@ -136,7 +136,7 @@ export class MypageRepository {
 		FROM "game_history"
 		WHERE winner_id = $1;
 		`,
-        [id],
+        [user_id],
       );
       return wins;
     } catch (error) {
@@ -145,7 +145,7 @@ export class MypageRepository {
     }
   }
 
-  async getLoseHistory(id: string) {
+  async getLoseHistory(user_id: string) {
     try {
       const loses = await this.databaseService.runQuery(
         `
@@ -153,7 +153,7 @@ export class MypageRepository {
 		FROM "game_history"
 		WHERE loser_id = $1;
 		`,
-        [id],
+        [user_id],
       );
       return loses;
     } catch (error) {
