@@ -206,15 +206,16 @@ export class ChannelsService {
 
       // Description: 내가 채널장인 경우 channel_member 테이블에서 해당 채널 모두 삭제. channel 테이블에서 채널 삭제
       if (authority === '1') {
-        // Description: channel_member 테이블에서 channel_id 에 참여 중인 유저 정보 삭제
+        // Description: channel_id 채널의 메세지 내역 삭제
+        await this.channelsRepository.deleteAllMessageInChannel(channel_id);
+
+        // Description: channel_id 채널에 참여 중인 유저 정보 삭제
         await this.channelsRepository.deleteAllUserInChannelMember(channel_id);
-        this.logger.log(
-          'channel_member에 존재하는 channel_id에 참여 중인 유저 정보 제거',
-        );
+        this.logger.log(`${channel_id} 채널에 참여 중인 유저 정보 제거`);
 
         // Description: 채널 제거
         await this.channelsRepository.deleteChannel(channel_id);
-        this.logger.log('채널 삭제에 성공했습니다.');
+        this.logger.log(`${channel_id} 채널 삭제에 성공했습니다.`);
       }
     } catch (exception) {
       throw exception;

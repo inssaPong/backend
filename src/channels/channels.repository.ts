@@ -244,6 +244,21 @@ export class ChannelsRepository {
     }
   }
 
+  async deleteAllMessageInChannel(channel_id: number): Promise<void> {
+    this.logger.log(`[${this.deleteAllMessageInChannel.name}]`);
+    try {
+      await this.databaseService.runQuery(
+        `
+        DELETE FROM "message"
+        WHERE channel_id='${channel_id}';
+        `,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async deleteOneUserInChannelMember(
     user_id: string,
     channel_id: number,
