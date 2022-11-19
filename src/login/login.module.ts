@@ -1,9 +1,8 @@
-import { CacheModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { FtStrategy } from './ft_oauth/ft.strategy';
 import { LoginController } from './login.controller';
 import { LoginRepository } from './login.repository';
-import { LoginService } from './login.service';
 import { JwtStrategy } from './jwt/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -30,6 +29,6 @@ import { MainSocketModule } from 'src/sockets/main.module';
     MainSocketModule,
   ],
   controllers: [LoginController],
-  providers: [LoginService, FtStrategy, JwtStrategy, LoginRepository],
+  providers: [FtStrategy, JwtStrategy, LoginRepository],
 })
 export class LoginModule {}
