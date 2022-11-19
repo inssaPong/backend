@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { DatabaseService } from 'src/database/database.service';
 import { LoginRepository } from '../login.repository';
 import { IS_PUBLIC_KEY } from '../public.decorator';
 
@@ -39,30 +38,25 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
     status?: any,
   ) {
-    const res = context.switchToHttp().getResponse();
     if (info) {
       this.logger.log(`${info}`);
     }
     if (err || !user) {
       this.logger.log('Unauthorized users');
-      res.redirect('http://localhost:8080');
-      throw err || new UnauthorizedException();
+      throw new UnauthorizedException();
     }
 
     // Description: DB 체크에 해당 유저가 있는지 검사
     try {
-      const has_user = this.loginRepository.findUser(user.id);
-      if (!has_user) {
+      const userData = this.loginRepository.getUserDataInUser(user.id);
+      if (!userData) {
         this.logger.log('Unauthorized users');
-        res.redirect('http://localhost:8080');
-        throw err || new UnauthorizedException();
+        throw new UnauthorizedException();
       }
-    } catch (error) {
-      this.logger.error(error);
-      res.redirect('http://localhost:8080');
-      throw err || new UnauthorizedException();
+    } catch (exception) {
+      throw exception;
     }
-    this.logger.log(`Authorized user: ${user.id}`);
+    this.logger.log(`${user.id}는 인가된 유저입니다.`);
     return user;
   }
 }
