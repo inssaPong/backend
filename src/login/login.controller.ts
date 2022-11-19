@@ -57,7 +57,11 @@ export class LoginController {
   @Get('/twofactor')
   async sendTwoFactorMail(@Req() req) {
     this.logger.log(`GET /login/twofactor`);
-    await this.mailService.sendMail(req.user.id, req.user.email);
+    try {
+      await this.mailService.sendMail(req.user.id, req.user.email);
+    } catch (error) {
+      throw error;
+    }
   }
 
   // 2차 인증 성공 여부

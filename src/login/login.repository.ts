@@ -4,6 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
+import { UserDto } from './dto/repository-login.dto';
 
 @Injectable()
 export class LoginRepository {
@@ -11,8 +12,8 @@ export class LoginRepository {
 
   private readonly logger = new Logger(LoginRepository.name);
 
-  async insertUserDataInUser(user_id: string, nickname: string, email: string) {
-    this.logger.log(`[${this.insertUserDataInUser.name}]`);
+  async insertUserData(user_id: string, nickname: string, email: string) {
+    this.logger.log(`[${this.insertUserData.name}]`);
     try {
       await this.databaseService.runQuery(
         `
@@ -26,8 +27,8 @@ export class LoginRepository {
     }
   }
 
-  async getUserDataInUser(user_id: string): Promise<any> {
-    this.logger.log(`[${this.getUserDataInUser.name}]`);
+  async getUserData(user_id: string): Promise<UserDto> {
+    this.logger.log(`[${this.getUserData.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
