@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import { UpdateUserInfoDto } from './dto/update-mypage.dto';
 
 @Injectable()
 export class MypageRepository {
@@ -29,10 +28,11 @@ export class MypageRepository {
     try {
       await this.databaseService.runQuery(
         `
-			UPDATE "user"
-			SET nickname = '${nickname}'
-			WHERE id='${id}';
-			`,
+		UPDATE "user"
+		SET nickname = $1
+		WHERE id = $2;
+		`,
+        [nickname, id],
       );
       return 200;
     } catch (error) {
@@ -45,10 +45,11 @@ export class MypageRepository {
     try {
       await this.databaseService.runQuery(
         `
-			UPDATE "user"
-			SET avatar = '${avatar}'
-			WHERE id='${id}';
-			`,
+		UPDATE "user"
+		SET avatar = $1
+		WHERE id = $2;
+		`,
+        [avatar, id],
       );
       return 200;
     } catch (error) {
@@ -61,10 +62,11 @@ export class MypageRepository {
     try {
       await this.databaseService.runQuery(
         `
-			UPDATE "user"
-			SET avatar = null
-			WHERE id='${id}';
-			`,
+		UPDATE "user"
+		SET avatar = null
+		WHERE id = $1;
+		`,
+        [id],
       );
       return 200;
     } catch (error) {
@@ -78,9 +80,10 @@ export class MypageRepository {
       await this.databaseService.runQuery(
         `
 		UPDATE "user"
-		SET twofactor_status = ${twofactor}
-		WHERE id='${id}';
+		SET twofactor_status = $1
+		WHERE id = $2;
 		`,
+        [twofactor, id],
       );
       return 200;
     } catch (error) {
