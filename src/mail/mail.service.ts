@@ -4,6 +4,7 @@ import {
   CACHE_MANAGER,
   Inject,
   Injectable,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -37,6 +38,7 @@ export class MailService {
       await this.mailerService.sendMail(mailOptions);
     } catch (error) {
       this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
