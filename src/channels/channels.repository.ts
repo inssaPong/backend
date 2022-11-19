@@ -8,6 +8,7 @@ import {
   ChannelMemberTableDto,
   ChannelTableDto as ChannelDto,
 } from './dto/repository-channels.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChannelsRepository {
@@ -181,10 +182,12 @@ export class ChannelsRepository {
     }
   }
 
-  // TODO: 의논. 이걸 만드는게 맞을까?
-  // Description: 채널 비밀번호 반환.
-  async getChannelPassword(channel_id: number): Promise<string> {
-    this.logger.log(`[${this.getChannelPassword.name}]`);
+  // Description: 채널 비밀번호 유효성 검사.
+  async isValidChannelPassword(
+    channel_id: number,
+    input_pw: string,
+  ): Promise<boolean> {
+    this.logger.log(`[${this.isValidChannelPassword.name}]`);
     try {
       const databaseResponse: ChannelDto[] =
         await this.databaseService.runQuery(
@@ -193,7 +196,8 @@ export class ChannelsRepository {
         WHERE id='${channel_id}';
         `,
         );
-      return databaseResponse[0].password;
+      const isValidPw = await bcrypt.compare(input_pw, input_pw);
+      return isValidPw;
     } catch (error) {
       this.logger.error(error);
       throw error;

@@ -148,10 +148,10 @@ export class ChannelsService {
       }
 
       // Description: 입력 받은 비밀번호 유효성 검사
-      const channel_pw = await this.channelsRepository.getChannelPassword(
+      const isValidPw = await this.channelsRepository.isValidChannelPassword(
         channel_id,
+        input_pw,
       );
-      const isValidPw = await bcrypt.compare(input_pw, channel_pw);
       if (isValidPw === false) {
         this.logger.error('잘못된 채널 비밀번호입니다.');
         throw new ForbiddenException();
