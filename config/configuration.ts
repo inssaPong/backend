@@ -9,7 +9,7 @@ export default () => ({
 
   jwt: {
     secret: process.env.JWT_SECRET,
-    expiration_time: parseInt(process.env.JWT_EXPIRATION_TIME, 10) || 3600,
+    expiration_time: parseInt(process.env.JWT_EXPIRATION_TIME, 10) || 86400,
   },
 
   cookie: {
@@ -21,6 +21,10 @@ export default () => ({
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
     from: process.env.MAIL_FROM,
+  },
+
+  twofactor: {
+    expiration_time: parseInt(process.env.TWOFACTOR_EXPIRATION_TIME, 10) || 180,
   },
 
   database: {
