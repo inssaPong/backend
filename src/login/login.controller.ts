@@ -27,7 +27,7 @@ import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';
 export class LoginController {
   constructor(private readonly mailService: MailService) {}
 
-  logger: Logger = new Logger(LoginController.name);
+  private readonly logger = new Logger(LoginController.name);
 
   @ApiOperation({
     summary: '42 Oauth 로그인',
@@ -56,8 +56,8 @@ export class LoginController {
   })
   @Get('/twofactor')
   async sendTwoFactorMail(@Req() req) {
-    const user_email = req.user.email;
-    await this.mailService.sendMail(user_email);
+    this.logger.log(`GET /login/twofactor`);
+    await this.mailService.sendMail(req.user.id, req.user.email);
   }
 
   // 2차 인증 성공 여부
@@ -73,16 +73,15 @@ export class LoginController {
   })
   @Post('/twofactor')
   async confirmCertificationNumber(@Req() req, @Res() res) {
-    const user_input_number = req.body.CertificationNumber;
-    const status = await this.mailService.confirmCertificationNumber(
-      user_input_number,
-    );
-    if (status === true) {
-      this.logger.log('Secondary Authentication Successful');
+    this.logger.log(`POST /login/twofactor`);
+    try {
+      await this.mailService.confirmCertificationNumber(
+        req.user.id,
+        req.body.CertificationNumber,
+      );
       res.status(200).send();
-    } else {
-      this.logger.error('Secondary authentication failed');
-      throw new BadRequestException();
+    } catch (exception) {
+      throw exception;
     }
   }
 }

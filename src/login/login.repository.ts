@@ -1,36 +1,44 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class LoginRepository {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  logger = new Logger(LoginRepository.name);
+  private readonly logger = new Logger(LoginRepository.name);
 
-  async insertUser(id: string, nickname: string, email: string) {
+  async insertUserDataInUser(user_id: string, nickname: string, email: string) {
+    this.logger.log(`[${this.insertUserDataInUser.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
+      await this.databaseService.runQuery(
         `
         INSERT INTO "user" (id, nickname, email)
-        VALUES ('${id}', '${nickname}', '${email}');
+        VALUES ('${user_id}', '${nickname}', '${email}');
         `,
       );
     } catch (error) {
       this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 
-  async findUser(id: string): Promise<any> {
+  async getUserDataInUser(user_id: string): Promise<any> {
+    this.logger.log(`[${this.getUserDataInUser.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT * FROM "user" WHERE id='${id}';
+        SELECT * FROM "user"
+        WHERE id='${user_id}';
         `,
       );
-      const user = databaseResponse[0];
-      return user;
+      return databaseResponse[0];
     } catch (error) {
       this.logger.error(error);
+      throw new InternalServerErrorException();
     }
   }
 }
