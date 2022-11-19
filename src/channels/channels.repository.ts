@@ -196,7 +196,8 @@ export class ChannelsRepository {
         WHERE id='${channel_id}';
         `,
         );
-      const isValidPw = await bcrypt.compare(input_pw, input_pw);
+      const hashPw = databaseResponse[0].password;
+      const isValidPw = await bcrypt.compare(input_pw, hashPw);
       return isValidPw;
     } catch (error) {
       this.logger.error(error);
