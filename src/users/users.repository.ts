@@ -12,7 +12,7 @@ export class UsersRepository {
         `
 		SELECT *
 		FROM "user"
-		WHERE id=$1;
+		WHERE id = $1;
 		`,
         [id],
       );
@@ -29,7 +29,7 @@ export class UsersRepository {
         `
 		  SELECT winner_id, loser_id
 		  FROM "game_history"
-		  WHERE winner_id=$1 OR loser_id=$1
+		  WHERE winner_id = $1 OR loser_id = $1
 		  ORDER BY id DESC
 		  LIMIT 5;
 		  `,
@@ -46,10 +46,10 @@ export class UsersRepository {
     try {
       const wins = await this.databaseService.runQuery(
         `
-		  SELECT id
-		  FROM "game_history"
-		  WHERE winner_id=$1;
-		  `,
+		SELECT id
+		FROM "game_history"
+		WHERE winner_id = $1;
+		`,
         [id],
       );
       return wins;
@@ -65,7 +65,7 @@ export class UsersRepository {
         `
 		SELECT id
 		FROM "game_history"
-		WHERE loser_id=$1;
+		WHERE loser_id = $1;
 		`,
         [id],
       );
@@ -131,10 +131,10 @@ export class UsersRepository {
     try {
       await this.databaseService.runQuery(
         `
-				UPDATE "user_relation"
-				SET block_status = false
-				WHERE user_id = $1 AND partner_id = $2;
-				`,
+		UPDATE "user_relation"
+		SET block_status = false
+		WHERE user_id = $1 AND partner_id = $2;
+		`,
         [user_id, partner_id],
       );
     } catch (error) {

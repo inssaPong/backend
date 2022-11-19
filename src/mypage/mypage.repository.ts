@@ -12,7 +12,7 @@ export class MypageRepository {
         `
 		SELECT id, nickname, avatar, twofactor_status
 		FROM "user"
-		WHERE id=$1;
+		WHERE id = $1;
 		`,
         [id],
       );
@@ -98,7 +98,7 @@ export class MypageRepository {
         `
 		SELECT partner_id
 		FROM "user_relation"
-		WHERE user_id=$1 AND block_status=false;
+		WHERE user_id = $1 AND block_status = false;
 		`,
         [id],
       );
@@ -115,7 +115,7 @@ export class MypageRepository {
         `
 		SELECT winner_id, loser_id
 		FROM "game_history"
-		WHERE winner_id=$1 OR loser_id=$1
+		WHERE winner_id = $1 OR loser_id = $1
 		ORDER BY id DESC
 		LIMIT 5;
 		`,
@@ -134,7 +134,7 @@ export class MypageRepository {
         `
 		SELECT id
 		FROM "game_history"
-		WHERE winner_id=$1;
+		WHERE winner_id = $1;
 		`,
         [id],
       );
@@ -151,7 +151,7 @@ export class MypageRepository {
         `
 		SELECT id
 		FROM "game_history"
-		WHERE loser_id=$1;
+		WHERE loser_id = $1;
 		`,
         [id],
       );
