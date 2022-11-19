@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { property } from 'lodash';
 import { DatabaseService } from 'src/database/database.service';
-import { GameStatDto } from './dto/create-mypage.dto';
 import { UpdateUserInfoDto } from './dto/update-mypage.dto';
 
 @Injectable()
@@ -13,7 +11,7 @@ export class MypageRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		SELECT nickname, avatar, twofactor_status
+		SELECT id, nickname, avatar, twofactor_status
 		FROM "user"
 		WHERE id='${id}';
 		`,
@@ -25,20 +23,66 @@ export class MypageRepository {
     }
   }
 
-  async patchUserInfo(id: string, body: UpdateUserInfoDto) {
+  async updateNickname(id: string, nickname: string) {
     try {
-      for (let [key, value] of Object.entries(body)) {
-        await this.databaseService.runQuery(
-          `
-				UPDATE "user"
-				SET ${key} = '${value}'
-				WHERE id='${id}';
-			  `,
-        );
-      }
+      await this.databaseService.runQuery(
+        `
+			UPDATE "user"
+			SET nickname = '${nickname}'
+			WHERE id='${id}';
+			`,
+      );
       return 200;
     } catch (error) {
-      this.logger.error(`patchUserInfo: ${error}`);
+      this.logger.error(`updateNickname: ${error}`);
+      throw error;
+    }
+  }
+
+  async updateAvatar(id: string, avatar: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+			UPDATE "user"
+			SET avatar = '${avatar}'
+			WHERE id='${id}';
+			`,
+      );
+      return 200;
+    } catch (error) {
+      this.logger.error(`updateAvatar: ${error}`);
+      throw error;
+    }
+  }
+
+  async deleteAvatar(id: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+			UPDATE "user"
+			SET avatar = null
+			WHERE id='${id}';
+			`,
+      );
+      return 200;
+    } catch (error) {
+      this.logger.error(`deleteAvatar: ${error}`);
+      throw error;
+    }
+  }
+
+  async updateTwofactor(id: string, twofactor: boolean) {
+    try {
+      await this.databaseService.runQuery(
+        `
+		UPDATE "user"
+		SET twofactor_status = ${twofactor}
+		WHERE id='${id}';
+		`,
+      );
+      return 200;
+    } catch (error) {
+      this.logger.error(`updateTwofactor: ${error}`);
       throw error;
     }
   }

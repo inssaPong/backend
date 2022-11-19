@@ -86,6 +86,13 @@ export class UserInfoDto {
   @IsNotEmpty()
   @MaxLength(10)
   @MinLength(1)
+  @ApiProperty({ description: '아이디' })
+  readonly id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(10)
+  @MinLength(1)
   @ApiProperty({ description: '닉네임' })
   readonly nickname: string;
 
@@ -95,7 +102,13 @@ export class UserInfoDto {
   @IsBoolean()
   @ApiProperty({ description: '팔로우 여부' })
   readonly follow_status: boolean;
-  constructor(nickname: string, avatar: string, follow_status: boolean) {
+  constructor(
+    id: string,
+    nickname: string,
+    avatar: string,
+    follow_status: boolean,
+  ) {
+    this.id = id;
     this.nickname = nickname;
     this.avatar = `${avatar}`;
     this.follow_status = follow_status;

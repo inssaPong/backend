@@ -76,7 +76,7 @@ export class UsersRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		  SELECT nickname, avatar
+		  SELECT id, nickname, avatar
 		  FROM "user"
 		  WHERE id='${id}';
 		  `,
@@ -120,30 +120,31 @@ export class UsersRepository {
     }
   }
 
-  async onFollowStatus(user_id: string, partner_id: string) {
+  async updateFollowStatus(user_id: string, partner_id: string) {
     try {
-      const checkBlock = await this.getBlockStatus(user_id, partner_id);
-      if (checkBlock.length == 1) {
-        await this.databaseService.runQuery(
-          `
+      await this.databaseService.runQuery(
+        `
 				UPDATE "user_relation"
 				SET block_status = false
 				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}';
 				`,
-        );
-      } else if (checkBlock.length == 0) {
-        await this.databaseService.runQuery(
-          `
-					INSERT INTO "user_relation" (user_id, partner_id)
-					VALUES ('${user_id}', '${partner_id}');
-					`,
-        );
-      } else {
-        throw new Error(`Invalid checkBlock length: ${checkBlock.length}`);
-      }
-      return 200;
+      );
     } catch (error) {
-      this.logger.error(`onFollowStatus: ${error}`);
+      this.logger.error(`updateFollowStatus: ${error}`);
+      throw error;
+    }
+  }
+
+  async insertFollowStatus(user_id: string, partner_id: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+			INSERT INTO "user_relation" (user_id, partner_id)
+			VALUES ('${user_id}', '${partner_id}');
+			`,
+      );
+    } catch (error) {
+      this.logger.error(`insertFollowStatus: ${error}`);
       throw error;
     }
   }

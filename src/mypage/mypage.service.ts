@@ -1,7 +1,34 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { DEFAULTIMAGE } from 'src/users/users.definition';
+import { UpdateUserInfoDto } from './dto/update-mypage.dto';
+import { MypageRepository } from './mypage.repository';
 
 @Injectable()
 export class MypageService {
+  private readonly logger: Logger = new Logger(MypageService.name);
+  constructor(private readonly mypageRepository: MypageRepository) {}
+  getDefaultImage(): string {
+    return DEFAULTIMAGE;
+  }
+
+  async updateUserInfo(id: string, body: UpdateUserInfoDto) {
+    try {
+      for (let [key, value] of Object.entries(body)) {
+        if (key == 'nickname')
+          await this.mypageRepository.updateNickname(id, value);
+        else if (key == 'avatar') {
+          if (body.avatar == null) await this.mypageRepository.deleteAvatar(id);
+          else await this.mypageRepository.updateAvatar(id, value);
+        } else if (key == 'twofactor_status')
+          await this.mypageRepository.updateTwofactor(id, value);
+        else throw BadRequestException;
+      }
+    } catch (error) {
+      this.logger.error(`${this.updateUserInfo.name}: ${error}`);
+      throw error;
+    }
+  }
+
   printObject(objectName: string, object: Object, logger: Logger) {
     logger.debug(`print object <${objectName}> {`);
     for (let [key, value] of Object.entries(object)) {

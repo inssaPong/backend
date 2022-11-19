@@ -54,8 +54,11 @@ export class MypageController {
   async getUserInfo(@Req() req, @Res() res: Response) {
     try {
       const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
-      if (userInfoDB.length <= 0) throw new NotFoundException();
+      if (userInfoDB.length <= 0) throw NotFoundException;
+      if (userInfoDB[0][`avatar`] == null)
+        userInfoDB[0][`avatar`] = this.mypageService.getDefaultImage();
       const userinfo: UserInfoDto = {
+        id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],
         avatar: `${userInfoDB[0]['avatar']}`,
         twofactor_status: userInfoDB[0]['twofactor_status'],
@@ -91,7 +94,7 @@ export class MypageController {
   ) {
     try {
       this.mypageService.printObject('UpdateUserInfo', body, this.logger);
-      await this.mypageRepository.patchUserInfo(req.user.id, body);
+      await this.mypageService.updateUserInfo(req.user.id, body);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.patchUserInfo.name}] ${error}`);
@@ -181,13 +184,15 @@ export class MypageController {
   @Get('/gameStat')
   async getGameStat(@Req() req, @Res() res: Response) {
     try {
-      const winHistory = await this.mypageRepository.getWinHistory(req.user.id);
-      const loseHistory = await this.mypageRepository.getLoseHistory(
+      const winHistoryDB = await this.mypageRepository.getWinHistory(
+        req.user.id,
+      );
+      const loseHistoryDB = await this.mypageRepository.getLoseHistory(
         req.user.id,
       );
       const gameStat: GameStatDto = {
-        wins: winHistory.length,
-        loses: loseHistory.length,
+        wins: winHistoryDB.length,
+        loses: loseHistoryDB.length,
       };
       this.mypageService.printObject('gameStat', gameStat, this.logger);
       res.status(200).send(gameStat);
