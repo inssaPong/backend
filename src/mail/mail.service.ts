@@ -1,5 +1,12 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 
 @Injectable()
@@ -7,23 +14,25 @@ export class MailService {
   constructor(
     private readonly mailerService: MailerService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private configService: ConfigService,
   ) {}
+
   logger = new Logger(MailService.name);
 
-  async sendMail(email: string) {
+  async sendMail(user_id: string, email: string) {
     try {
-      const certification_number = Math.random().toString(36).substring(2);
+      const certificationNumber = Math.random().toString(36).substring(2);
       this.logger.debug(`email: ${email}`);
-      this.logger.debug(`certified number: ${certification_number}`);
+      this.logger.debug(`certified number: ${certificationNumber}`);
       const mailOptions = {
         to: email,
         subject: '인증 번호 요청 메일',
-        html: '인증 코드: ' + `<b> ${certification_number} </b>`,
+        html: '인증 코드: ' + `<b> ${certificationNumber} </b>`,
       };
       await this.cacheManager.set(
-        'certification_number',
-        certification_number,
-        3600, // TODO: 수정. env로 추가
+        `${user_id}_twofactor`,
+        certificationNumber,
+        this.configService.get<number>('twofactor.expiration_time'),
       );
       await this.mailerService.sendMail(mailOptions);
     } catch (error) {
@@ -31,16 +40,18 @@ export class MailService {
     }
   }
 
-  async confirmCertificationNumber(input: string) {
+  async confirmCertificationNumber(user_id: string, input_number: string) {
     try {
-      const certification_number = await this.cacheManager.get(
-        'certification_number',
+      const certificationNumber = await this.cacheManager.get(
+        `${user_id}_twofactor`,
       );
-      this.logger.debug(`input number: ${input}`);
-      if (certification_number !== input) return false;
-      else return true;
-    } catch (error) {
-      this.logger.error(error);
+      if (certificationNumber !== input_number) {
+        throw '';
+      }
+      this.logger.log('Secondary Authentication Successful');
+    } catch (exception) {
+      this.logger.error('Secondary authentication failed');
+      throw new BadRequestException();
     }
   }
 }
