@@ -22,7 +22,6 @@ export class JwtSignGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
     const user = req.user;
-    // const referer = req.headers.referer;
     const referer = 'http://localhost:8080/';
     if (user === undefined) {
       this.logger.log('Undefined user');
