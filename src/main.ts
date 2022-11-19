@@ -29,8 +29,7 @@ async function bootstrap() {
   // app.use(cookieParser(process.env.COOKIE_SECRET)); // TODO: Env config. Encrypt cookie
   const DOMAIN = process.env.DOMAIN;
   const PORT = process.env.BACKEND_PORT;
-  // app.enableShutdownHooks(); // TODO: 버그
-  app.use(json({limit: '1mb'}));
+  app.use(json({ limit: '1mb' }));
   await app.listen(PORT);
 
   const logger = new Logger(bootstrap.name);
