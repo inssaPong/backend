@@ -77,5 +77,5 @@ export class RequestBodyConnectDmDto {
     default: 'sanjeon',
     required: true,
   })
-  reciever_id: number;
+  receiver_id: number;
 }
