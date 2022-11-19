@@ -5,16 +5,17 @@ import {
   IsString,
   Length,
   MaxLength,
+  MinLength,
 } from 'class-validator';
 
-export class ChannelTableDto {
+export class ChannelDto {
   @IsNumber()
   @IsNotEmpty()
-  @MaxLength(10)
   readonly id: number;
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(1)
   @MaxLength(20)
   readonly name: string;
 
@@ -30,6 +31,7 @@ export class ChannelMemberTableDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(1)
   @MaxLength(10)
   user_id: string;
 
