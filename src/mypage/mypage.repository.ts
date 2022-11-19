@@ -1,36 +1,38 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import { UpdateUserInfoDto } from './dto/update-mypage.dto';
 
 @Injectable()
 export class MypageRepository {
   private readonly logger = new Logger(MypageRepository.name);
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async getUserInfo(id: string) {
+  async getUserInfo(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
 		SELECT id, nickname, avatar, twofactor_status
 		FROM "user"
-		WHERE id='${id}';
+		WHERE id = $1;
 		`,
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
       this.logger.error(`[${this.getUserInfo.name}] ${error}`);
+      console.log(error);
       throw error;
     }
   }
 
-  async updateNickname(id: string, nickname: string) {
+  async updateNickname(user_id: string, nickname: string) {
     try {
       await this.databaseService.runQuery(
         `
-			UPDATE "user"
-			SET nickname = '${nickname}'
-			WHERE id='${id}';
-			`,
+		UPDATE "user"
+		SET nickname = $1
+		WHERE id = $2;
+		`,
+        [nickname, user_id],
       );
       return 200;
     } catch (error) {
@@ -39,14 +41,15 @@ export class MypageRepository {
     }
   }
 
-  async updateAvatar(id: string, avatar: string) {
+  async updateAvatar(user_id: string, avatar: string) {
     try {
       await this.databaseService.runQuery(
         `
-			UPDATE "user"
-			SET avatar = '${avatar}'
-			WHERE id='${id}';
-			`,
+		UPDATE "user"
+		SET avatar = $1
+		WHERE id = $2;
+		`,
+        [avatar, user_id],
       );
       return 200;
     } catch (error) {
@@ -55,14 +58,15 @@ export class MypageRepository {
     }
   }
 
-  async deleteAvatar(id: string) {
+  async deleteAvatar(user_id: string) {
     try {
       await this.databaseService.runQuery(
         `
-			UPDATE "user"
-			SET avatar = null
-			WHERE id='${id}';
-			`,
+		UPDATE "user"
+		SET avatar = null
+		WHERE id = $1;
+		`,
+        [user_id],
       );
       return 200;
     } catch (error) {
@@ -71,14 +75,15 @@ export class MypageRepository {
     }
   }
 
-  async updateTwofactor(id: string, twofactor: boolean) {
+  async updateTwofactor(user_id: string, twofactor: boolean) {
     try {
       await this.databaseService.runQuery(
         `
 		UPDATE "user"
-		SET twofactor_status = ${twofactor}
-		WHERE id='${id}';
+		SET twofactor_status = $1
+		WHERE id = $2;
 		`,
+        [twofactor, user_id],
       );
       return 200;
     } catch (error) {
@@ -87,14 +92,15 @@ export class MypageRepository {
     }
   }
 
-  async getFollows(id: string) {
+  async getFollows(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
 		SELECT partner_id
 		FROM "user_relation"
-		WHERE user_id='${id}' AND block_status=false;
+		WHERE user_id = $1 AND block_status = false;
 		`,
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -103,16 +109,17 @@ export class MypageRepository {
     }
   }
 
-  async getGameHistory(id: string) {
+  async getGameHistory(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
 		SELECT winner_id, loser_id
 		FROM "game_history"
-		WHERE winner_id='${id}' OR loser_id='${id}'
+		WHERE winner_id = $1 OR loser_id = $1
 		ORDER BY id DESC
 		LIMIT 5;
 		`,
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -121,14 +128,15 @@ export class MypageRepository {
     }
   }
 
-  async getWinHistory(id: string) {
+  async getWinHistory(user_id: string) {
     try {
       const wins = await this.databaseService.runQuery(
         `
 		SELECT id
 		FROM "game_history"
-		WHERE winner_id='${id}';
+		WHERE winner_id = $1;
 		`,
+        [user_id],
       );
       return wins;
     } catch (error) {
@@ -137,14 +145,15 @@ export class MypageRepository {
     }
   }
 
-  async getLoseHistory(id: string) {
+  async getLoseHistory(user_id: string) {
     try {
       const loses = await this.databaseService.runQuery(
         `
 		SELECT id
 		FROM "game_history"
-		WHERE loser_id='${id}';
+		WHERE loser_id = $1;
 		`,
+        [user_id],
       );
       return loses;
     } catch (error) {
