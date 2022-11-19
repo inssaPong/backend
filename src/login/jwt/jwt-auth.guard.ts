@@ -48,7 +48,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // Description: DB 체크에 해당 유저가 있는지 검사
     try {
-      const userData = this.loginRepository.getUserDataInUser(user.id);
+      const userData = this.loginRepository.getUserData(user.id);
       if (!userData) {
         this.logger.log('Unauthorized users');
         throw new UnauthorizedException();

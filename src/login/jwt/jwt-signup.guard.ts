@@ -34,18 +34,18 @@ export class JwtSignGuard implements CanActivate {
     });
 
     try {
-      const userData = await this.loginRepository.getUserDataInUser(user.id);
+      const userData = await this.loginRepository.getUserData(user.id);
       if (userData === undefined) {
         // Description: 해당 유저가 DB에 존재하지 않을 때
         this.logger.log('User does not exist in DB.');
-        this.loginRepository.insertUserDataInUser(user.id, user.id, user.email);
+        this.loginRepository.insertUserData(user.id, user.id, user.email);
         res.redirect(`${referer}editprofile`);
         // socket용 user 객체 생성함
         this.mainGateway.newUser(user.id);
       } else {
         // Description: 해당 유저가 DB에 존재할 때
         this.logger.log('User is in DB.');
-        if (userData.twofactor === true) {
+        if (userData.twofactor_status === true) {
           res.redirect(`${referer}login/twofactor`);
         } else {
           res.redirect(`${referer}home`);
