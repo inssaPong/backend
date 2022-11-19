@@ -137,6 +137,7 @@ export class ChannelsService {
         channel_id,
       );
       if (isBanned) {
+        this.logger.error(`밴 된 대상입니다.`);
         throw new HttpException(
           {
             status: HttpStatus.NO_CONTENT,
@@ -155,12 +156,13 @@ export class ChannelsService {
         this.logger.error('잘못된 채널 비밀번호입니다.');
         throw new ForbiddenException();
       }
-
+      this.logger.log(`비밀번호 인증에 성공했습니다.`);
       // Description: DB channel_member 테이블에 추가
       await this.channelsRepository.insertGuestToChannelMember(
         user_id,
         channel_id,
       );
+      this.logger.log(`${channel_id} 채널 입장에 성공했습니다.`);
     } catch (exception) {
       throw exception;
     }
@@ -170,6 +172,7 @@ export class ChannelsService {
     try {
       const channelName =
         await this.channelsRepository.getChannelNameByChannelId(channel_id);
+      this.logger.log(`채널 이름을 가져왔습니다: ${channelName}`);
       return channelName;
     } catch (exception) {
       throw exception;
@@ -181,6 +184,9 @@ export class ChannelsService {
     try {
       const userIdList =
         await this.channelsRepository.getUserIdListInChannelMember(channel_id);
+      this.logger.log(
+        `${userIdList.length}개의 유저 id 리스트를 가져왔습니다.`,
+      );
       return userIdList;
     } catch (exception) {
       throw exception;
@@ -196,7 +202,9 @@ export class ChannelsService {
           user_id,
           channel_id,
         );
-      this.logger.log(`authority: ${authority}`);
+      this.logger.log(
+        `${channel_id} 채널의 내 권한을 가져왔습니다: ${authority}`,
+      );
 
       // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
       await this.channelsRepository.deleteOneUserInChannelMember(
@@ -204,14 +212,17 @@ export class ChannelsService {
         channel_id,
       );
 
-      // Description: 내가 채널장인 경우 channel_member 테이블에서 해당 채널 모두 삭제. channel 테이블에서 채널 삭제
+      // Description: 내가 채널장인 경우
       if (authority === '1') {
         // Description: channel_id 채널의 메세지 내역 삭제
         await this.channelsRepository.deleteAllMessageInChannel(channel_id);
+        this.logger.log(`${channel_id} 채널의 메세지 내역을 삭제했습니다.`);
 
         // Description: channel_id 채널에 참여 중인 유저 정보 삭제
         await this.channelsRepository.deleteAllUserInChannelMember(channel_id);
-        this.logger.log(`${channel_id} 채널에 참여 중인 유저 정보 제거`);
+        this.logger.log(
+          `${channel_id} 채널에 참여 중인 유저 정보 삭제했습니다.`,
+        );
 
         // Description: 채널 제거
         await this.channelsRepository.deleteChannel(channel_id);
