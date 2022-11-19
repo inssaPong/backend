@@ -6,7 +6,7 @@ export class UsersRepository {
   private readonly logger = new Logger(UsersRepository.name);
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async findUser(id: string) {
+  async findUser(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -14,7 +14,7 @@ export class UsersRepository {
 		FROM "user"
 		WHERE id = $1;
 		`,
-        [id],
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -23,7 +23,7 @@ export class UsersRepository {
     }
   }
 
-  async getGameHistory(id: string) {
+  async getGameHistory(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -33,7 +33,7 @@ export class UsersRepository {
 		  ORDER BY id DESC
 		  LIMIT 5;
 		  `,
-        [id],
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -42,7 +42,7 @@ export class UsersRepository {
     }
   }
 
-  async getWinHistory(id: string) {
+  async getWinHistory(user_id: string) {
     try {
       const wins = await this.databaseService.runQuery(
         `
@@ -50,7 +50,7 @@ export class UsersRepository {
 		FROM "game_history"
 		WHERE winner_id = $1;
 		`,
-        [id],
+        [user_id],
       );
       return wins;
     } catch (error) {
@@ -59,7 +59,7 @@ export class UsersRepository {
     }
   }
 
-  async getLoseHistory(id: string) {
+  async getLoseHistory(user_id: string) {
     try {
       const loses = await this.databaseService.runQuery(
         `
@@ -67,7 +67,7 @@ export class UsersRepository {
 		FROM "game_history"
 		WHERE loser_id = $1;
 		`,
-        [id],
+        [user_id],
       );
       return loses;
     } catch (error) {
@@ -76,7 +76,7 @@ export class UsersRepository {
     }
   }
 
-  async getUserInfo(id: string) {
+  async getUserInfo(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -84,7 +84,7 @@ export class UsersRepository {
 		FROM "user"
 		WHERE id=$1;
 		`,
-        [id],
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
