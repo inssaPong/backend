@@ -6,7 +6,7 @@ import {
 import { DatabaseService } from 'src/database/database.service';
 import {
   ChannelMemberTableDto,
-  ChannelTableDto as ChannelDto,
+  ChannelDto as ChannelDto,
 } from './dto/repository-channels.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -106,7 +106,7 @@ export class ChannelsRepository {
     }
   }
 
-  // Description: 전체 채널 목록 가져오기
+  // Description: 채널 목록 가져오기
   async getAllChannelListIncludePrivate(): Promise<ChannelDto[]> {
     this.logger.log(`[${this.getAllChannelListIncludePrivate.name}]`);
     try {
@@ -196,9 +196,12 @@ export class ChannelsRepository {
         WHERE id='${channel_id}';
         `,
         );
-      const hashPw = databaseResponse[0].password;
-      const isValidPw = await bcrypt.compare(input_pw, hashPw);
-      return isValidPw;
+      const password = databaseResponse[0].password;
+      if (password) {
+        const isValidPw = await bcrypt.compare(input_pw, password);
+        return isValidPw;
+      }
+      return password === input_pw ? true : false;
     } catch (error) {
       this.logger.error(error);
       throw error;
