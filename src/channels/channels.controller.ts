@@ -20,7 +20,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ChannelsRepository } from './channels.repository';
 import {
   RequestBodyChannelNameAndPwDto,
   ResponseChannelIdDto,
@@ -34,10 +33,7 @@ import { ChannelsService } from './channels.service';
 @Controller('/channels')
 @ApiTags('채널 API')
 export class ChannelsController {
-  constructor(
-    private readonly channelsService: ChannelsService,
-    private readonly channelsRepository: ChannelsRepository,
-  ) {}
+  constructor(private readonly channelsService: ChannelsService) {}
 
   private readonly logger = new Logger(ChannelsController.name);
 
