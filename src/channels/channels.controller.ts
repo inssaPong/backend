@@ -66,14 +66,14 @@ export class ChannelsController {
     this.logger.log('POST /channels/create');
 
     try {
-      const channel_id =
+      const channelId =
         await this.channelsService.createChannelAndReturnChannelId(
           req.user.id,
           body.name,
           body.pw,
         );
       res.status(201).send({
-        id: channel_id,
+        id: channelId,
       });
     } catch (exception) {
       throw exception;
@@ -194,12 +194,12 @@ export class ChannelsController {
   ) {
     this.logger.log('GET /channels/room/users');
     try {
-      const usersId =
-        await this.channelsRepository.getUserIdListInChannelMember(channel_id);
+      const usersId = await this.channelsService.getUserIdListInChannel(
+        channel_id,
+      );
       res.status(200).send(usersId);
-    } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException();
+    } catch (exception) {
+      throw exception;
     }
   }
 
