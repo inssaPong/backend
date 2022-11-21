@@ -15,13 +15,13 @@ export default async function gameOver(
   if (p1 != undefined) {
     p1.gameInfo.reset();
     p1.setStatusOnline();
-    this.server.emit(`getUserStatus_${p1.id}`, p1.status);
+    gameGateway.mainGateway.server.emit(`getUserStatus_${p1.id}`, p1.status);
   }
   const p2 = gameGateway.mainGateway.users.find((user) => user.id == p2_id);
   if (p2 != undefined) {
     p2.gameInfo.reset();
     p2.setStatusOnline();
-    this.server.emit(`getUserStatus_${p2.id}`, p2.status);
+    gameGateway.mainGateway.server.emit(`getUserStatus_${p2.id}`, p2.status);
   }
 
   let winner_id;
