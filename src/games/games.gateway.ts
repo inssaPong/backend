@@ -75,6 +75,9 @@ export class GameGateway {
     }
     if (this.mainGateway.enterPlayer.length > 1) {
       const p1_p2 = this.getP1P2();
+      if (p1_p2 == undefined) {
+        return;
+      }
       this.startGame(p1_p2.p1, p1_p2.p2);
     }
   }
