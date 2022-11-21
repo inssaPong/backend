@@ -109,6 +109,7 @@ export class ChannelsService {
       // TODO: 수정. dto?
       let channelIdAndNameList = [];
       for (const channelObject of joinedChannelIdList) {
+        if (channelObject.ban_status == true) continue;
         const channelName =
           await this.channelsRepository.getChannelNameByChannelId(
             channelObject.channel_id,
