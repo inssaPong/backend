@@ -27,7 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     try {
       const userData = await this.loginRepository.getUserData(payload.id);
       if (!userData) {
-        this.logger.log('Unauthorized users');
         throw new UnauthorizedException();
       }
       return { id: payload.id, email: payload.email };

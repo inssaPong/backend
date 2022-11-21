@@ -46,8 +46,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       this.logger.log(`status: ${status}`);
     }
     if (err || !user) {
-      this.logger.log(`error: ${err}`);
-      throw new UnauthorizedException();
+      this.logger.error(`${err}`);
+      throw err;
     }
     this.logger.log(`${user.id}는 인가된 유저입니다.`);
     return user;

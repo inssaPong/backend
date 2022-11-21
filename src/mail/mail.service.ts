@@ -48,12 +48,12 @@ export class MailService {
         `${user_id}_twofactor`,
       );
       if (certificationNumber !== input_number) {
-        throw '';
+        throw new BadRequestException('Secondary authentication failed');
       }
       this.logger.log('Secondary Authentication Successful');
-    } catch (exception) {
-      this.logger.error('Secondary authentication failed');
-      throw new BadRequestException();
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
     }
   }
 }
