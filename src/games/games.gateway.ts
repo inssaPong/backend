@@ -82,9 +82,15 @@ export class GameGateway {
   @SubscribeMessage('game/move')
   movePlayer(client: Socket, data: string) {
     const player = this.mainGateway.users.find((user) => user.socket == client);
+    if (player == undefined) {
+      this.logger.log(`[movePlayer] : ${client.id} 이런 일은 있을 수 없음.`);
+    }
     const gameRoom = this.gameRooms.find(
       (room) => room.room_id == player.gameInfo.room_id,
     );
+    if (gameRoom == undefined) {
+      this.logger.log(`[movePlayer] : ${player.gameInfo.room_id} error.`);
+    }
 
     let value = 1;
     if ('up' == data) {
@@ -113,9 +119,15 @@ export class GameGateway {
   @SubscribeMessage('game/giveUp')
   giveUpGame(client: Socket) {
     const player = this.mainGateway.users.find((user) => user.socket == client);
+    if (player == undefined) {
+      this.logger.log(`[giveUpGame] : ${client.id} 이런 일은 있을 수 없음.`);
+    }
     const gameRoom = this.gameRooms.find(
       (gameRoom) => gameRoom.room_id == player.gameInfo.room_id,
     );
+    if (gameRoom == undefined) {
+      this.logger.log(`[giveUpGame] : ${player.gameInfo.room_id} error.`);
+    }
     if (gameRoom.p1_id == player.id) gameRoom.p2_score = GAMEOBJECT.finalScore;
     else gameRoom.p1_score = GAMEOBJECT.finalScore;
     this.mainGateway.server.to(gameRoom.room_id).emit('game/giveUp', player.id);

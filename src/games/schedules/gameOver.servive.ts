@@ -21,7 +21,7 @@ export default async function gameOver(
     p2.gameInfo.reset();
     p2.setStatusOnline();
   }
-  // database에 결과값 저장!!!!!!!!!!!
+
   let winner_id;
   let loser_id;
   if (gameRoom.p1_score == GAMEOBJECT.finalScore) {
