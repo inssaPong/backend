@@ -162,7 +162,7 @@ export class UsersController {
         id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],
         avatar: userInfoDB[0]['avatar'],
-        follow_status: await this.usersService.getFollowStatus(
+        relation_status: await this.usersService.getRelationStatus(
           req.user.id,
           target_id,
         ),

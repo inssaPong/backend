@@ -7,7 +7,9 @@ import {
   MaxLength,
   MinLength,
   IsBoolean,
+  IsEnum,
 } from 'class-validator';
+import { Relation_status } from '../users.definition';
 
 export class ChanageFollowStatusDto {
   @IsString()
@@ -99,18 +101,19 @@ export class UserInfoDto {
   @ApiProperty({ description: '프로필 사진' })
   readonly avatar: string;
 
-  @IsBoolean()
-  @ApiProperty({ description: '팔로우 여부' })
-  readonly follow_status: boolean;
+  @IsEnum(Relation_status)
+  @ApiProperty({ enum: Relation_status, description: '관계 상태' })
+  readonly relation_status: Relation_status;
+
   constructor(
     id: string,
     nickname: string,
     avatar: string,
-    follow_status: boolean,
+    relation_status: Relation_status,
   ) {
     this.id = id;
     this.nickname = nickname;
     this.avatar = `${avatar}`;
-    this.follow_status = follow_status;
+    this.relation_status = relation_status;
   }
 }
