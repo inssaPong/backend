@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Controller,
   Get,
   Logger,
@@ -16,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FtAuthGuard } from './ft_oauth/ft.guard';
-import { JwtSignGuard } from './jwt/jwt-signup.guard';
+import { JwtSignGuard } from './jwt/jwt-sign.guard';
 import { Public } from './public.decorator';
 import { MailService } from 'src/mail/mail.service';
 import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';

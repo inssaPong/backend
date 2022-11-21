@@ -19,6 +19,7 @@ export class JwtSignGuard implements CanActivate {
   private readonly logger = new Logger(JwtSignGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.log('Function: [canActivate]');
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
     const user = req.user;
@@ -49,9 +50,9 @@ export class JwtSignGuard implements CanActivate {
           res.redirect(`${referer}login/twofactor`);
         } else {
           res.redirect(`${referer}home`);
+          return true;
         }
       }
-      return true;
     } catch (exception) {
       throw exception;
     }
