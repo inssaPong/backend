@@ -116,6 +116,9 @@ export class GameGateway {
     const gameRoom = this.gameRooms.find(
       (gameRoom) => gameRoom.room_id == player.gameInfo.room_id,
     );
+    if (gameRoom.p1_id == player.id) gameRoom.p2_score = GAMEOBJECT.finalScore;
+    else gameRoom.p1_score = GAMEOBJECT.finalScore;
+    this.mainGateway.server.to(gameRoom.room_id).emit('game/giveUp', player.id);
     setTimeout(nextRound, 0, gameRoom, this);
   }
 
