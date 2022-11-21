@@ -163,19 +163,19 @@ export class ChannelGateway {
       client.emit('DBError');
       return;
     }
-    roomMembers.forEach(async (element) => {
+    for (const member of roomMembers) {
       const db_result = await this.channelsRepository.isBlockedUser(
         user_id,
-        element.user_id,
+        member.user_id,
       );
       if (db_result == 200) {
-        block_user.push(element.user_id);
+        block_user.push(member.user_id);
       }
       if (db_result == 500) {
         client.emit('DBError');
         return;
       }
-    });
+    }
     return block_user;
   }
 
