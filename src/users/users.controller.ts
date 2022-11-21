@@ -207,7 +207,7 @@ export class UsersController {
       await this.usersService.checkUserExist(req.user.id);
       await this.usersService.checkUserExist(body.partner_id);
 
-      if (req.user.id == body.partner_id) throw new BadRequestException();
+      if (req.user.id == body.partner_id) throw new BadRequestException('자기 자신을 follow 할 수 없음');
       if (body.follow_status == false) {
         await this.usersRepository.offFollowStatus(
           req.user.id,
