@@ -14,6 +14,7 @@ export class MainGateway {
   server: Server;
   users: UserInfo[] = [];
   enterPlayer: Socket[] = [];
+  invitePlayer: Socket[] = [];
   private readonly logger: Logger = new Logger(MainGateway.name);
   constructor(private mainSocketRepository: MainSocketRepository) {}
 
@@ -23,13 +24,10 @@ export class MainGateway {
 
   handleConnection(client: Socket) {
     this.setOnline(client);
-    this.logger.log(`Client Connected : ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
     this.userDisconnect(client);
-    this.enterPlayer = this.enterPlayer.filter((element) => element != client);
-    this.logger.log(`Client Disconnected : ${client.id}`);
   }
 
   setOnline(client: Socket) {

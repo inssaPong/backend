@@ -16,7 +16,7 @@ export class GamesRepository {
       );
       return 201;
     } catch (error) {
-      console.log('[GameDB]insertGameHistory : ' + error);
+      this.logger.log('[insertGameHistory] : ' + error);
       return 500;
     }
   }
