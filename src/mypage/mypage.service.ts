@@ -21,7 +21,7 @@ export class MypageService {
           else await this.mypageRepository.updateAvatar(id, value);
         } else if (key == 'twofactor_status')
           await this.mypageRepository.updateTwofactor(id, value);
-        else throw BadRequestException;
+        else throw new BadRequestException('DTO에 맞지 않는 객체');
       }
     } catch (error) {
       this.logger.error(`${this.updateUserInfo.name}: ${error}`);
