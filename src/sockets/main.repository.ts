@@ -16,8 +16,8 @@ export class MainSocketRepository {
 		    `,
       );
       return databaseResponse;
-    } catch (error) {
-      console.log(`[MainSocketRepository] error`);
+    } catch (err) {
+      this.logger.log(err);
       return databaseResponse;
     }
   }

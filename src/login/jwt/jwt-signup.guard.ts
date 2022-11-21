@@ -32,7 +32,6 @@ export class JwtSignGuard implements CanActivate {
     res.cookie('Authorization', access_token, {
       // httpOnly: true, // TODO: true일때 보안은 좋으나 클라이언트에서 접근 불가. 어떻게 하지?
     });
-
     try {
       const userData = await this.loginRepository.getUserData(user.id);
       if (userData === undefined) {
