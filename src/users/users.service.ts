@@ -4,7 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DEFAULTIMAGE } from './users.definition';
+import { DEFAULTIMAGE, Relation_status } from './users.definition';
 import { UsersRepository } from './users.repository';
 
 @Injectable()
@@ -12,21 +12,24 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async getFollowStatus(user_id: string, partner_id: string) {
+  async getRelationStatus(user_id: string, partner_id: string) : Promise<Relation_status> {
     try {
-      const followStatusDB = await this.usersRepository.getFollowStatus(
+      const relationStatusDB = await this.usersRepository.getRelationStatus(
         user_id,
         partner_id,
       );
-      if (followStatusDB.length == 0) {
-        return false;
-      } else if (followStatusDB.length == 1) {
-        return true;
+      if (relationStatusDB.length == 0) {
+        return Relation_status.UNFOLLOW;
+      } else if (relationStatusDB.length == 1) {
+		if (relationStatusDB[0]['block_status'] == false)
+        	return Relation_status.FOLLOW;
+		else
+			return Relation_status.BLOCK;
       } else {
         throw new InternalServerErrorException('서버 에러');
       }
     } catch (error) {
-      this.logger.error(`${this.getFollowStatus.name}: ${error}`);
+      this.logger.error(`${this.getRelationStatus.name}: ${error}`);
       throw error;
     }
   }
