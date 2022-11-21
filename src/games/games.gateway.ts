@@ -21,7 +21,7 @@ export class GameGateway {
   @SubscribeMessage('game/invite')
   gameInvite(client: Socket, data: string) {
     const req = JSON.parse(data);
-    // this.enterInvitePlayerQueue(client);
+    this.enterInvitePlayerQueue(client);
     const partner = this.mainGateway.users.find(
       (user) => user.id == req.partner_id,
     );
@@ -36,36 +36,13 @@ export class GameGateway {
       return;
     }
     partner.socket.emit('game/invite', req.user_id);
+    client.emit('game/successInvited');
   }
 
   @SubscribeMessage('game/acceptedInvite')
   gameAcceptedInvite(client: Socket, data: string) {
     const req = JSON.parse(data);
-    const player = this.mainGateway.users.find(
-      (user) => user.id == req.user_id,
-    );
-    const partner = this.mainGateway.users.find(
-      (user) => user.id == req.partner_id,
-    );
-    if (player == undefined) {
-      this.logger.log(
-        `[gameInvite] : ${req.partner_id} 이런 일은 있을 수 없음.`,
-      );
-      return;
-    }
-    if (player.status != USERSTATUS.online) {
-      client.emit('game/failAcceptInvite', req.user_id);
-      return;
-    }
-    if (partner == undefined) {
-      this.logger.log(
-        `[gameInvite] : ${req.partner_id} 이런 일은 있을 수 없음.`,
-      );
-      return;
-    }
-    player.setStatusGaming();
-    partner.setStatusGaming();
-    this.startGame(player, partner);
+    this.checkInvitePlayers(req, client);
   }
 
   @SubscribeMessage('game/watch')
@@ -94,7 +71,6 @@ export class GameGateway {
       this.mainGateway.enterPlayer.find((element) => element == client) ==
       undefined
     ) {
-      this.logger.log(`${client.id} enter!!!!!`);
       this.mainGateway.enterPlayer.push(client);
     }
     if (this.mainGateway.enterPlayer.length > 1) {
@@ -143,6 +119,16 @@ export class GameGateway {
     setTimeout(nextRound, 0, gameRoom, this);
   }
 
+  @SubscribeMessage('game/exitWaiting')
+  exitWaiting(client: Socket) {
+    this.mainGateway.enterPlayer = this.mainGateway.enterPlayer.filter(
+      (element) => element != client,
+    );
+    this.mainGateway.invitePlayer = this.mainGateway.invitePlayer.filter(
+      (element) => element != client,
+    );
+  }
+
   getP1P2() {
     let room_id: string;
     const p1 = this.mainGateway.users.find(
@@ -168,10 +154,6 @@ export class GameGateway {
 
     room_id = p1.id + '_' + p2.id;
     this.mainGateway.enterPlayer.splice(0, 2);
-    p1.gameInfo.init(p1.id, p2.id, room_id);
-    p2.gameInfo.init(p1.id, p2.id, room_id);
-    p1.setStatusGaming();
-    p2.setStatusGaming();
     return { p1, p2 };
   }
 
@@ -183,6 +165,10 @@ export class GameGateway {
     gameRoom.p2_id = p2.id;
     p1.socket.join(room_id);
     p2.socket.join(room_id);
+    p1.gameInfo.init(p1.id, p2.id, room_id);
+    p2.gameInfo.init(p1.id, p2.id, room_id);
+    p1.setStatusGaming();
+    p2.setStatusGaming();
     this.gameRooms.push(gameRoom);
     this.mainGateway.server.to(room_id).emit('game/start', p1.id, p2.id);
     this.mainGateway.server
@@ -215,5 +201,48 @@ export class GameGateway {
       this.logger.log(`${client.id} invite game queue enter!!!!!`);
       this.mainGateway.invitePlayer.push(client);
     }
+  }
+
+  checkInvitePlayers(req: any, client: Socket) {
+    const player = this.mainGateway.users.find(
+      (user) => user.id == req.user_id,
+    );
+    const partner = this.mainGateway.users.find(
+      (user) => user.id == req.partner_id,
+    );
+    if (player == undefined) {
+      this.logger.log(
+        `[checkInvitePlayers] : ${req.user_id} 이런 일은 있을 수 없음.`,
+      );
+      return;
+    }
+    if (player.status != USERSTATUS.online) {
+      client.emit('game/failAcceptInvite', req.user_id);
+      return;
+    }
+    if (partner == undefined) {
+      this.logger.log(
+        `[checkInvitePlayers] : ${req.partner_id} 이런 일은 있을 수 없음.`,
+      );
+      return;
+    }
+    if (partner.status != USERSTATUS.online) {
+      client.emit('game/failAcceptInvite', req.partner_id);
+      return;
+    }
+    const p1 = this.mainGateway.invitePlayer.find(
+      (user) => user.id == player.socket.id,
+    );
+    const p2 = this.mainGateway.invitePlayer.find(
+      (user) => user.id == partner.socket.id,
+    );
+    if (p1 == undefined && p2 == undefined) {
+      client.emit('game/notInvited', req.partner_id);
+      return;
+    }
+    if (p1 != undefined) {
+      return;
+    }
+    this.startGame(player, partner);
   }
 }

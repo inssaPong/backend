@@ -28,10 +28,6 @@ export class MainGateway {
 
   handleDisconnect(client: Socket) {
     this.userDisconnect(client);
-    this.enterPlayer = this.enterPlayer.filter((element) => element != client);
-    this.invitePlayer = this.invitePlayer.filter(
-      (element) => element != client,
-    );
   }
 
   setOnline(client: Socket) {
