@@ -150,7 +150,7 @@ export class ChannelsRepository {
       const databaseResopnse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT channel_id FROM "channel_member"
+        SELECT channel_id, ban_status FROM "channel_member"
         WHERE user_id='${user_id}';
         `,
         );
