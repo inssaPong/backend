@@ -246,10 +246,10 @@ export class ChannelGateway {
     }
 
     const salt = await bcrypt.genSalt();
-    password = await bcrypt.hash(password, salt);
+    const salt_password = await bcrypt.hash(password, salt);
     const db_result = await this.channelsRepository.changeChannelPassword(
       req.channel_id,
-      password,
+      salt_password,
     );
     if (db_result == 500) {
       client.emit('DBError');
