@@ -47,7 +47,7 @@ export class JwtSignGuard implements CanActivate {
         // Description: 해당 유저가 DB에 존재할 때
         this.logger.log('User is in DB.');
         if (userData.twofactor_status === true) {
-          res.redirect(`${referer}login/twofactor`);
+          res.redirect(`${referer}twofactor`);
         } else {
           res.redirect(`${referer}home`);
           return true;
