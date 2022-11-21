@@ -19,6 +19,7 @@ export class JwtSignGuard implements CanActivate {
   private readonly logger = new Logger(JwtSignGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.log('[canActivate]');
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
     const user = req.user;
@@ -37,7 +38,7 @@ export class JwtSignGuard implements CanActivate {
       if (userData === undefined) {
         // Description: 해당 유저가 DB에 존재하지 않을 때
         this.logger.log('User does not exist in DB.');
-        this.loginRepository.insertUserData(user.id, user.id, user.email);
+        await this.loginRepository.insertUserData(user.id, user.id, user.email);
         res.redirect(`${referer}editprofile`);
         // socket용 user 객체 생성함
         this.mainGateway.newUser(user.id);
@@ -45,12 +46,12 @@ export class JwtSignGuard implements CanActivate {
         // Description: 해당 유저가 DB에 존재할 때
         this.logger.log('User is in DB.');
         if (userData.twofactor_status === true) {
-          res.redirect(`${referer}login/twofactor`);
+          res.redirect(`${referer}twofactor`);
         } else {
           res.redirect(`${referer}home`);
+          return true;
         }
       }
-      return true;
     } catch (exception) {
       throw exception;
     }
