@@ -285,7 +285,10 @@ export class ChannelGateway {
       admin_id,
       req.channel_id,
     );
-    if (possible_authority == false) return;
+    if (possible_authority == false) {
+      client.emit('channel/commandFailed', `${admin_id}의 권한이 더 높습니다.`);
+      return;
+    }
 
     const db_result = await this.channelsRepository.changeChannelAuthority(
       admin_id,
@@ -326,7 +329,10 @@ export class ChannelGateway {
       kick_id,
       req.channel_id,
     );
-    if (possible_authority == false) return;
+    if (possible_authority == false) {
+      client.emit('channel/commandFailed', `${kick_id}의 권한이 더 높습니다.`);
+      return;
+    }
 
     try {
       await this.channelsRepository.exitChannel(kick_id, req.channel_id);
@@ -359,7 +365,10 @@ export class ChannelGateway {
       mute_id,
       req.channel_id,
     );
-    if (possible_authority == false) return;
+    if (possible_authority == false) {
+      client.emit('channel/commandFailed', `${mute_id}의 권한이 더 높습니다.`);
+      return;
+    }
 
     await this.cacheManager.set(
       `mute_${mute_id}`,
@@ -392,7 +401,10 @@ export class ChannelGateway {
       ban_id,
       req.channel_id,
     );
-    if (possible_authority == false) return;
+    if (possible_authority == false) {
+      client.emit('channel/commandFailed', `${ban_id}의 권한이 더 높습니다.`);
+      return;
+    }
 
     const db_result = await this.channelsRepository.patchBanStatus(
       ban_id,
@@ -428,6 +440,6 @@ export class ChannelGateway {
     const user2_authority = await this.getAuthority(client, user2, channel_id);
 
     if (user1_authority <= user2_authority) return true;
-    else false;
+    else return false;
   }
 }
