@@ -58,6 +58,7 @@ export class UsersController {
   async findUser(@Query('id') id: string, @Res() res: Response) {
     try {
       await this.usersService.checkUserExist(id);
+      this.logger.log(`${id} 유저 존재`);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.findUser.name}] ${error}`);
@@ -90,11 +91,9 @@ export class UsersController {
           winner: element['winner_id'],
           loser: element['loser_id'],
         };
-        this.logger.debug(
-          `winner: ${oneGameHistory.winner}, loser: ${oneGameHistory.loser}`,
-        );
         gameHistory.gameHistory.push(oneGameHistory);
       }
+      this.logger.log(`${id}의 전적을 가져오는데 성공`);
       res.status(200).send(gameHistory);
     } catch (error) {
       this.logger.error(`[${this.getGameHistory.name}] ${error}`);
@@ -126,7 +125,7 @@ export class UsersController {
         wins: winHistoryDB.length,
         loses: loseHistoryDB.length,
       };
-      this.usersService.printObject('gameStat', gameStat, this.logger);
+      this.logger.log(`${id}의 승패수를 가져오는데 성공`);
       res.status(200).send(gameStat);
     } catch (error) {
       this.logger.error(`[${this.getGameStat.name}] ${error}`);
@@ -168,7 +167,7 @@ export class UsersController {
           target_id,
         ),
       };
-      this.usersService.printObject('userInfo', userInfo, this.logger);
+      this.logger.log(`${target_id}의 유저 정보를 가져오는데 성공`);
       res.status(200).send(userInfo);
     } catch (error) {
       this.logger.error(`[${this.getUserInfo.name}] ${error}`);
@@ -214,10 +213,10 @@ export class UsersController {
           req.user.id,
           body.partner_id,
         );
-        this.logger.debug('success unfollow');
+        this.logger.log(`${req.user.id}가 ${body.partner_id}를 unfollow`);
       } else if (body.follow_status == true) {
         await this.usersService.onFollowStatus(req.user.id, body.partner_id);
-        this.logger.debug('success follow');
+        this.logger.log(`${req.user.id}가 ${body.partner_id}를 follow`);
       }
       res.status(200).send();
     } catch (error) {
@@ -248,7 +247,7 @@ export class UsersController {
     description: '서버 에러',
   })
   @Patch('block')
-  async blockUser(@Body() body: ApplyBlockDto, @Res() res: Response) {
+  async blockUser(@Body() body: ApplyBlockDto, @Req() req, @Res() res: Response) {
     try {
       await this.usersService.checkUserExist(body.user_id);
       await this.usersService.checkUserExist(body.block_id);
@@ -257,10 +256,11 @@ export class UsersController {
         body.block_id,
       );
       if (relation_status.length == 1)
-        this.usersRepository.blockFollow(body.user_id, body.block_id);
-      else if (relation_status.length == 0)
-        this.usersRepository.blockUnfollow(body.user_id, body.block_id);
-      res.status(200).send();
+		  this.usersRepository.blockFollow(body.user_id, body.block_id);
+		else if (relation_status.length == 0)
+		  this.usersRepository.blockUnfollow(body.user_id, body.block_id);
+		this.logger.log(`${req.user.id}가 ${body.block_id}를 차단`);
+		res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.blockUser.name}] ${error}`);
       throw error;

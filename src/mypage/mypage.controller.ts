@@ -63,7 +63,7 @@ export class MypageController {
         avatar: `${userInfoDB[0]['avatar']}`,
         twofactor_status: userInfoDB[0]['twofactor_status'],
       };
-      this.mypageService.printObject('userInfo', userinfo, this.logger);
+      this.logger.log(`${userinfo.id}의 정보를 가져오는데 성공`);
       res.status(200).send(userinfo);
     } catch (error) {
       this.logger.error(`[${this.getUserInfo.name}] ${error}`);
@@ -93,8 +93,8 @@ export class MypageController {
     @Res() res: Response,
   ) {
     try {
-      this.mypageService.printObject('UpdateUserInfo', body, this.logger);
       await this.mypageService.updateUserInfo(req.user.id, body);
+      this.logger.log(`${req.user.id}의 정보를 업데이트하는데 성공`);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.patchUserInfo.name}] ${error}`);
@@ -121,11 +121,7 @@ export class MypageController {
       for (const element of followsDB) {
         follows.follow.push(element['partner_id'] as string);
       }
-      this.mypageService.printStringArray(
-        'follows',
-        follows.follow,
-        this.logger,
-      );
+      this.logger.log(`${req.user.id}의 follow를 가져오는데 성공`);
       res.status(200).send(follows);
     } catch (error) {
       this.logger.error(`[${this.getFollows.name}] ${error}`);
@@ -158,11 +154,9 @@ export class MypageController {
           winner: element['winner_id'],
           loser: element['loser_id'],
         };
-        this.logger.debug(
-          `winner: ${oneGameHistory.winner}, loser: ${oneGameHistory.loser}`,
-        );
         gameHistory.gameHistory.push(oneGameHistory);
       }
+      this.logger.log(`${req.user.id}의 게임 전적을 가져오는데 성공`);
       res.status(200).send(gameHistory);
     } catch (error) {
       this.logger.error(`[${this.getGameHistory.name}] ${error}`);
@@ -194,7 +188,7 @@ export class MypageController {
         wins: winHistoryDB.length,
         loses: loseHistoryDB.length,
       };
-      this.mypageService.printObject('gameStat', gameStat, this.logger);
+      this.logger.log(`${req.user.id}의 승패 수를 가져오는데 성공`);
       res.status(200).send(gameStat);
     } catch (error) {
       this.logger.error(`[${this.getGameStat.name}] ${error}`);

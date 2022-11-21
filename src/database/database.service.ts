@@ -9,9 +9,7 @@ export class DatabaseService {
   constructor(@Inject('DATABASE_POOL') private pool: Pool) {}
 
   runQuery(queryText: string, param?: unknown[]) {
-    this.logger.debug(`Executing query: ${queryText}`);
     return this.pool.query(queryText, param).then((result: QueryResult) => {
-      this.logger.debug(`Executed query, result size ${result.rows.length}`);
       return result.rows;
     });
   }
