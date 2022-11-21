@@ -405,12 +405,12 @@ export class ChannelsRepository {
     }
   }
 
-  async insertDM(sender_id: string, receive_id: string, content: string) {
+  async insertDM(sender_id: string, receiver_id: string, content: string) {
     try {
       await this.databaseService.runQuery(
         `
-			    INSERT INTO "message" (sender_id, receive_id, content)
-			    VALUES ('${sender_id}', '${receive_id}', '${content}');
+			    INSERT INTO "message" (sender_id, receiver_id, content)
+			    VALUES ('${sender_id}', '${receiver_id}', '${content}');
 		    `,
       );
       return 201;

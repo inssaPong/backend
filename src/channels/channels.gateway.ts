@@ -46,7 +46,7 @@ export class ChannelGateway {
 
     if (req.channel_id != undefined) {
       this.sendMessageToChannel(client, req);
-    } else if (req.receive_id != undefined) {
+    } else if (req.receiver_id != undefined) {
       this.sendMessageDM(client, req);
     }
   }
@@ -103,7 +103,7 @@ export class ChannelGateway {
   async sendMessageDM(client: Socket, req: any) {
     const db_result = await this.channelsRepository.insertDM(
       req.sender_id,
-      req.receive_id,
+      req.receiver_id,
       req.message,
     );
     if (db_result == 500) {
@@ -128,11 +128,11 @@ export class ChannelGateway {
 
   async broadcastToDM(client: Socket, req: any) {
     const receiver = this.mainGateway.users.find(
-      (user) => user.id == req.receive_id,
+      (user) => user.id == req.receiver_id,
     );
     if (receiver == undefined) {
       this.logger.log(
-        `[broadcastToDM] : ${req.receive_id}가 없음. 있을 수 없는 일!`,
+        `[broadcastToDM] : ${req.receiver_id}가 없음. 있을 수 없는 일!`,
       );
     }
     const is_block = await this.channelsRepository.isBlockedUser(
@@ -143,11 +143,11 @@ export class ChannelGateway {
       receiver.socket.emit(
         'DM/send',
         req.sender_id,
-        req.receive_id,
+        req.receiver_id,
         req.message,
       );
     }
-    client.emit('DM/send', req.sender_id, req.receive_id, req.message);
+    client.emit('DM/send', req.sender_id, req.receiver_id, req.message);
   }
 
   async getBlockUsersAmongMember(
