@@ -187,6 +187,8 @@ export class GameGateway {
     p2.gameInfo.init(p1.id, p2.id, room_id);
     p1.setStatusGaming();
     p2.setStatusGaming();
+    this.mainGateway.server.emit(`getUserStatus_${p1.id}`, p1.status);
+    this.mainGateway.server.emit(`getUserStatus_${p2.id}`, p2.status);
     this.gameRooms.push(gameRoom);
     this.mainGateway.server.to(room_id).emit('game/start', p1.id, p2.id);
     this.mainGateway.server

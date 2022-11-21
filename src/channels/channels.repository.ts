@@ -358,11 +358,15 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-          SELECT user_id FROM "channel_member"
+          SELECT user_id, ban_status FROM "channel_member"
           WHERE user_id='${user_id}' AND channel_id=${channel_id};
 		    `,
       );
-      if (databaseResponse.length == 1) return 200;
+      if (
+        databaseResponse.length == 1 &&
+        databaseResponse[0].ban_status == false
+      )
+        return 200;
       else return 400;
     } catch (err) {
       this.logger.log(`[checkEnteredChannel] : ${err}`);
