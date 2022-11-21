@@ -336,6 +336,7 @@ export class ChannelGateway {
 
     try {
       await this.channelsRepository.exitChannel(kick_id, req.channel_id);
+      this.exitSocketEvent(kick_id, 'kick');
       client.emit('channel/send', 'server', `${kick_id}를 kick 완료!`);
     } catch {
       client.emit('DBError');
@@ -414,6 +415,7 @@ export class ChannelGateway {
     if (db_result == 500) {
       client.emit('DBError');
     } else {
+      this.exitSocketEvent(ban_id, 'ban');
       client.emit('channel/send', 'server', `${ban_id}를 ban 함!`);
     }
   }
@@ -441,5 +443,13 @@ export class ChannelGateway {
 
     if (user1_authority <= user2_authority) return true;
     else return false;
+  }
+
+  exitSocketEvent(user_id: string, command: string) {
+    const user = this.mainGateway.users.find((user) => user.id == user_id);
+    if (user == undefined) {
+      this.logger.log(`[exitSocketEvent] ${user_id} 그럴 일 없음...`);
+    }
+    user.socket.emit('channel/exit', command);
   }
 }
