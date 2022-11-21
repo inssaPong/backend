@@ -46,7 +46,7 @@ export class ChannelGateway {
 
     if (req.channel_id != undefined) {
       this.sendMessageToChannel(client, req);
-    } else if (req.receive_id != undefined) {
+    } else if (req.receiver_id != undefined) {
       this.sendMessageDM(client, req);
     }
   }
@@ -103,7 +103,7 @@ export class ChannelGateway {
   async sendMessageDM(client: Socket, req: any) {
     const db_result = await this.channelsRepository.insertDM(
       req.sender_id,
-      req.receive_id,
+      req.receiver_id,
       req.message,
     );
     if (db_result == 500) {
@@ -128,11 +128,11 @@ export class ChannelGateway {
 
   async broadcastToDM(client: Socket, req: any) {
     const receiver = this.mainGateway.users.find(
-      (user) => user.id == req.receive_id,
+      (user) => user.id == req.receiver_id,
     );
     if (receiver == undefined) {
       this.logger.log(
-        `[broadcastToDM] : ${req.receive_id}가 없음. 있을 수 없는 일!`,
+        `[broadcastToDM] : ${req.receiver_id}가 없음. 있을 수 없는 일!`,
       );
     }
     const is_block = await this.channelsRepository.isBlockedUser(
@@ -143,11 +143,11 @@ export class ChannelGateway {
       receiver.socket.emit(
         'DM/send',
         req.sender_id,
-        req.receive_id,
+        req.receiver_id,
         req.message,
       );
     }
-    client.emit('DM/send', req.sender_id, req.receive_id, req.message);
+    client.emit('DM/send', req.sender_id, req.receiver_id, req.message);
   }
 
   async getBlockUsersAmongMember(
@@ -240,13 +240,16 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == 400) return;
+    if (authority == CHANNELAUTHORITY.guest) {
+      client.emit('channel/commandFailed', '권한이 없습니다.');
+      return;
+    }
 
     const salt = await bcrypt.genSalt();
-    password = await bcrypt.hash(password, salt);
+    const salt_password = await bcrypt.hash(password, salt);
     const db_result = await this.channelsRepository.changeChannelPassword(
       req.channel_id,
-      password,
+      salt_password,
     );
     if (db_result == 500) {
       client.emit('DBError');
@@ -271,7 +274,10 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == 400) return;
+    if (authority == CHANNELAUTHORITY.guest) {
+      client.emit('channel/commandFailed', '권한이 없습니다.');
+      return;
+    }
 
     const possible_authority = await this.checkHighAuthority(
       client,
@@ -309,7 +315,10 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == 400) return;
+    if (authority == CHANNELAUTHORITY.guest) {
+      client.emit('channel/commandFailed', '권한이 없습니다.');
+      return;
+    }
 
     const possible_authority = await this.checkHighAuthority(
       client,
@@ -339,7 +348,10 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == 400) return;
+    if (authority == CHANNELAUTHORITY.guest) {
+      client.emit('channel/commandFailed', '권한이 없습니다.');
+      return;
+    }
 
     const possible_authority = await this.checkHighAuthority(
       client,
@@ -369,7 +381,10 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == 400) return;
+    if (authority == CHANNELAUTHORITY.guest) {
+      client.emit('channel/commandFailed', '권한이 없습니다.');
+      return;
+    }
 
     const possible_authority = await this.checkHighAuthority(
       client,
@@ -398,11 +413,7 @@ export class ChannelGateway {
     );
     if (authority == 500) {
       client.emit('DBError');
-      return 400;
-    }
-    if (authority == CHANNELAUTHORITY.guest) {
-      client.emit('channel/commandFailed', '권한이 없습니다.');
-      return 400;
+      return 500;
     }
     return authority;
   }
@@ -416,8 +427,7 @@ export class ChannelGateway {
     const user1_authority = await this.getAuthority(client, user1, channel_id);
     const user2_authority = await this.getAuthority(client, user2, channel_id);
 
-    if (user1_authority == 400 || user2_authority == 400) return false;
-    else if (user1_authority <= user2_authority) return true;
+    if (user1_authority <= user2_authority) return true;
     else false;
   }
 }
