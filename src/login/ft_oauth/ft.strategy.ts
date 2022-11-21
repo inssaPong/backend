@@ -7,7 +7,7 @@ import { Strategy, Profile, VerifyCallback } from 'passport-42';
 export class FtStrategy extends PassportStrategy(Strategy, '42') {
   private readonly logger = new Logger(FtStrategy.name);
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     super({
       clientID: configService.get<string>('ft.uid'),
       clientSecret: configService.get<string>('ft.secret'),
@@ -25,6 +25,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     profile: Profile,
     cb: VerifyCallback,
   ): Promise<any> {
+    this.logger.log('Function: [validate]');
     const user = {
       id: profile.username,
       email: profile.email,
