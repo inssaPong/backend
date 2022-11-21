@@ -39,7 +39,7 @@ export class JwtSignGuard implements CanActivate {
       if (userData === undefined) {
         // Description: 해당 유저가 DB에 존재하지 않을 때
         this.logger.log('User does not exist in DB.');
-        this.loginRepository.insertUserData(user.id, user.id, user.email);
+        await this.loginRepository.insertUserData(user.id, user.id, user.email);
         res.redirect(`${referer}editprofile`);
         // socket용 user 객체 생성함
         this.mainGateway.newUser(user.id);
