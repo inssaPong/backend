@@ -1,8 +1,8 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
   Logger,
   Param,
   Patch,
@@ -57,8 +57,7 @@ export class UsersController {
   @Get()
   async findUser(@Query('id') id: string, @Res() res: Response) {
     try {
-      const userExist = await this.usersRepository.findUser(id);
-      await this.usersService.checkUserExist(userExist);
+      await this.usersService.checkUserExist(id);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.findUser.name}] ${error}`);
@@ -83,8 +82,7 @@ export class UsersController {
   @Get('/gameHistory')
   async getGameHistory(@Query('id') id: string, @Res() res: Response) {
     try {
-      const userExist = await this.usersRepository.findUser(id);
-      await this.usersService.checkUserExist(userExist);
+      await this.usersService.checkUserExist(id);
       const gameHistoryDB = await this.usersRepository.getGameHistory(id);
       const gameHistory: GameHistoryDto = { gameHistory: [] };
       for (const element of gameHistoryDB) {
@@ -121,8 +119,7 @@ export class UsersController {
   @Get('/gameStat')
   async getGameStat(@Query('id') id: string, @Res() res: Response) {
     try {
-      const userExist = await this.usersRepository.findUser(id);
-      await this.usersService.checkUserExist(userExist);
+      await this.usersService.checkUserExist(id);
       const winHistoryDB = await this.usersRepository.getWinHistory(id);
       const loseHistoryDB = await this.usersRepository.getLoseHistory(id);
       const gameStat: GameStatDto = {
@@ -158,31 +155,19 @@ export class UsersController {
     @Res() res: Response,
   ) {
     try {
-      const userExist = await this.usersRepository.findUser(target_id);
-      await this.usersService.checkUserExist(userExist);
+      await this.usersService.checkUserExist(target_id);
       const userInfoDB = await this.usersRepository.getUserInfo(target_id);
-      const followStatusDB = await this.usersRepository.getFollowStatus(
-        req.user.username,
-        target_id,
-      );
-      let userInfo: UserInfoDto;
-      if (followStatusDB.length == 0) {
-        userInfo = new UserInfoDto(
-          userInfoDB[0]['id'],
-          userInfoDB[0][`nickname`],
-          userInfoDB[0][`avatar`],
-          false,
-        );
-      } else if (followStatusDB.length == 1) {
-        userInfo = new UserInfoDto(
-          userInfoDB[0]['id'],
-          userInfoDB[0][`nickname`],
-          userInfoDB[0][`avatar`],
-          true,
-        );
-      } else {
-        throw InternalServerErrorException;
-      }
+      if (userInfoDB[0][`avatar`] == null)
+        userInfoDB[0][`avatar`] = await this.usersService.getDefaultImage();
+      const userInfo: UserInfoDto = {
+        id: userInfoDB[0]['id'],
+        nickname: userInfoDB[0]['nickname'],
+        avatar: userInfoDB[0]['avatar'],
+        follow_status: await this.usersService.getFollowStatus(
+          req.user.id,
+          target_id,
+        ),
+      };
       this.usersService.printObject('userInfo', userInfo, this.logger);
       res.status(200).send(userInfo);
     } catch (error) {
@@ -216,19 +201,22 @@ export class UsersController {
   @Patch('follow')
   async changeFollowStatus(
     @Body() body: ChanageFollowStatusDto,
+    @Req() req,
     @Res() res: Response,
   ) {
     try {
-      const userExist = await this.usersRepository.findUser(body.user_id);
-      await this.usersService.checkUserExist(userExist);
-      const partnerExist = await this.usersRepository.findUser(body.partner_id);
-      await this.usersService.checkUserExist(partnerExist);
+      await this.usersService.checkUserExist(req.user.id);
+      await this.usersService.checkUserExist(body.partner_id);
 
+      if (req.user.id == body.partner_id) throw new BadRequestException();
       if (body.follow_status == false) {
-        this.usersRepository.offFollowStatus(body.user_id, body.partner_id);
+        await this.usersRepository.offFollowStatus(
+          req.user.id,
+          body.partner_id,
+        );
         this.logger.debug('success unfollow');
       } else if (body.follow_status == true) {
-        this.usersRepository.onFollowStatus(body.user_id, body.partner_id);
+        await this.usersService.onFollowStatus(req.user.id, body.partner_id);
         this.logger.debug('success follow');
       }
       res.status(200).send();
@@ -262,10 +250,8 @@ export class UsersController {
   @Patch('block')
   async blockUser(@Body() body: ApplyBlockDto, @Res() res: Response) {
     try {
-      const UserExist = await this.usersRepository.findUser(body.user_id);
-      await this.usersService.checkUserExist(UserExist);
-      const blockUserExist = await this.usersRepository.findUser(body.block_id);
-      await this.usersService.checkUserExist(blockUserExist);
+      await this.usersService.checkUserExist(body.user_id);
+      await this.usersService.checkUserExist(body.block_id);
       const relation_status = await this.usersRepository.getRelationStatus(
         body.user_id,
         body.block_id,

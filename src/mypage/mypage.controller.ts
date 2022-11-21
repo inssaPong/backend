@@ -54,7 +54,9 @@ export class MypageController {
   async getUserInfo(@Req() req, @Res() res: Response) {
     try {
       const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
-      if (userInfoDB.length <= 0) throw new NotFoundException();
+      if (userInfoDB.length <= 0) throw NotFoundException;
+      if (userInfoDB[0][`avatar`] == null)
+        userInfoDB[0][`avatar`] = this.mypageService.getDefaultImage();
       const userinfo: UserInfoDto = {
         id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],
@@ -92,7 +94,7 @@ export class MypageController {
   ) {
     try {
       this.mypageService.printObject('UpdateUserInfo', body, this.logger);
-      await this.mypageRepository.patchUserInfo(req.user.id, body);
+      await this.mypageService.updateUserInfo(req.user.id, body);
       res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.patchUserInfo.name}] ${error}`);

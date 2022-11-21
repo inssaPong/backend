@@ -6,14 +6,15 @@ export class UsersRepository {
   private readonly logger = new Logger(UsersRepository.name);
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async findUser(id: string) {
+  async findUser(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-				SELECT *
-				FROM "user"
-				WHERE id='${id}';
-				`,
+		SELECT *
+		FROM "user"
+		WHERE id = $1;
+		`,
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -22,16 +23,17 @@ export class UsersRepository {
     }
   }
 
-  async getGameHistory(id: string) {
+  async getGameHistory(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
 		  SELECT winner_id, loser_id
 		  FROM "game_history"
-		  WHERE winner_id='${id}' OR loser_id='${id}'
+		  WHERE winner_id = $1 OR loser_id = $1
 		  ORDER BY id DESC
 		  LIMIT 5;
 		  `,
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -40,14 +42,15 @@ export class UsersRepository {
     }
   }
 
-  async getWinHistory(id: string) {
+  async getWinHistory(user_id: string) {
     try {
       const wins = await this.databaseService.runQuery(
         `
-		  SELECT id
-		  FROM "game_history"
-		  WHERE winner_id='${id}';
-		  `,
+		SELECT id
+		FROM "game_history"
+		WHERE winner_id = $1;
+		`,
+        [user_id],
       );
       return wins;
     } catch (error) {
@@ -56,14 +59,15 @@ export class UsersRepository {
     }
   }
 
-  async getLoseHistory(id: string) {
+  async getLoseHistory(user_id: string) {
     try {
       const loses = await this.databaseService.runQuery(
         `
-		  SELECT id
-		  FROM "game_history"
-		  WHERE loser_id='${id}';
-		  `,
+		SELECT id
+		FROM "game_history"
+		WHERE loser_id = $1;
+		`,
+        [user_id],
       );
       return loses;
     } catch (error) {
@@ -72,14 +76,15 @@ export class UsersRepository {
     }
   }
 
-  async getUserInfo(id: string) {
+  async getUserInfo(user_id: string) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		  SELECT id, nickname, avatar
-		  FROM "user"
-		  WHERE id='${id}';
-		  `,
+		SELECT id, nickname, avatar
+		FROM "user"
+		WHERE id=$1;
+		`,
+        [user_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -92,10 +97,11 @@ export class UsersRepository {
     try {
       const databaseResponse = this.databaseService.runQuery(
         `
-				SELECT *
-				FROM "user_relation"
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}' AND block_status = false;
-				`,
+		SELECT *
+		FROM "user_relation"
+		WHERE user_id = $1 AND partner_id = $2 AND block_status = false;
+		`,
+        [user_id, partner_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -108,10 +114,11 @@ export class UsersRepository {
     try {
       const databaseResponse = this.databaseService.runQuery(
         `
-				SELECT *
-				FROM "user_relation"
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}' AND block_status = true;
-				`,
+		SELECT *
+		FROM "user_relation"
+		WHERE user_id = $1 AND partner_id = $2 AND block_status = true;
+		`,
+        [user_id, partner_id],
       );
       return databaseResponse;
     } catch (error) {
@@ -120,30 +127,33 @@ export class UsersRepository {
     }
   }
 
-  async onFollowStatus(user_id: string, partner_id: string) {
+  async updateFollowStatus(user_id: string, partner_id: string) {
     try {
-      const checkBlock = await this.getBlockStatus(user_id, partner_id);
-      if (checkBlock.length == 1) {
-        await this.databaseService.runQuery(
-          `
-				UPDATE "user_relation"
-				SET block_status = false
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}';
-				`,
-        );
-      } else if (checkBlock.length == 0) {
-        await this.databaseService.runQuery(
-          `
-					INSERT INTO "user_relation" (user_id, partner_id)
-					VALUES ('${user_id}', '${partner_id}');
-					`,
-        );
-      } else {
-        throw new Error(`Invalid checkBlock length: ${checkBlock.length}`);
-      }
-      return 200;
+      await this.databaseService.runQuery(
+        `
+		UPDATE "user_relation"
+		SET block_status = false
+		WHERE user_id = $1 AND partner_id = $2;
+		`,
+        [user_id, partner_id],
+      );
     } catch (error) {
-      this.logger.error(`onFollowStatus: ${error}`);
+      this.logger.error(`updateFollowStatus: ${error}`);
+      throw error;
+    }
+  }
+
+  async insertFollowStatus(user_id: string, partner_id: string) {
+    try {
+      await this.databaseService.runQuery(
+        `
+		INSERT INTO "user_relation" (user_id, partner_id)
+		VALUES ($1, $2);
+		`,
+        [user_id, partner_id],
+      );
+    } catch (error) {
+      this.logger.error(`insertFollowStatus: ${error}`);
       throw error;
     }
   }
@@ -152,9 +162,10 @@ export class UsersRepository {
     try {
       this.databaseService.runQuery(
         `
-				DELETE FROM "user_relation"
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}';
-				`,
+		DELETE FROM "user_relation"
+		WHERE user_id = $1 AND partner_id = $2;
+		`,
+        [user_id, partner_id],
       );
       return 200;
     } catch (error) {
@@ -167,10 +178,11 @@ export class UsersRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-				SELECT partner_id
-				FROM "user_relation"
-				WHERE user_id = '${user_id}' AND partner_id = '${partner_id}';
-				`,
+		SELECT partner_id
+		FROM "user_relation"
+		WHERE user_id = $1 AND partner_id = $2;
+		`,
+        [user_id, partner_id],
       );
       if (databaseResponse.length != 1 && databaseResponse.length != 0)
         throw 500;
@@ -185,10 +197,11 @@ export class UsersRepository {
     try {
       await this.databaseService.runQuery(
         `
-				UPDATE "user_relation"
-				SET block_status = true
-				WHERE user_id = '${user_id}' AND partner_id = '${block_id}' AND block_status != true
-				`,
+		UPDATE "user_relation"
+		SET block_status = true
+		WHERE user_id = $1 AND partner_id = $2 AND block_status != true
+		`,
+        [user_id, block_id],
       );
     } catch (error) {
       this.logger.error(`blockFolow: ${error}`);
@@ -200,9 +213,10 @@ export class UsersRepository {
     try {
       await this.databaseService.runQuery(
         `
-				INSERT INTO "user_relation" (user_id, partner_id, block_status)
-				VALUES ('${user_id}', '${block_id}', true);
-				`,
+		INSERT INTO "user_relation" (user_id, partner_id, block_status)
+		VALUES ($1, $2, true);
+		`,
+        [user_id, block_id],
       );
     } catch (error) {
       this.logger.error(`blockUnfollow: ${error}`);
