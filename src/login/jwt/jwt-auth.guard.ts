@@ -1,9 +1,4 @@
-import {
-  ExecutionContext,
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { LoginRepository } from '../login.repository';
@@ -39,22 +34,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     status?: any,
   ) {
     if (info) {
-      this.logger.log(`${info}`);
+      this.logger.log(`info: ${info}`);
+    }
+    if (status) {
+      this.logger.log(`status: ${status}`);
     }
     if (err || !user) {
-      this.logger.log('Unauthorized users');
-      throw new UnauthorizedException();
-    }
-
-    // Description: DB 체크에 해당 유저가 있는지 검사
-    try {
-      const userData = this.loginRepository.getUserData(user.id);
-      if (!userData) {
-        this.logger.log('Unauthorized users');
-        throw new UnauthorizedException();
-      }
-    } catch (exception) {
-      throw exception;
+      this.logger.error(`${err}`);
+      throw err;
     }
     this.logger.log(`${user.id}는 인가된 유저입니다.`);
     return user;
