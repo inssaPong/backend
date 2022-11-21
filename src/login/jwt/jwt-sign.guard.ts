@@ -19,7 +19,7 @@ export class JwtSignGuard implements CanActivate {
   private readonly logger = new Logger(JwtSignGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    this.logger.log('Function: [canActivate]');
+    this.logger.log('[canActivate]');
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
     const user = req.user;

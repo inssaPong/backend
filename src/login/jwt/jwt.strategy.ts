@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   private readonly logger = new Logger(JwtStrategy.name);
 
   async validate(payload: any) {
-    this.logger.log(`Function: [validate]`);
+    this.logger.log(`[validate]`);
     this.logger.debug(`id: ${payload.id}, email: ${payload.email}`);
 
     // Description: DB 체크에 해당 유저가 있는지 검사

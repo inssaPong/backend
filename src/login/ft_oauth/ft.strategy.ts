@@ -25,7 +25,7 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     profile: Profile,
     cb: VerifyCallback,
   ): Promise<any> {
-    this.logger.log('Function: [validate]');
+    this.logger.log('[validate]');
     const user = {
       id: profile.username,
       email: profile.email,
