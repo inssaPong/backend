@@ -16,13 +16,6 @@ export class ChanageFollowStatusDto {
   @IsNotEmpty()
   @MaxLength(10)
   @MinLength(1)
-  @ApiProperty({ description: '유저 아이디' })
-  readonly user_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
   @ApiProperty({ description: '팔로우할 대상 유저 아이디' })
   readonly partner_id: string;
 
@@ -33,13 +26,6 @@ export class ChanageFollowStatusDto {
 }
 
 export class ApplyBlockDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  @ApiProperty({ description: '유저 아이디' })
-  readonly user_id: string;
-
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)
