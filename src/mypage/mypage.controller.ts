@@ -18,12 +18,12 @@ import {
 } from '@nestjs/swagger';
 import {
   GameHistoryDto,
-  UserInfoDto,
+  MypageInfoDto,
   GameStatDto,
   FollowsDto,
   OneGameHistoryDto,
 } from './dto/create-mypage.dto';
-import { UpdateUserInfoDto } from './dto/update-mypage.dto';
+import { UpdateMypageInfoDto } from './dto/update-mypage.dto';
 import { MypageRepository } from './mypage.repository';
 import { MypageService } from './mypage.service';
 import { Response } from 'express';
@@ -45,7 +45,7 @@ export class MypageController {
   })
   @ApiOkResponse({
     description: '성공',
-    type: UserInfoDto,
+    type: MypageInfoDto,
   })
   @ApiInternalServerErrorResponse({
     description: '서버 에러',
@@ -54,10 +54,11 @@ export class MypageController {
   async getUserInfo(@Req() req, @Res() res: Response) {
     try {
       const userInfoDB = await this.mypageRepository.getUserInfo(req.user.id);
-      if (userInfoDB.length <= 0) throw new NotFoundException(`${req.user.id}: 존재하지 않는 유저`);
+      if (userInfoDB.length <= 0)
+        throw new NotFoundException(`${req.user.id}: 존재하지 않는 유저`);
       if (userInfoDB[0][`avatar`] == null)
         userInfoDB[0][`avatar`] = this.mypageService.getDefaultImage();
-      const userinfo: UserInfoDto = {
+      const userinfo: MypageInfoDto = {
         id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],
         avatar: `${userInfoDB[0]['avatar']}`,
@@ -78,7 +79,7 @@ export class MypageController {
 	  \n request body에 UserInfo의 {nickname | avatar | twoFacktor_status} 해당 요소들 중 최소 하나만 존재하면 됨',
   })
   @ApiBody({
-    type: UpdateUserInfoDto,
+    type: UpdateMypageInfoDto,
   })
   @ApiOkResponse({
     description: '성공',
@@ -89,11 +90,11 @@ export class MypageController {
   @Patch()
   async patchUserInfo(
     @Req() req,
-    @Body() body: UpdateUserInfoDto,
+    @Body() body: UpdateMypageInfoDto,
     @Res() res: Response,
   ) {
     try {
-      await this.mypageService.updateUserInfo(req.user.id, body);
+      await this.mypageService.updateMypageInfo(req.user.id, body);
       this.logger.log(`${req.user.id}의 정보를 업데이트하는데 성공`);
       res.status(200).send();
     } catch (error) {

@@ -9,7 +9,7 @@ import {
   IsNumber,
 } from 'class-validator';
 
-export class UserInfoDto {
+export class MypageInfoDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)
