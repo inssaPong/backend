@@ -16,13 +16,6 @@ export class ChanageFollowStatusDto {
   @IsNotEmpty()
   @MaxLength(10)
   @MinLength(1)
-  @ApiProperty({ description: '유저 아이디' })
-  readonly user_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
   @ApiProperty({ description: '팔로우할 대상 유저 아이디' })
   readonly partner_id: string;
 
@@ -30,22 +23,6 @@ export class ChanageFollowStatusDto {
   @IsBoolean()
   @ApiProperty({ description: '팔로우 여부' })
   readonly follow_status: boolean;
-}
-
-export class ApplyBlockDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  @ApiProperty({ description: '유저 아이디' })
-  readonly user_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  @ApiProperty({ description: '차단할 대상 유저 아이디' })
-  readonly block_id: string;
 }
 
 // TODO mypage와 dto 중복되는 거 리팩토링하기
