@@ -424,7 +424,7 @@ export class ChannelsRepository {
     }
   }
 
-  async getAllMessage(channel_id: number) {
+  async getAllMessageChannel(channel_id: number) {
     // todo any 형식 dto로 변경
     let databaseResponse: any[];
     try {
@@ -435,7 +435,25 @@ export class ChannelsRepository {
       );
       return databaseResponse;
     } catch (err) {
-      this.logger.log(`[getAllMessage] : ${err}`);
+      this.logger.log(`[getAllMessageChannel] : ${err}`);
+      return databaseResponse;
+    }
+  }
+
+  async getAllMessageDM(user_id: string, partner_id: string) {
+    // todo any 형식 dto로 변경
+    let databaseResponse: any[];
+    try {
+      databaseResponse = await this.databaseService.runQuery(
+        `
+          SELECT * FROM "message"
+          WHERE (sender_id='${user_id}' AND receiver_id='${partner_id}')
+          OR (sender_id='${partner_id}' AND receiver_id='${user_id}');
+		    `,
+      );
+      return databaseResponse;
+    } catch (err) {
+      this.logger.log(`[getAllMessageDM] : ${err}`);
       return databaseResponse;
     }
   }

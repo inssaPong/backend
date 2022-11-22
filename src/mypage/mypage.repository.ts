@@ -10,10 +10,10 @@ export class MypageRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		SELECT id, nickname, avatar, twofactor_status
-		FROM "user"
-		WHERE id = $1;
-		`,
+          SELECT id, nickname, avatar, twofactor_status
+          FROM "user"
+          WHERE id = $1;
+        `,
         [user_id],
       );
       return databaseResponse;
@@ -28,10 +28,10 @@ export class MypageRepository {
     try {
       await this.databaseService.runQuery(
         `
-		UPDATE "user"
-		SET nickname = $1
-		WHERE id = $2;
-		`,
+          UPDATE "user"
+          SET nickname = $1
+          WHERE id = $2;
+        `,
         [nickname, user_id],
       );
       return 200;
@@ -45,10 +45,10 @@ export class MypageRepository {
     try {
       await this.databaseService.runQuery(
         `
-		UPDATE "user"
-		SET avatar = $1
-		WHERE id = $2;
-		`,
+          UPDATE "user"
+          SET avatar = $1
+          WHERE id = $2;
+        `,
         [avatar, user_id],
       );
       return 200;
@@ -62,10 +62,10 @@ export class MypageRepository {
     try {
       await this.databaseService.runQuery(
         `
-		UPDATE "user"
-		SET avatar = null
-		WHERE id = $1;
-		`,
+          UPDATE "user"
+          SET avatar = null
+          WHERE id = $1;
+        `,
         [user_id],
       );
       return 200;
@@ -79,10 +79,10 @@ export class MypageRepository {
     try {
       await this.databaseService.runQuery(
         `
-		UPDATE "user"
-		SET twofactor_status = $1
-		WHERE id = $2;
-		`,
+          UPDATE "user"
+          SET twofactor_status = $1
+          WHERE id = $2;
+        `,
         [twofactor, user_id],
       );
       return 200;
@@ -96,10 +96,10 @@ export class MypageRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		SELECT partner_id
-		FROM "user_relation"
-		WHERE user_id = $1 AND block_status = false;
-		`,
+          SELECT partner_id
+          FROM "user_relation"
+          WHERE user_id = $1 AND block_status = false;
+        `,
         [user_id],
       );
       return databaseResponse;
@@ -113,12 +113,12 @@ export class MypageRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		SELECT winner_id, loser_id
-		FROM "game_history"
-		WHERE winner_id = $1 OR loser_id = $1
-		ORDER BY id DESC
-		LIMIT 5;
-		`,
+          SELECT winner_id, loser_id
+          FROM "game_history"
+          WHERE winner_id = $1 OR loser_id = $1
+          ORDER BY id DESC
+          LIMIT 5;
+        `,
         [user_id],
       );
       return databaseResponse;
@@ -132,10 +132,10 @@ export class MypageRepository {
     try {
       const wins = await this.databaseService.runQuery(
         `
-		SELECT id
-		FROM "game_history"
-		WHERE winner_id = $1;
-		`,
+          SELECT id
+          FROM "game_history"
+          WHERE winner_id = $1;
+        `,
         [user_id],
       );
       return wins;
@@ -149,10 +149,10 @@ export class MypageRepository {
     try {
       const loses = await this.databaseService.runQuery(
         `
-		SELECT id
-		FROM "game_history"
-		WHERE loser_id = $1;
-		`,
+          SELECT id
+          FROM "game_history"
+          WHERE loser_id = $1;
+        `,
         [user_id],
       );
       return loses;
