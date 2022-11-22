@@ -37,7 +37,13 @@ export class ChannelGateway {
       client.emit('DBError');
       return;
     }
-    this.sendPreviousMessage(client, req.user_id, req.channel_id);
+    this.sendPreviousChannel(client, req.user_id, req.channel_id);
+  }
+
+  @SubscribeMessage('channel/enteredDM')
+  async enteredDM(client: Socket, data: string) {
+    const req = JSON.parse(data);
+    this.sendPreviousDM(client, req.user_id, req.partner_id);
   }
 
   @SubscribeMessage('channel/send')
@@ -51,27 +57,60 @@ export class ChannelGateway {
     }
   }
 
-  async sendPreviousMessage(
+  async sendPreviousChannel(
     client: Socket,
     user_id: string,
     channel_id: number,
   ) {
-    const message = await this.channelsRepository.getAllMessage(channel_id);
+    const message = await this.channelsRepository.getAllMessageChannel(
+      channel_id,
+    );
+    if (message == undefined) {
+      client.emit('DBError');
+      return;
+    }
     const block_users = await this.getBlockUsersAmongMember(
       client,
       user_id,
       channel_id,
     );
 
-    if (message == undefined) {
-      client.emit('DBError');
-      return;
-    }
     message.forEach((element) => {
       const user = block_users.find((user) => user == element.sender_id);
       if (user == undefined) {
         client.emit('channel/send', element.sender_id, element.content);
       }
+    });
+  }
+
+  async sendPreviousDM(client: Socket, user_id: string, partner_id: string) {
+    const message = await this.channelsRepository.getAllMessageDM(
+      user_id,
+      partner_id,
+    );
+    if (message == undefined) {
+      client.emit('DBError');
+      return;
+    }
+    const is_block = await this.channelsRepository.isBlockedUser(
+      user_id,
+      partner_id,
+    );
+    if (is_block == 200) {
+      return;
+    }
+    if (is_block == 500) {
+      client.emit('DBError');
+      return;
+    }
+
+    message.forEach((element) => {
+      client.emit(
+        'DM/send',
+        element.sender_id,
+        element.receiver_id,
+        element.content,
+      );
     });
   }
 
@@ -164,14 +203,14 @@ export class ChannelGateway {
       return;
     }
     for (const member of roomMembers) {
-      const db_result = await this.channelsRepository.isBlockedUser(
+      const is_block = await this.channelsRepository.isBlockedUser(
         user_id,
         member.user_id,
       );
-      if (db_result == 200) {
+      if (is_block == 200) {
         block_user.push(member.user_id);
       }
-      if (db_result == 500) {
+      if (is_block == 500) {
         client.emit('DBError');
         return;
       }
