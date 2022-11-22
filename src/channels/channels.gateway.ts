@@ -11,6 +11,7 @@ import {
 import { ChannelsRepository } from './channels.repository';
 import { Cache } from 'cache-manager';
 import * as bcrypt from 'bcrypt';
+import { ChannelsService } from './channels.service';
 
 @WebSocketGateway({ cors: true })
 export class ChannelGateway {
@@ -19,6 +20,7 @@ export class ChannelGateway {
   constructor(
     private mainGateway: MainGateway,
     private channelsRepository: ChannelsRepository,
+    private readonly channelsService: ChannelsService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -374,7 +376,7 @@ export class ChannelGateway {
     }
 
     try {
-      await this.channelsRepository.exitChannel(kick_id, req.channel_id);
+      await this.channelsService.exitChannel(kick_id, req.channel_id);
       this.exitSocketEvent(kick_id, 'kick');
       client.emit('channel/send', 'server', `${kick_id}를 kick 완료!`);
     } catch {

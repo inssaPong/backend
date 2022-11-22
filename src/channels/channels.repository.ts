@@ -307,60 +307,15 @@ export class ChannelsRepository {
     }
   }
 
-  ///////////////////////////////////////////////////////////////////
-
-  // Description: 채널 나가기
-  async exitChannel(user_id: string, channel_id: number): Promise<boolean> {
-    try {
-      // Description: 내가 이 채널에서 어떤 권한을 가지고 있는지 확인
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-        SELECT authority FROM "channel_member"
-        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
-        `,
-      );
-      if (databaseResponse.length === 0) {
-        return false;
-      }
-      const authority = databaseResponse[0].authority;
-
-      // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
-      await this.databaseService.runQuery(
-        `
-        DELETE FROM "channel_member"
-        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
-        `,
-      );
-
-      // Description: 내가 채널장인 경우 channel_member 테이블에서 해당 채널 모두 삭제. channel 테이블에서 채널 삭제
-      if (authority === '1') {
-        await this.databaseService.runQuery(
-          `
-          DELETE FROM "channel_member"
-          WHERE channel_id='${channel_id}';
-          `,
-        );
-
-        await this.databaseService.runQuery(
-          `
-          DELETE FROM "channel"
-          WHERE id='${channel_id}';
-          `,
-        );
-      }
-      return true;
-    } catch (error) {
-      throw `exitChannel: ${error}`;
-    }
-  }
-
   async checkEnteredChannel(user_id: string, channel_id: number) {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-          SELECT user_id, ban_status FROM "channel_member"
-          WHERE user_id='${user_id}' AND channel_id=${channel_id};
-		    `,
+          SELECT user_id, ban_status
+          FROM "channel_member"
+          WHERE user_id=$1 AND channel_id=$2;
+        `,
+        [user_id, channel_id],
       );
       if (
         databaseResponse.length == 1 &&
@@ -380,8 +335,10 @@ export class ChannelsRepository {
     try {
       databaseResponse = await this.databaseService.runQuery(
         `
-			    SELECT user_id FROM "channel_member" WHERE channel_id=${channel_id};
-		    `,
+          SELECT user_id FROM "channel_member"
+          WHERE channel_id=$1;
+        `,
+        [channel_id],
       );
       return databaseResponse;
     } catch (err) {
@@ -398,9 +355,10 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-			    INSERT INTO "message" (channel_id, sender_id, content)
-			    VALUES ('${channel_id}', '${sender_id}', '${content}');
-		    `,
+          INSERT INTO "message" (channel_id, sender_id, content)
+          VALUES ($1, $2, $3);
+        `,
+        [channel_id, sender_id, content],
       );
       return 201;
     } catch (err) {
@@ -413,9 +371,10 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-			    INSERT INTO "message" (sender_id, receiver_id, content)
-			    VALUES ('${sender_id}', '${receiver_id}', '${content}');
-		    `,
+          INSERT INTO "message" (sender_id, receiver_id, content)
+          VALUES ($1, $2, $3);
+        `,
+        [sender_id, receiver_id, content],
       );
       return 201;
     } catch (err) {
@@ -430,8 +389,10 @@ export class ChannelsRepository {
     try {
       databaseResponse = await this.databaseService.runQuery(
         `
-          SELECT * FROM "message" WHERE channel_id=${channel_id};
-		    `,
+          SELECT * FROM "message"
+          WHERE channel_id=$1;
+        `,
+        [channel_id],
       );
       return databaseResponse;
     } catch (err) {
@@ -447,9 +408,10 @@ export class ChannelsRepository {
       databaseResponse = await this.databaseService.runQuery(
         `
           SELECT * FROM "message"
-          WHERE (sender_id='${user_id}' AND receiver_id='${partner_id}')
-          OR (sender_id='${partner_id}' AND receiver_id='${user_id}');
-		    `,
+          WHERE (sender_id=$1 AND receiver_id=$2)
+          OR (sender_id=$2 AND receiver_id=$1);
+        `,
+        [user_id, partner_id],
       );
       return databaseResponse;
     } catch (err) {
@@ -462,9 +424,11 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-          SELECT block_status FROM "user_relation"
-          WHERE user_id='${user_id}' AND partner_id='${partner_id}';
-		    `,
+          SELECT block_status
+          FROM "user_relation"
+          WHERE user_id=$1 AND partner_id=$2;
+        `,
+        [user_id, partner_id],
       );
       if (
         databaseResponse.length == 1 &&
@@ -482,9 +446,11 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-          SELECT authority FROM "channel_member"
-          WHERE user_id='${user_id}' AND channel_id='${channel_id}';
-		    `,
+          SELECT authority
+          FROM "channel_member"
+          WHERE user_id=$1 AND channel_id=$2;
+        `,
+        [user_id, channel_id],
       );
       return databaseResponse[0].authority;
     } catch (err) {
@@ -498,9 +464,10 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "channel"
-          SET password = '${password}'
-          WHERE id=${id};
+          SET password=$2'
+          WHERE id=$1;
         `,
+        [id, password],
       );
       return 200;
     } catch (err) {
@@ -518,9 +485,10 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "channel_member"
-          SET authority = '${authority}'
-          WHERE user_id='${user_id}' AND channel_id=${channel_id};
+          SET authority = $3
+          WHERE user_id=$1 AND channel_id=$2;
         `,
+        [user_id, channel_id, authority],
       );
       return 200;
     } catch (err) {
@@ -538,9 +506,10 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "channel_member"
-          SET ban_status = ${ban_status}
-          WHERE user_id='${user_id}' AND channel_id=${channel_id};
+          SET ban_status=$3
+          WHERE user_id=$1 AND channel_id=$2;
         `,
+        [user_id, channel_id, ban_status],
       );
       return 200;
     } catch (err) {
@@ -553,10 +522,11 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-				SELECT *
-				FROM "user"
-				WHERE id='${id}';
-				`,
+        SELECT *
+        FROM "user"
+        WHERE id=$1;
+        `,
+        [id],
       );
       if (databaseResponse.length == 1) return 200;
       else return 404;
