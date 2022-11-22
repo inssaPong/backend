@@ -85,7 +85,7 @@ export class ChannelsController {
     description: '[500 internal Server Error] DB에 문제',
   })
   @Get('/list')
-  async GetAvailableChannelList(@Req() req, @Res() res) {
+  async getAvailableChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list');
     try {
       const availableChannelList =
@@ -164,7 +164,9 @@ export class ChannelsController {
     this.logger.log('GET /room/name');
     try {
       const channelName = await this.channelsService.getChannelName(channel_id);
-      res.status(200).send(channelName);
+      res.status(200).send({
+        name: channelName,
+      });
     } catch (exception) {
       throw exception;
     }
