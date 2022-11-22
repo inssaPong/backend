@@ -251,9 +251,9 @@ export class UsersController {
         blockId,
       );
       if (relation_status.length == 1)
-        this.usersRepository.blockFollow(req.user.id, blockId);
+        await this.usersRepository.blockFollow(req.user.id, blockId);
       else if (relation_status.length == 0)
-        this.usersRepository.blockUnfollow(req.user.id, blockId);
+        await this.usersRepository.blockUnfollow(req.user.id, blockId);
       this.logger.log(`${req.user.id}가 ${blockId}를 차단`);
       res.status(200).send();
     } catch (error) {
