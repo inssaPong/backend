@@ -21,7 +21,6 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import {
-  ApplyBlockDto,
   ChanageFollowStatusDto,
   GameHistoryDto,
   GameStatDto,
@@ -178,9 +177,9 @@ export class UsersController {
   @ApiOperation({
     summary: '팔로우 상태 변경',
     description:
-      'body로 해당 유저와 팔로우 상태를 변경할 대상 유저의 id, 팔로우 여부를 보내면\
-	  해당 유저와 대상 유저의 팔로우 상태를 업데이트\
-	  \n\n**차단 중인 유저를 팔로우할 경우 자동으로 차단해제',
+      'body로 팔로우 상태를 변경할 대상 유저의 id, 팔로우 여부를 보내면\
+	  본인 대상 유저의 팔로우 상태를 업데이트\
+	  \n\n**차단 중인 유저의 상태를 변경할 경우 자동으로 차단해제',
   })
   @ApiBody({
     type: ChanageFollowStatusDto,
@@ -207,7 +206,8 @@ export class UsersController {
       await this.usersService.checkUserExist(req.user.id);
       await this.usersService.checkUserExist(body.partner_id);
 
-      if (req.user.id == body.partner_id) throw new BadRequestException('자기 자신을 follow 할 수 없음');
+      if (req.user.id == body.partner_id)
+        throw new BadRequestException('자기 자신을 follow 할 수 없음');
       if (body.follow_status == false) {
         await this.usersRepository.offFollowStatus(
           req.user.id,
@@ -227,12 +227,7 @@ export class UsersController {
 
   @ApiOperation({
     summary: '유저 차단하기',
-    description:
-      'body로 해당 유저와 차단할 유저의 id를 보내면\
-	  차단할 유저 차단',
-  })
-  @ApiBody({
-    type: ApplyBlockDto,
+    description: 'query로 차단할 유저의 id를 보내면 해당 유저 차단',
   })
   @ApiOkResponse({
     description: '성공',
@@ -247,20 +242,20 @@ export class UsersController {
     description: '서버 에러',
   })
   @Patch('block')
-  async blockUser(@Body() body: ApplyBlockDto, @Req() req, @Res() res: Response) {
+  async blockUser(@Query('id') blockId, @Req() req, @Res() res: Response) {
     try {
-      await this.usersService.checkUserExist(body.user_id);
-      await this.usersService.checkUserExist(body.block_id);
+      await this.usersService.checkUserExist(req.user.id);
+      await this.usersService.checkUserExist(blockId);
       const relation_status = await this.usersRepository.getRelationStatus(
-        body.user_id,
-        body.block_id,
+        req.user.id,
+        blockId,
       );
       if (relation_status.length == 1)
-		  this.usersRepository.blockFollow(body.user_id, body.block_id);
-		else if (relation_status.length == 0)
-		  this.usersRepository.blockUnfollow(body.user_id, body.block_id);
-		this.logger.log(`${req.user.id}가 ${body.block_id}를 차단`);
-		res.status(200).send();
+        await this.usersRepository.blockFollow(req.user.id, blockId);
+      else if (relation_status.length == 0)
+        await this.usersRepository.blockUnfollow(req.user.id, blockId);
+      this.logger.log(`${req.user.id}가 ${blockId}를 차단`);
+      res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.blockUser.name}] ${error}`);
       throw error;
