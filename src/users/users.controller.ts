@@ -242,7 +242,7 @@ export class UsersController {
     description: '서버 에러',
   })
   @Patch('block')
-  async blockUser(@Query() blockId, @Req() req, @Res() res: Response) {
+  async blockUser(@Query('id') blockId, @Req() req, @Res() res: Response) {
     try {
       await this.usersService.checkUserExist(req.user.id);
       await this.usersService.checkUserExist(blockId);
