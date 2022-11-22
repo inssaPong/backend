@@ -11,7 +11,7 @@ export class FtAuthGuard extends AuthGuard('42') {
   private readonly logger = new Logger(FtAuthGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    this.logger.log(`[canActivate]`);
+    this.logger.log(`[${context.getHandler().name}] -> [canActivate]`);
     try {
       const activate: boolean = (await super.canActivate(context)) as boolean;
       return activate;
