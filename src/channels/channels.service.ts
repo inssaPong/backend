@@ -168,6 +168,7 @@ export class ChannelsService {
         channel_id,
       );
       this.logger.log(`${channel_id} 채널 입장에 성공했습니다.`);
+      this.mainGateway.someoneEnterSocket(user_id, channel_id);
     } catch (exception) {
       throw exception;
     }
