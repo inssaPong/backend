@@ -84,11 +84,11 @@ export class ChannelGateway {
   }
 
   async sendPreviousDM(client: Socket, user_id: string, partner_id: string) {
-    const message = await this.channelsRepository.getAllMessageDM(
+    const messages = await this.channelsRepository.getAllMessageDM(
       user_id,
       partner_id,
     );
-    if (message == undefined) {
+    if (messages == undefined) {
       client.emit('DBError');
       return;
     }
@@ -104,7 +104,7 @@ export class ChannelGateway {
       return;
     }
 
-    message.forEach((element) => {
+    messages.forEach((element) => {
       client.emit(
         'DM/send',
         element.sender_id,
