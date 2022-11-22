@@ -201,7 +201,7 @@ export class ChannelsRepository {
         const isValidPw = await bcrypt.compare(input_pw, password);
         return isValidPw;
       }
-      return password === input_pw ? true : false;
+      return !input_pw ? true : false;
     } catch (error) {
       this.logger.error(error);
       throw error;
