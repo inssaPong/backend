@@ -41,13 +41,13 @@ export class ChannelGateway {
   }
 
   @SubscribeMessage('channel/enteredDM')
-  async enteredDM(client: Socket, data: string) {
+  enteredDM(client: Socket, data: string) {
     const req = JSON.parse(data);
     this.sendPreviousDM(client, req.user_id, req.partner_id);
   }
 
   @SubscribeMessage('channel/send')
-  async sendMessage(client: Socket, data: string) {
+  sendMessage(client: Socket, data: string) {
     const req = JSON.parse(data);
 
     if (req.channel_id != undefined) {
