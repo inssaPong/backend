@@ -39,6 +39,7 @@ export class ChannelGateway {
       client.emit('DBError');
       return;
     }
+    client.emit('channel/checkEnteredSuccess');
     this.sendPreviousChannel(client, req.user_id, req.channel_id);
   }
 
