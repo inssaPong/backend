@@ -8,10 +8,14 @@ import {
 } from '@nestjs/common';
 import { ChannelsRepository } from './channels.repository';
 import * as bcrypt from 'bcrypt';
+import { MainGateway } from 'src/sockets/main.gateway';
 
 @Injectable()
 export class ChannelsService {
-  constructor(private readonly channelsRepository: ChannelsRepository) {}
+  constructor(
+    private readonly channelsRepository: ChannelsRepository,
+    private readonly mainGateway: MainGateway,
+  ) {}
 
   private readonly logger: Logger = new Logger(ChannelsService.name);
 
@@ -229,6 +233,7 @@ export class ChannelsService {
         await this.channelsRepository.deleteChannel(channel_id);
         this.logger.log(`${channel_id} 채널 삭제에 성공했습니다.`);
       }
+      this.mainGateway.someoneExitSocket(user_id, channel_id);
     } catch (exception) {
       throw exception;
     }

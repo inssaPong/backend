@@ -89,6 +89,10 @@ export class MainGateway {
     });
   }
 
+  someoneExitSocket(user_id: string, channel_id: number) {
+    this.server.emit(`channel/someoneExit/${channel_id}`, user_id);
+  }
+
   printAllUser() {
     this.users.forEach((element) => {
       this.logger.log(element.id);

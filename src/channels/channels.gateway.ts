@@ -14,9 +14,9 @@ import * as bcrypt from 'bcrypt';
 import { ChannelsService } from './channels.service';
 
 @WebSocketGateway({ cors: true })
-export class ChannelGateway {
+export class ChannelsGateway {
   mute_users: string[] = [];
-  private readonly logger: Logger = new Logger(ChannelGateway.name);
+  private readonly logger: Logger = new Logger(ChannelsGateway.name);
   constructor(
     private mainGateway: MainGateway,
     private readonly channelsRepository: ChannelsRepository,
