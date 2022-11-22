@@ -19,7 +19,7 @@ export class ChannelGateway {
   private readonly logger: Logger = new Logger(ChannelGateway.name);
   constructor(
     private mainGateway: MainGateway,
-    private channelsRepository: ChannelsRepository,
+    private readonly channelsRepository: ChannelsRepository,
     private readonly channelsService: ChannelsService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
