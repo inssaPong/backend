@@ -10,9 +10,10 @@ export class GamesRepository {
     try {
       await this.databaseService.runQuery(
         `
-			  INSERT INTO "game_history" (winner_id, loser_id)
-			  VALUES ('${winner_id}', '${loser_id}');
-		  `,
+          INSERT INTO "game_history" (winner_id, loser_id)
+          VALUES ($1, $2);
+        `,
+        [winner_id, loser_id],
       );
       return 201;
     } catch (error) {
