@@ -90,11 +90,11 @@ export class MainGateway {
   }
 
   someoneExitSocket(user_id: string, channel_id: number) {
-    this.server.emit(`channel/someoneExit/${channel_id}`, user_id);
+    this.server.emit(`channel/someoneExit`, user_id, channel_id);
   }
 
   someoneEnterSocket(user_id: string, channel_id: number) {
-    this.server.emit(`channel/someoneEnter/${channel_id}`, user_id);
+    this.server.emit(`channel/someoneEnter`, user_id, channel_id);
   }
 
   printAllUser() {

@@ -62,7 +62,7 @@ export class ChannelsService {
         channelId,
       );
       this.logger.log('channel_member 테이블에 추가');
-
+      this.mainGateway.someoneEnterSocket(user_id, channelId);
       return channelId;
     } catch (exception) {
       throw exception;
@@ -79,7 +79,7 @@ export class ChannelsService {
         return [];
       }
 
-      let availableChannelList = [];
+      const availableChannelList = [];
       for (const channel of allChannelList) {
         const isJoinedChannel = await this.channelsRepository.isJoinedChannel(
           user_id,
@@ -111,7 +111,7 @@ export class ChannelsService {
         await this.channelsRepository.getJoinedChannelIdListByUserId(user_id);
 
       // TODO: 수정. dto?
-      let channelIdAndNameList = [];
+      const channelIdAndNameList = [];
       for (const channelObject of joinedChannelIdList) {
         if (channelObject.ban_status == true) continue;
         const channelName =
