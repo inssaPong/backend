@@ -1,6 +1,6 @@
 import { GAMEOBJECT, GameRoomComponent } from '../game.component';
 import { GameGateway } from '../games.gateway';
-import failSaveResult from './failSaveResult';
+import failSaveResult from './failSaveResult.service';
 
 export default async function gameOver(
   gameRoom: GameRoomComponent,

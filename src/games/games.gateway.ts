@@ -15,7 +15,7 @@ export class GameGateway {
   private readonly logger: Logger = new Logger(GameGateway.name);
   constructor(
     public mainGateway: MainGateway,
-    public gamesRepository: GamesRepository,
+    public readonly gamesRepository: GamesRepository,
   ) {}
 
   @SubscribeMessage('game/invite')
