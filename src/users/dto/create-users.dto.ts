@@ -25,15 +25,6 @@ export class ChanageFollowStatusDto {
   readonly follow_status: boolean;
 }
 
-export class ApplyBlockDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  @ApiProperty({ description: '차단할 대상 유저 아이디' })
-  readonly block_id: string;
-}
-
 // TODO mypage와 dto 중복되는 거 리팩토링하기
 // =========아래 DTO들 mypage와 중복되는데 이게 맞나?===========
 // TODO gameHistoryDto 굳이 배열로 감싸서 보내는게 아니라 아래의 OneGameHistoryDto를 배열로 만들어서 보내는 걸로 고치기
