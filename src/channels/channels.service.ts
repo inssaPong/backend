@@ -62,7 +62,7 @@ export class ChannelsService {
         channelId,
       );
       this.logger.log('channel_member 테이블에 추가');
-      this.mainGateway.someoneEnterSocket(user_id, channelId);
+      this.mainGateway.changedChannelList();
       return channelId;
     } catch (exception) {
       throw exception;
@@ -168,7 +168,7 @@ export class ChannelsService {
         channel_id,
       );
       this.logger.log(`${channel_id} 채널 입장에 성공했습니다.`);
-      this.mainGateway.someoneEnterSocket(user_id, channel_id);
+      this.mainGateway.changedChannelMember(user_id, channel_id);
     } catch (exception) {
       throw exception;
     }
@@ -233,8 +233,10 @@ export class ChannelsService {
         // Description: 채널 제거
         await this.channelsRepository.deleteChannel(channel_id);
         this.logger.log(`${channel_id} 채널 삭제에 성공했습니다.`);
+        this.mainGateway.changedChannelList();
+      } else {
+        this.mainGateway.changedChannelMember(user_id, channel_id);
       }
-      this.mainGateway.someoneExitSocket(user_id, channel_id);
     } catch (exception) {
       throw exception;
     }
