@@ -4,9 +4,9 @@ import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
 import { USERSTATUS } from 'src/sockets/user.component';
 import {
-  CHANNELAUTHORITY,
-  CHANNELCOMMAND,
-  MUTETIME,
+  CHANNEL_AUTHORITY,
+  CHANNEL_COMMAND,
+  MUTE_TIME,
 } from './channels.component';
 import { ChannelsRepository } from './channels.repository';
 import { Cache } from 'cache-manager';
@@ -252,19 +252,19 @@ export class ChannelsGateway {
       .toLowerCase();
 
     switch (keyword) {
-      case CHANNELCOMMAND.chpwd:
+      case CHANNEL_COMMAND.CHPWD:
         this.changeChannelPassword(client, req, content);
         return true;
-      case CHANNELCOMMAND.admin:
+      case CHANNEL_COMMAND.ADMIN:
         this.insertChannelAdmin(client, req, content);
         return true;
-      case CHANNELCOMMAND.kick:
+      case CHANNEL_COMMAND.KICK:
         this.kickChannel(client, req, content);
         return true;
-      case CHANNELCOMMAND.mute:
+      case CHANNEL_COMMAND.MUTE:
         this.muteChannel(client, req, content);
         return true;
-      case CHANNELCOMMAND.ban:
+      case CHANNEL_COMMAND.BAN:
         this.banChannel(client, req, content);
         return true;
       default:
@@ -282,7 +282,7 @@ export class ChannelsGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -316,7 +316,7 @@ export class ChannelsGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -335,7 +335,7 @@ export class ChannelsGateway {
     const db_result = await this.channelsRepository.changeChannelAuthority(
       admin_id,
       req.channel_id,
-      CHANNELAUTHORITY.admin,
+      CHANNEL_AUTHORITY.ADMIN,
     );
     if (db_result == 500) {
       client.emit('DBError');
@@ -360,7 +360,7 @@ export class ChannelsGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -397,7 +397,7 @@ export class ChannelsGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -416,7 +416,7 @@ export class ChannelsGateway {
     await this.cacheManager.set(
       `mute_${mute_id}`,
       `${req.channel_id}`,
-      MUTETIME,
+      MUTE_TIME,
     );
     client.emit('channel/send', 'server', `${mute_id}를 음소거 시킴!`);
   }
@@ -433,7 +433,7 @@ export class ChannelsGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
