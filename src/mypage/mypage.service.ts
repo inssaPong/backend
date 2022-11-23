@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DEFAULTIMAGE } from 'src/users/users.definition';
-import { UpdateUserInfoDto } from './dto/update-mypage.dto';
+import { UpdateMypageInfoDto } from './dto/update-mypage.dto';
 import { MypageRepository } from './mypage.repository';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class MypageService {
     return DEFAULTIMAGE;
   }
 
-  async updateUserInfo(id: string, body: UpdateUserInfoDto) {
+  async updateMypageInfo(id: string, body: UpdateMypageInfoDto) {
     try {
       for (let [key, value] of Object.entries(body)) {
         if (key == 'nickname')
@@ -24,7 +24,7 @@ export class MypageService {
         else throw new BadRequestException('DTO에 맞지 않는 객체');
       }
     } catch (error) {
-      this.logger.error(`${this.updateUserInfo.name}: ${error}`);
+      this.logger.error(`${this.updateMypageInfo.name}: ${error}`);
       throw error;
     }
   }

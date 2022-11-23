@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ChannelsRepository } from './channels.repository';
 import * as bcrypt from 'bcrypt';
@@ -132,6 +133,15 @@ export class ChannelsService {
     input_pw: string,
   ): Promise<void> {
     try {
+      // Description: 채널이 존재하는지 여부 확인
+      const isExist = await this.channelsRepository.isChannelThatExist(
+        channel_id,
+      );
+      if (isExist === false) {
+        this.logger.error('해당 채널이 존재하지 않습니다.');
+        throw new NotFoundException();
+      }
+
       // Description: 밴 여부 확인
       const isBanned = await this.channelsRepository.isBannedChannel(
         user_id,
