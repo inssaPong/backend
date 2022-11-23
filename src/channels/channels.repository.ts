@@ -484,7 +484,7 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "channel"
-          SET password=$2'
+          SET password=$2
           WHERE id=$1;
         `,
         [id, password],
