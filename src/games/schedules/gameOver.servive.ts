@@ -1,4 +1,4 @@
-import { GAMEOBJECT, GameRoomComponent } from '../game.component';
+import { GAME_OBJECT, GameRoomComponent } from '../game.component';
 import { GameGateway } from '../games.gateway';
 import failSaveResult from './failSaveResult.service';
 
@@ -26,7 +26,7 @@ export default async function gameOver(
 
   let winner_id;
   let loser_id;
-  if (gameRoom.p1_score == GAMEOBJECT.finalScore) {
+  if (gameRoom.p1_score == GAME_OBJECT.FINAL_SCORE) {
     winner_id = gameRoom.p1_id;
     loser_id = gameRoom.p2_id;
   } else {
