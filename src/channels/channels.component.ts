@@ -1,15 +1,15 @@
-export const CHANNELCOMMAND = {
-  chpwd: 'chpwd',
-  admin: 'admin',
-  kick: 'kick',
-  mute: 'mute',
-  ban: 'ban',
+export const CHANNEL_COMMAND = {
+  CHPWD: 'chpwd',
+  ADMIN: 'admin',
+  KICK: 'kick',
+  MUTE: 'mute',
+  BAN: 'ban',
 };
 
-export const CHANNELAUTHORITY = {
-  owner: 1,
-  admin: 2,
-  guest: 3,
+export const CHANNEL_AUTHORITY = {
+  OWNER: 1,
+  ADMIN: 2,
+  GUEST: 3,
 };
 
-export const MUTETIME = 5 * 60;
+export const MUTE_TIME = 5 * 60;

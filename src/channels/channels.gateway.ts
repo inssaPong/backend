@@ -2,11 +2,11 @@ import { CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { USERSTATUS } from 'src/sockets/user.component';
+import { USER_STATUS } from 'src/sockets/user.component';
 import {
-  CHANNELAUTHORITY,
-  CHANNELCOMMAND,
-  MUTETIME,
+  CHANNEL_AUTHORITY,
+  CHANNEL_COMMAND,
+  MUTE_TIME,
 } from './channels.component';
 import { ChannelsRepository } from './channels.repository';
 import { Cache } from 'cache-manager';
@@ -14,9 +14,9 @@ import * as bcrypt from 'bcrypt';
 import { ChannelsService } from './channels.service';
 
 @WebSocketGateway({ cors: true })
-export class ChannelGateway {
+export class ChannelsGateway {
   mute_users: string[] = [];
-  private readonly logger: Logger = new Logger(ChannelGateway.name);
+  private readonly logger: Logger = new Logger(ChannelsGateway.name);
   constructor(
     private mainGateway: MainGateway,
     private readonly channelsRepository: ChannelsRepository,
@@ -181,7 +181,7 @@ export class ChannelGateway {
       receiver.id,
       req.sender_id,
     );
-    if (is_block == 400 && receiver.status == USERSTATUS.online) {
+    if (is_block == 400 && receiver.status == USER_STATUS.ONLINE) {
       receiver.socket.emit(
         'DM/send',
         req.sender_id,
@@ -233,7 +233,7 @@ export class ChannelGateway {
       receiver,
       req.sender_id,
     );
-    if (is_block == 400 && member.status == USERSTATUS.online) {
+    if (is_block == 400 && member.status == USER_STATUS.ONLINE) {
       member.socket.emit('channel/send', req.sender_id, req.message);
     }
   }
@@ -252,19 +252,19 @@ export class ChannelGateway {
       .toLowerCase();
 
     switch (keyword) {
-      case CHANNELCOMMAND.chpwd:
+      case CHANNEL_COMMAND.CHPWD:
         this.changeChannelPassword(client, req, content);
         return true;
-      case CHANNELCOMMAND.admin:
+      case CHANNEL_COMMAND.ADMIN:
         this.insertChannelAdmin(client, req, content);
         return true;
-      case CHANNELCOMMAND.kick:
+      case CHANNEL_COMMAND.KICK:
         this.kickChannel(client, req, content);
         return true;
-      case CHANNELCOMMAND.mute:
+      case CHANNEL_COMMAND.MUTE:
         this.muteChannel(client, req, content);
         return true;
-      case CHANNELCOMMAND.ban:
+      case CHANNEL_COMMAND.BAN:
         this.banChannel(client, req, content);
         return true;
       default:
@@ -282,7 +282,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -316,7 +316,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -335,7 +335,7 @@ export class ChannelGateway {
     const db_result = await this.channelsRepository.changeChannelAuthority(
       admin_id,
       req.channel_id,
-      CHANNELAUTHORITY.admin,
+      CHANNEL_AUTHORITY.ADMIN,
     );
     if (db_result == 500) {
       client.emit('DBError');
@@ -360,7 +360,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -397,7 +397,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -416,7 +416,7 @@ export class ChannelGateway {
     await this.cacheManager.set(
       `mute_${mute_id}`,
       `${req.channel_id}`,
-      MUTETIME,
+      MUTE_TIME,
     );
     client.emit('channel/send', 'server', `${mute_id}를 음소거 시킴!`);
   }
@@ -433,7 +433,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
