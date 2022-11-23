@@ -161,6 +161,26 @@ export class ChannelsRepository {
     }
   }
 
+  // Description: 채널이 존재하는지 여부 확인
+  async isChannelThatExist(channel_id: number): Promise<boolean> {
+    this.logger.log(`[${this.isChannelThatExist.name}]`);
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT id FROM "channel"
+        WHERE id='${channel_id}';
+        `,
+      );
+      if (databaseResponse.length === 0) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
   // Description: 접근하려는 채널의 밴 여부 확인
   async isBannedChannel(user_id: string, channel_id: number): Promise<boolean> {
     this.logger.log(`[${this.isBannedChannel.name}]`);
