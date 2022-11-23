@@ -27,6 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     try {
       const userData = await this.loginRepository.getUserData(payload.id);
       if (!userData) {
+        this.logger.error('DB에 해당 유저가 존재하지 않습니다.');
         throw new UnauthorizedException();
       }
       return { id: payload.id, email: payload.email };
