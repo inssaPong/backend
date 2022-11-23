@@ -2,7 +2,7 @@ import { CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { USERSTATUS } from 'src/sockets/user.component';
+import { USER_STATUS } from 'src/sockets/user.component';
 import {
   CHANNEL_AUTHORITY,
   CHANNEL_COMMAND,
@@ -181,7 +181,7 @@ export class ChannelsGateway {
       receiver.id,
       req.sender_id,
     );
-    if (is_block == 400 && receiver.status == USERSTATUS.online) {
+    if (is_block == 400 && receiver.status == USER_STATUS.ONLINE) {
       receiver.socket.emit(
         'DM/send',
         req.sender_id,
@@ -233,7 +233,7 @@ export class ChannelsGateway {
       receiver,
       req.sender_id,
     );
-    if (is_block == 400 && member.status == USERSTATUS.online) {
+    if (is_block == 400 && member.status == USER_STATUS.ONLINE) {
       member.socket.emit('channel/send', req.sender_id, req.message);
     }
   }

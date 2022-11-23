@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { UserInfo, USERSTATUS } from 'src/sockets/user.component';
+import { UserInfo, USER_STATUS } from 'src/sockets/user.component';
 import { GAME_OBJECT, GameRoomComponent } from './game.component';
 import { GamesRepository } from './games.repository';
 import getPosition from './schedules/getPosition.service';
@@ -31,7 +31,7 @@ export class GameGateway {
       );
       return;
     }
-    if (partner.status != USERSTATUS.online) {
+    if (partner.status != USER_STATUS.ONLINE) {
       client.emit('game/failInvite', req.user_id);
       return;
     }
@@ -237,7 +237,7 @@ export class GameGateway {
       );
       return;
     }
-    if (player.status != USERSTATUS.online) {
+    if (player.status != USER_STATUS.ONLINE) {
       client.emit('game/failAcceptInvite', req.user_id);
       return;
     }
@@ -247,7 +247,7 @@ export class GameGateway {
       );
       return;
     }
-    if (partner.status != USERSTATUS.online) {
+    if (partner.status != USER_STATUS.ONLINE) {
       client.emit('game/failAcceptInvite', req.partner_id);
       return;
     }
