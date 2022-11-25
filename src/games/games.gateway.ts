@@ -36,7 +36,7 @@ export class GameGateway {
       return;
     }
     partner.socket.emit('game/invite', req.user_id);
-    client.emit('game/successInvited');
+    client.emit(`game/successInvited/${req.partner_id}`);
   }
 
   @SubscribeMessage('game/acceptedInvite')
