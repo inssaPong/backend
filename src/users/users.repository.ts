@@ -178,7 +178,7 @@ export class UsersRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		SELECT partner_id
+		SELECT block_status
 		FROM "user_relation"
 		WHERE user_id = $1 AND partner_id = $2;
 		`,

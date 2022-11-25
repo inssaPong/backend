@@ -2,23 +2,25 @@ import { CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { USERSTATUS } from 'src/sockets/user.component';
+import { USER_STATUS } from 'src/sockets/user.component';
 import {
-  CHANNELAUTHORITY,
-  CHANNELCOMMAND,
-  MUTETIME,
+  CHANNEL_AUTHORITY,
+  CHANNEL_COMMAND,
+  MUTE_TIME,
 } from './channels.component';
 import { ChannelsRepository } from './channels.repository';
 import { Cache } from 'cache-manager';
 import * as bcrypt from 'bcrypt';
+import { ChannelsService } from './channels.service';
 
 @WebSocketGateway({ cors: true })
-export class ChannelGateway {
+export class ChannelsGateway {
   mute_users: string[] = [];
-  private readonly logger: Logger = new Logger(ChannelGateway.name);
+  private readonly logger: Logger = new Logger(ChannelsGateway.name);
   constructor(
     private mainGateway: MainGateway,
-    private channelsRepository: ChannelsRepository,
+    private readonly channelsRepository: ChannelsRepository,
+    private readonly channelsService: ChannelsService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -37,11 +39,18 @@ export class ChannelGateway {
       client.emit('DBError');
       return;
     }
-    this.sendPreviousMessage(client, req.user_id, req.channel_id);
+    client.emit('channel/checkEnteredSuccess');
+    this.sendPreviousChannel(client, req.user_id, req.channel_id);
+  }
+
+  @SubscribeMessage('channel/enteredDM')
+  enteredDM(client: Socket, data: string) {
+    const req = JSON.parse(data);
+    this.sendPreviousDM(client, req.user_id, req.partner_id);
   }
 
   @SubscribeMessage('channel/send')
-  async sendMessage(client: Socket, data: string) {
+  sendMessage(client: Socket, data: string) {
     const req = JSON.parse(data);
 
     if (req.channel_id != undefined) {
@@ -51,27 +60,60 @@ export class ChannelGateway {
     }
   }
 
-  async sendPreviousMessage(
+  async sendPreviousChannel(
     client: Socket,
     user_id: string,
     channel_id: number,
   ) {
-    const message = await this.channelsRepository.getAllMessage(channel_id);
+    const message = await this.channelsRepository.getAllMessageChannel(
+      channel_id,
+    );
+    if (message == undefined) {
+      client.emit('DBError');
+      return;
+    }
     const block_users = await this.getBlockUsersAmongMember(
       client,
       user_id,
       channel_id,
     );
 
-    if (message == undefined) {
-      client.emit('DBError');
-      return;
-    }
     message.forEach((element) => {
       const user = block_users.find((user) => user == element.sender_id);
       if (user == undefined) {
         client.emit('channel/send', element.sender_id, element.content);
       }
+    });
+  }
+
+  async sendPreviousDM(client: Socket, user_id: string, partner_id: string) {
+    const messages = await this.channelsRepository.getAllMessageDM(
+      user_id,
+      partner_id,
+    );
+    if (messages == undefined) {
+      client.emit('DBError');
+      return;
+    }
+    const is_block = await this.channelsRepository.isBlockedUser(
+      user_id,
+      partner_id,
+    );
+    if (is_block == 200) {
+      return;
+    }
+    if (is_block == 500) {
+      client.emit('DBError');
+      return;
+    }
+
+    messages.forEach((element) => {
+      client.emit(
+        'DM/send',
+        element.sender_id,
+        element.receiver_id,
+        element.content,
+      );
     });
   }
 
@@ -139,7 +181,7 @@ export class ChannelGateway {
       receiver.id,
       req.sender_id,
     );
-    if (is_block == 400 && receiver.status == USERSTATUS.online) {
+    if (is_block == 400 && receiver.status == USER_STATUS.ONLINE) {
       receiver.socket.emit(
         'DM/send',
         req.sender_id,
@@ -164,14 +206,14 @@ export class ChannelGateway {
       return;
     }
     for (const member of roomMembers) {
-      const db_result = await this.channelsRepository.isBlockedUser(
+      const is_block = await this.channelsRepository.isBlockedUser(
         user_id,
         member.user_id,
       );
-      if (db_result == 200) {
+      if (is_block == 200) {
         block_user.push(member.user_id);
       }
-      if (db_result == 500) {
+      if (is_block == 500) {
         client.emit('DBError');
         return;
       }
@@ -191,7 +233,7 @@ export class ChannelGateway {
       receiver,
       req.sender_id,
     );
-    if (is_block == 400 && member.status == USERSTATUS.online) {
+    if (is_block == 400 && member.status == USER_STATUS.ONLINE) {
       member.socket.emit('channel/send', req.sender_id, req.message);
     }
   }
@@ -210,19 +252,19 @@ export class ChannelGateway {
       .toLowerCase();
 
     switch (keyword) {
-      case CHANNELCOMMAND.chpwd:
+      case CHANNEL_COMMAND.CHPWD:
         this.changeChannelPassword(client, req, content);
         return true;
-      case CHANNELCOMMAND.admin:
+      case CHANNEL_COMMAND.ADMIN:
         this.insertChannelAdmin(client, req, content);
         return true;
-      case CHANNELCOMMAND.kick:
+      case CHANNEL_COMMAND.KICK:
         this.kickChannel(client, req, content);
         return true;
-      case CHANNELCOMMAND.mute:
+      case CHANNEL_COMMAND.MUTE:
         this.muteChannel(client, req, content);
         return true;
-      case CHANNELCOMMAND.ban:
+      case CHANNEL_COMMAND.BAN:
         this.banChannel(client, req, content);
         return true;
       default:
@@ -240,7 +282,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -274,7 +316,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -293,7 +335,7 @@ export class ChannelGateway {
     const db_result = await this.channelsRepository.changeChannelAuthority(
       admin_id,
       req.channel_id,
-      CHANNELAUTHORITY.admin,
+      CHANNEL_AUTHORITY.ADMIN,
     );
     if (db_result == 500) {
       client.emit('DBError');
@@ -318,7 +360,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -335,7 +377,8 @@ export class ChannelGateway {
     }
 
     try {
-      await this.channelsRepository.exitChannel(kick_id, req.channel_id);
+      await this.channelsService.exitChannel(kick_id, req.channel_id);
+      this.exitSocketEvent(kick_id, 'kick');
       client.emit('channel/send', 'server', `${kick_id}를 kick 완료!`);
     } catch {
       client.emit('DBError');
@@ -354,7 +397,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -373,7 +416,7 @@ export class ChannelGateway {
     await this.cacheManager.set(
       `mute_${mute_id}`,
       `${req.channel_id}`,
-      MUTETIME,
+      MUTE_TIME,
     );
     client.emit('channel/send', 'server', `${mute_id}를 음소거 시킴!`);
   }
@@ -390,7 +433,7 @@ export class ChannelGateway {
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNELAUTHORITY.guest) {
+    if (authority == CHANNEL_AUTHORITY.GUEST) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
@@ -414,6 +457,7 @@ export class ChannelGateway {
     if (db_result == 500) {
       client.emit('DBError');
     } else {
+      this.exitSocketEvent(ban_id, 'ban');
       client.emit('channel/send', 'server', `${ban_id}를 ban 함!`);
     }
   }
@@ -441,5 +485,13 @@ export class ChannelGateway {
 
     if (user1_authority <= user2_authority) return true;
     else return false;
+  }
+
+  exitSocketEvent(user_id: string, command: string) {
+    const user = this.mainGateway.users.find((user) => user.id == user_id);
+    if (user == undefined) {
+      this.logger.log(`[exitSocketEvent] ${user_id} 그럴 일 없음...`);
+    }
+    user.socket.emit('channel/exit', command);
   }
 }

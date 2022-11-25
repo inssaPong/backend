@@ -1,6 +1,6 @@
-import { GAMEOBJECT, GameRoomComponent } from '../game.component';
+import { GAME_OBJECT, GameRoomComponent } from '../game.component';
 import { GameGateway } from '../games.gateway';
-import failSaveResult from './failSaveResult';
+import failSaveResult from './failSaveResult.service';
 
 export default async function gameOver(
   gameRoom: GameRoomComponent,
@@ -15,16 +15,18 @@ export default async function gameOver(
   if (p1 != undefined) {
     p1.gameInfo.reset();
     p1.setStatusOnline();
+    gameGateway.mainGateway.server.emit(`getUserStatus_${p1.id}`, p1.status);
   }
   const p2 = gameGateway.mainGateway.users.find((user) => user.id == p2_id);
   if (p2 != undefined) {
     p2.gameInfo.reset();
     p2.setStatusOnline();
+    gameGateway.mainGateway.server.emit(`getUserStatus_${p2.id}`, p2.status);
   }
 
   let winner_id;
   let loser_id;
-  if (gameRoom.p1_score == GAMEOBJECT.finalScore) {
+  if (gameRoom.p1_score == GAME_OBJECT.FINAL_SCORE) {
     winner_id = gameRoom.p1_id;
     loser_id = gameRoom.p2_id;
   } else {

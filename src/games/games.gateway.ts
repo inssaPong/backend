@@ -2,8 +2,8 @@ import { Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { UserInfo, USERSTATUS } from 'src/sockets/user.component';
-import { GAMEOBJECT, GameRoomComponent } from './game.component';
+import { UserInfo, USER_STATUS } from 'src/sockets/user.component';
+import { GAME_OBJECT, GameRoomComponent } from './game.component';
 import { GamesRepository } from './games.repository';
 import getPosition from './schedules/getPosition.service';
 import nextRound from './schedules/nextRound.service';
@@ -15,7 +15,7 @@ export class GameGateway {
   private readonly logger: Logger = new Logger(GameGateway.name);
   constructor(
     public mainGateway: MainGateway,
-    public gamesRepository: GamesRepository,
+    public readonly gamesRepository: GamesRepository,
   ) {}
 
   @SubscribeMessage('game/invite')
@@ -31,7 +31,7 @@ export class GameGateway {
       );
       return;
     }
-    if (partner.status != USERSTATUS.online) {
+    if (partner.status != USER_STATUS.ONLINE) {
       client.emit('game/failInvite', req.user_id);
       return;
     }
@@ -59,9 +59,9 @@ export class GameGateway {
     );
     client.emit(
       'game/initCanvas',
-      GAMEOBJECT.ball_radius,
-      GAMEOBJECT.bar_width,
-      GAMEOBJECT.bar_height,
+      GAME_OBJECT.BALL_RADIUS,
+      GAME_OBJECT.BAR_WIDTH,
+      GAME_OBJECT.BAR_HEIGHT,
     );
   }
 
@@ -103,19 +103,19 @@ export class GameGateway {
     }
     if (
       (gameRoom.p1_y > 0 || value == 1) &&
-      (gameRoom.p1_y < GAMEOBJECT.canvas_height - GAMEOBJECT.bar_height ||
+      (gameRoom.p1_y < GAME_OBJECT.CANVAS_HEIGHT - GAME_OBJECT.BAR_HEIGHT ||
         value == -1) &&
       gameRoom.p1_id == player.id
     ) {
-      gameRoom.p1_y += value * GAMEOBJECT.move_pixel;
+      gameRoom.p1_y += value * GAME_OBJECT.MOVE_PIXEL;
     }
     if (
       (gameRoom.p2_y > 0 || value == 1) &&
-      (gameRoom.p2_y < GAMEOBJECT.canvas_height - GAMEOBJECT.bar_height ||
+      (gameRoom.p2_y < GAME_OBJECT.CANVAS_HEIGHT - GAME_OBJECT.BAR_HEIGHT ||
         value == -1) &&
       gameRoom.p2_id == player.id
     ) {
-      gameRoom.p2_y += value * GAMEOBJECT.move_pixel;
+      gameRoom.p2_y += value * GAME_OBJECT.MOVE_PIXEL;
     }
   }
 
@@ -131,8 +131,9 @@ export class GameGateway {
     if (gameRoom == undefined) {
       this.logger.log(`[giveUpGame] : ${player.gameInfo.room_id} error.`);
     }
-    if (gameRoom.p1_id == player.id) gameRoom.p2_score = GAMEOBJECT.finalScore;
-    else gameRoom.p1_score = GAMEOBJECT.finalScore;
+    if (gameRoom.p1_id == player.id)
+      gameRoom.p2_score = GAME_OBJECT.FINAL_SCORE;
+    else gameRoom.p1_score = GAME_OBJECT.FINAL_SCORE;
     this.mainGateway.server.to(gameRoom.room_id).emit('game/giveUp', player.id);
     setTimeout(nextRound, 0, gameRoom, this);
   }
@@ -187,25 +188,27 @@ export class GameGateway {
     p2.gameInfo.init(p1.id, p2.id, room_id);
     p1.setStatusGaming();
     p2.setStatusGaming();
+    this.mainGateway.server.emit(`getUserStatus_${p1.id}`, p1.status);
+    this.mainGateway.server.emit(`getUserStatus_${p2.id}`, p2.status);
     this.gameRooms.push(gameRoom);
     this.mainGateway.server.to(room_id).emit('game/start', p1.id, p2.id);
     this.mainGateway.server
       .to(room_id)
       .emit(
         'game/initCanvas',
-        GAMEOBJECT.ball_radius,
-        GAMEOBJECT.bar_width,
-        GAMEOBJECT.bar_height,
+        GAME_OBJECT.BALL_RADIUS,
+        GAME_OBJECT.BAR_WIDTH,
+        GAME_OBJECT.BAR_HEIGHT,
       );
     gameRoom.interval_ball = setInterval(
       updateBallPos,
-      GAMEOBJECT.ballSpeed,
+      GAME_OBJECT.BALL_SPEED,
       gameRoom,
       this,
     );
     gameRoom.interval_move = setInterval(
       getPosition,
-      GAMEOBJECT.drawUpdateTime,
+      GAME_OBJECT.DRAW_UPDATE_TIME,
       gameRoom,
       this.mainGateway.server,
     );
@@ -234,7 +237,7 @@ export class GameGateway {
       );
       return;
     }
-    if (player.status != USERSTATUS.online) {
+    if (player.status != USER_STATUS.ONLINE) {
       client.emit('game/failAcceptInvite', req.user_id);
       return;
     }
@@ -244,7 +247,7 @@ export class GameGateway {
       );
       return;
     }
-    if (partner.status != USERSTATUS.online) {
+    if (partner.status != USER_STATUS.ONLINE) {
       client.emit('game/failAcceptInvite', req.partner_id);
       return;
     }

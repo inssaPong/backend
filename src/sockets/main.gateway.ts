@@ -32,7 +32,7 @@ export class MainGateway {
 
   setOnline(client: Socket) {
     const user_id = client.handshake.query.user_id;
-    const user = this.users.find((user) => user.id == user_id);
+    const user = this.users.find((element) => element.id == user_id);
     if (user == undefined) {
       this.logger.log(
         `[connect] ${user_id} : 여기 들어오면 안돼!! 이젠 절대 있을 수 없는 일임.`,
@@ -43,6 +43,7 @@ export class MainGateway {
     this.logger.log(`[setOnline] : ${user_id}`);
     user.socket = client;
     user.setStatusOnline();
+    this.server.emit(`getUserStatus_${user_id}`, user.status);
   }
 
   @SubscribeMessage('getUserStatus')
@@ -65,15 +66,16 @@ export class MainGateway {
   }
 
   userDisconnect(client: Socket) {
-    const player = this.users.find((user) => user.socket == client);
-    if (player == undefined) {
+    const user = this.users.find((element) => element.socket == client);
+    if (user == undefined) {
       this.logger.log(
         `[disconnect] 여기 들어오면 안돼!! 그치만 발생할 수도 있는 일임.`,
       );
       this.initUsers();
       return;
     }
-    player.setStatusOffline();
+    user.setStatusOffline();
+    this.server.emit(`getUserStatus_${user.id}`, user.status);
   }
 
   async initUsers() {
@@ -85,6 +87,14 @@ export class MainGateway {
     users.forEach((element) => {
       this.newUser(element.id);
     });
+  }
+
+  changedChannelMember(user_id: string, channel_id: number) {
+    this.server.emit(`channel/changedChannelMember/${channel_id}`, user_id);
+  }
+
+  changedChannelList() {
+    this.server.emit(`channel/changedChannelList`);
   }
 
   printAllUser() {

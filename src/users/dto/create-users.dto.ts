@@ -7,16 +7,11 @@ import {
   MaxLength,
   MinLength,
   IsBoolean,
+  IsEnum,
 } from 'class-validator';
+import { Relation_status } from '../users.definition';
 
 export class ChanageFollowStatusDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  @ApiProperty({ description: '유저 아이디' })
-  readonly user_id: string;
-
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)
@@ -28,22 +23,6 @@ export class ChanageFollowStatusDto {
   @IsBoolean()
   @ApiProperty({ description: '팔로우 여부' })
   readonly follow_status: boolean;
-}
-
-export class ApplyBlockDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  @ApiProperty({ description: '유저 아이디' })
-  readonly user_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(10)
-  @MinLength(1)
-  @ApiProperty({ description: '차단할 대상 유저 아이디' })
-  readonly block_id: string;
 }
 
 // TODO mypage와 dto 중복되는 거 리팩토링하기
@@ -104,18 +83,19 @@ export class UserInfoDto {
   @ApiProperty({ description: '프로필 사진' })
   readonly avatar: string;
 
-  @IsBoolean()
-  @ApiProperty({ description: '팔로우 여부' })
-  readonly follow_status: boolean;
+  @IsEnum(Relation_status)
+  @ApiProperty({ enum: Relation_status, description: '관계 상태' })
+  readonly relation_status: Relation_status;
+
   constructor(
     id: string,
     nickname: string,
     avatar: string,
-    follow_status: boolean,
+    relation_status: Relation_status,
   ) {
     this.id = id;
     this.nickname = nickname;
     this.avatar = `${avatar}`;
-    this.follow_status = follow_status;
+    this.relation_status = relation_status;
   }
 }
