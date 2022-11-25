@@ -113,7 +113,7 @@ export class MypageRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-		SELECT winner_id, loser_id
+		SELECT id, winner_id, loser_id
 		FROM "game_history"
 		WHERE winner_id = $1 OR loser_id = $1
 		ORDER BY id DESC

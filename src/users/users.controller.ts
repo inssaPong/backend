@@ -88,6 +88,7 @@ export class UsersController {
       const gameHistory: GameHistoryDto = { gameHistory: [] };
       for (const element of gameHistoryDB) {
         const oneGameHistory: OneGameHistoryDto = {
+          id: element['id'],
           winner: element['winner_id'],
           loser: element['loser_id'],
         };
@@ -207,7 +208,8 @@ export class UsersController {
       await this.usersService.checkUserExist(req.user.id);
       await this.usersService.checkUserExist(body.partner_id);
 
-      if (req.user.id == body.partner_id) throw new BadRequestException('자기 자신을 follow 할 수 없음');
+      if (req.user.id == body.partner_id)
+        throw new BadRequestException('자기 자신을 follow 할 수 없음');
       if (body.follow_status == false) {
         await this.usersRepository.offFollowStatus(
           req.user.id,
@@ -247,7 +249,11 @@ export class UsersController {
     description: '서버 에러',
   })
   @Patch('block')
-  async blockUser(@Body() body: ApplyBlockDto, @Req() req, @Res() res: Response) {
+  async blockUser(
+    @Body() body: ApplyBlockDto,
+    @Req() req,
+    @Res() res: Response,
+  ) {
     try {
       await this.usersService.checkUserExist(body.user_id);
       await this.usersService.checkUserExist(body.block_id);
@@ -256,11 +262,11 @@ export class UsersController {
         body.block_id,
       );
       if (relation_status.length == 1)
-		  this.usersRepository.blockFollow(body.user_id, body.block_id);
-		else if (relation_status.length == 0)
-		  this.usersRepository.blockUnfollow(body.user_id, body.block_id);
-		this.logger.log(`${req.user.id}가 ${body.block_id}를 차단`);
-		res.status(200).send();
+        this.usersRepository.blockFollow(body.user_id, body.block_id);
+      else if (relation_status.length == 0)
+        this.usersRepository.blockUnfollow(body.user_id, body.block_id);
+      this.logger.log(`${req.user.id}가 ${body.block_id}를 차단`);
+      res.status(200).send();
     } catch (error) {
       this.logger.error(`[${this.blockUser.name}] ${error}`);
       throw error;
