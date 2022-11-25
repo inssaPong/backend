@@ -8,7 +8,7 @@ export const GAME_OBJECT = {
   MARGIN: 20,
   DRAW_UPDATE_TIME: 50,
   BALL_SPEED: 10,
-  FINAL_SCORE: 50,
+  FINAL_SCORE: 5,
 };
 
 export class GameComponent {
