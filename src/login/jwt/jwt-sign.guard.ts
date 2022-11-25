@@ -49,10 +49,10 @@ export class JwtSignGuard implements CanActivate {
       response.redirect(`${referer}/twofactor`);
     } else if (userInfo.isUserExist === false) {
       this.logger.log(
-        `'${userInfo.id}: '유저 등록이 필요합니다. editprofile로 이동`,
+        `'${userInfo.id}: '유저 등록이 필요합니다. signup로 이동`,
       );
       response.cookie('Authorization', preLoginAcessToken);
-      response.redirect(`${referer}/editprofile`);
+      response.redirect(`${referer}/signup`);
     }
   }
 }
