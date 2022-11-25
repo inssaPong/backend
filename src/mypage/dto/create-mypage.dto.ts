@@ -40,6 +40,11 @@ export class GameHistoryDto {
 }
 
 export class OneGameHistoryDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ description: '게임 전적 아이디' })
+  readonly id: string;
+
   @IsString()
   @IsNotEmpty()
   @MaxLength(10)

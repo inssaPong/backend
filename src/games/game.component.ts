@@ -1,14 +1,14 @@
-export const GAMEOBJECT = {
-  canvas_width: 300,
-  canvas_height: 150,
-  ball_radius: 3,
-  bar_width: 5,
-  bar_height: 20,
-  move_pixel: 5,
-  margin: 20,
-  drawUpdateTime: 50,
-  ballSpeed: 10,
-  finalScore: 5,
+export const GAME_OBJECT = {
+  CANVAS_WIDTH: 300,
+  CANVAS_HEIGHT: 150,
+  BALL_RADIUS: 3,
+  BAR_WIDTH: 5,
+  BAR_HEIGHT: 20,
+  MOVE_PIXEL: 5,
+  MARGIN: 20,
+  DRAW_UPDATE_TIME: 50,
+  BALL_SPEED: 10,
+  FINAL_SCORE: 5,
 };
 
 export class GameComponent {
@@ -59,11 +59,11 @@ export class GameRoomComponent {
   nextRound() {
     this.ball_x_dir = 1;
     this.ball_y_dir = 1;
-    this.ball_x = GAMEOBJECT.canvas_width / 2;
-    this.ball_y = GAMEOBJECT.canvas_height / 2;
-    this.p1_x = GAMEOBJECT.margin;
-    this.p1_y = GAMEOBJECT.canvas_height / 2 - GAMEOBJECT.bar_height / 2;
-    this.p2_x = GAMEOBJECT.canvas_width - GAMEOBJECT.margin;
-    this.p2_y = GAMEOBJECT.canvas_height / 2 - GAMEOBJECT.bar_height / 2;
+    this.ball_x = GAME_OBJECT.CANVAS_WIDTH / 2;
+    this.ball_y = GAME_OBJECT.CANVAS_HEIGHT / 2;
+    this.p1_x = GAME_OBJECT.MARGIN;
+    this.p1_y = GAME_OBJECT.CANVAS_HEIGHT / 2 - GAME_OBJECT.BAR_HEIGHT / 2;
+    this.p2_x = GAME_OBJECT.CANVAS_WIDTH - GAME_OBJECT.MARGIN;
+    this.p2_y = GAME_OBJECT.CANVAS_HEIGHT / 2 - GAME_OBJECT.BAR_HEIGHT / 2;
   }
 }

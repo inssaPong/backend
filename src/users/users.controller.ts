@@ -87,6 +87,7 @@ export class UsersController {
       const gameHistory: GameHistoryDto = { gameHistory: [] };
       for (const element of gameHistoryDB) {
         const oneGameHistory: OneGameHistoryDto = {
+          id: element['id'],
           winner: element['winner_id'],
           loser: element['loser_id'],
         };

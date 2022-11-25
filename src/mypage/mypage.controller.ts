@@ -152,6 +152,7 @@ export class MypageController {
       };
       for (const element of gameHistoryDB) {
         const oneGameHistory: OneGameHistoryDto = {
+          id: element['id'],
           winner: element['winner_id'],
           loser: element['loser_id'],
         };
