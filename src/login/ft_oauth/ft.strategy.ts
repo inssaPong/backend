@@ -2,18 +2,23 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile, VerifyCallback } from 'passport-42';
+import { FtUserDto } from '../dto/login.dto';
+import { LoginRepository } from '../login.repository';
 
 @Injectable()
 export class FtStrategy extends PassportStrategy(Strategy, '42') {
   private readonly logger = new Logger(FtStrategy.name);
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly loginRepository: LoginRepository,
+  ) {
     super({
       clientID: configService.get<string>('ft.uid'),
       clientSecret: configService.get<string>('ft.secret'),
       callbackURL: configService.get<string>('ft.redirect_url'),
       profileFields: {
-        username: 'login',
+        id: 'login',
         email: 'email',
       },
     });
@@ -26,11 +31,28 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     cb: VerifyCallback,
   ): Promise<any> {
     this.logger.log('[validate]');
-    const user = {
-      id: profile.username,
+    const isUserExist: boolean = await this.loginRepository.isUserExistInDB(
+      profile.id,
+    );
+    let twoFactorStatus: boolean = false;
+    if (isUserExist === true) {
+      twoFactorStatus = await this.loginRepository.getTwoFactorStatusByUserId(
+        profile.id,
+      );
+    }
+
+    let isAuthenticated = true;
+    if (twoFactorStatus === true || isUserExist === false) {
+      isAuthenticated = false;
+    }
+
+    const user: FtUserDto = {
+      id: profile.id,
       email: profile.email,
+      isUserExist,
+      twoFactorStatus,
+      isAuthenticated,
     };
-    this.logger.debug(`id: ${user.id}, email: ${user.email}`);
     return cb(null, user);
   }
 }

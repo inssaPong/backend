@@ -17,7 +17,7 @@ export class FtAuthGuard extends AuthGuard('42') {
       return activate;
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException();
+      throw error;
     }
   }
 }

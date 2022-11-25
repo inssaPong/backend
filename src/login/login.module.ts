@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseModule } from 'src/database/database.module';
 import { MailModule } from '../mail/mail.module';
 import { MainSocketModule } from 'src/sockets/main.module';
+import { LoginService } from './login.service';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { MainSocketModule } from 'src/sockets/main.module';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('jwt.secret'),
         signOptions: {
-          expiresIn: configService.get<string>('jwt.expiration_time'),
+          expiresIn: configService.get<string>('jwt.expiration_time_long'),
         },
       }),
     }),
@@ -29,6 +30,6 @@ import { MainSocketModule } from 'src/sockets/main.module';
     MainSocketModule,
   ],
   controllers: [LoginController],
-  providers: [FtStrategy, JwtStrategy, LoginRepository],
+  providers: [FtStrategy, JwtStrategy, LoginRepository, LoginService],
 })
 export class LoginModule {}

@@ -9,7 +9,10 @@ export default () => ({
 
   jwt: {
     secret: process.env.JWT_SECRET,
-    expiration_time: parseInt(process.env.JWT_EXPIRATION_TIME, 10) || 86400,
+    expiration_time_long:
+      parseInt(process.env.JWT_EXPIRATION_TIME_LONG, 10) || 86400,
+    expiration_time_short:
+      parseInt(process.env.JWT_EXPIRATION_TIME_SHORT, 10) || 180,
   },
 
   cookie: {

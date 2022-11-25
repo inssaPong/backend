@@ -4,55 +4,55 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { LoginRepository } from '../login.repository';
 
 @Injectable()
 export class JwtSignGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly loginRepository: LoginRepository,
     private mainGateway: MainGateway,
+    private readonly configService: ConfigService,
   ) {}
 
   private readonly logger = new Logger(JwtSignGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     this.logger.log(`[${context.getHandler().name}] -> [canActivate]`);
-    const req = context.switchToHttp().getRequest();
-    const res = context.switchToHttp().getResponse();
-    const user = req.user;
-    const referer = 'http://localhost:8080/';
-    if (user === undefined) {
+    const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
+
+    // Description: 유저가 존재하지 않을 때
+    const userInfo = request.user;
+    this.logger.debug(userInfo);
+    if (userInfo === undefined) {
       this.logger.log('Undefined user');
       return false;
     }
-    const access_token = this.jwtService.sign(user);
-    this.logger.debug(`access_token:  ${access_token}`);
-    res.cookie('Authorization', access_token, {
-      // httpOnly: true, // TODO: true일때 보안은 좋으나 클라이언트에서 접근 불가. 어떻게 하지?
+
+    // Description: 로그인 성공 시 유효기간이 긴 jwt 토큰 발급
+    const loginAccessToken = this.jwtService.sign(userInfo);
+
+    // Description: 로그인 절차가 남았을 때 유효기간이 짧은 jwt 토큰 발급(2차 인증, 회원 가입)
+    const preLoginAcessToken = this.jwtService.sign(userInfo, {
+      expiresIn: this.configService.get<string>('jwt.expiration_time_short'),
     });
-    try {
-      const userData = await this.loginRepository.getUserData(user.id);
-      if (userData === undefined) {
-        // Description: 해당 유저가 DB에 존재하지 않을 때
-        this.logger.log('User does not exist in DB.');
-        await this.loginRepository.insertUserData(user.id, user.id, user.email);
-        res.redirect(`${referer}editprofile`);
-        // socket용 user 객체 생성함
-        this.mainGateway.newUser(user.id);
-      } else {
-        // Description: 해당 유저가 DB에 존재할 때
-        this.logger.log('User is in DB.');
-        if (userData.twofactor_status === true) {
-          res.redirect(`${referer}twofactor`);
-        } else {
-          res.redirect(`${referer}home`);
-        }
-      }
-    } catch (exception) {
-      throw exception;
+    const referer = 'http://localhost:8080';
+    if (userInfo.isAuthenticated === true) {
+      this.logger.log(`'${userInfo.id}': 로그인을 성공했습니다.`);
+      response.cookie('Authorization', loginAccessToken);
+      response.redirect(`${referer}/home`);
+    } else if (userInfo.twoFactorStatus === true) {
+      this.logger.log(`'${userInfo.id}': 2차 인증이 필요합니다.`);
+      response.cookie('Authorization', preLoginAcessToken);
+      response.redirect(`${referer}/twofactor`);
+    } else if (userInfo.isUserExist === false) {
+      this.logger.log(
+        `'${userInfo.id}: '유저 등록이 필요합니다. editprofile로 이동`,
+      );
+      response.cookie('Authorization', preLoginAcessToken);
+      response.redirect(`${referer}/editprofile`);
     }
   }
 }
