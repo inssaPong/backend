@@ -52,6 +52,7 @@ export class GameGateway {
       this.logger.log(`[gameCatch] : ${id} 이런 일은 있을 수 없음.`);
     }
     client.join(player.gameInfo.room_id);
+    client.emit('game/getRoomId', player.gameInfo.room_id);
     client.emit(
       'game/watchStart',
       player.gameInfo.p1_id,
@@ -138,18 +139,31 @@ export class GameGateway {
     setTimeout(nextRound, 0, gameRoom, this);
   }
 
-  @SubscribeMessage('game/exitWaiting')
-  exitWaiting(client: Socket) {
+  @SubscribeMessage('game/exit')
+  exit(client: Socket, room_id: string) {
     this.mainGateway.enterPlayer = this.mainGateway.enterPlayer.filter(
       (element) => element != client,
     );
     this.mainGateway.invitePlayer = this.mainGateway.invitePlayer.filter(
       (element) => element != client,
     );
+
+    const player = this.mainGateway.users.find((user) => user.socket == client);
+    if (player == undefined) {
+      this.logger.log(`[exit] : ${client.id} 이런 일은 있을 수 없음.`);
+    }
+    const gameRoom = this.gameRooms.find(
+      (gameRoom) => gameRoom.room_id == player.gameInfo.room_id,
+    );
+    if (gameRoom == undefined) {
+      client.leave(room_id);
+      this.logger.error(room_id);
+      return;
+    }
+    this.giveUpGame(client);
   }
 
   getP1P2() {
-    let room_id: string;
     const p1 = this.mainGateway.users.find(
       (user) => user.socket == this.mainGateway.enterPlayer[0],
     );
@@ -170,8 +184,6 @@ export class GameGateway {
       this.mainGateway.enterPlayer.splice(1, 2);
       return;
     }
-
-    room_id = p1.id + '_' + p2.id;
     this.mainGateway.enterPlayer.splice(0, 2);
     return { p1, p2 };
   }
@@ -191,6 +203,7 @@ export class GameGateway {
     this.mainGateway.server.emit(`getUserStatus_${p1.id}`, p1.status);
     this.mainGateway.server.emit(`getUserStatus_${p2.id}`, p2.status);
     this.gameRooms.push(gameRoom);
+    this.mainGateway.server.to(room_id).emit('game/getRoomId', gameRoom);
     this.mainGateway.server.to(room_id).emit('game/start', p1.id, p2.id);
     this.mainGateway.server
       .to(room_id)
