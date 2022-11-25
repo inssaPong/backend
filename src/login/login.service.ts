@@ -56,10 +56,11 @@ export class LoginService {
   }
 
   getExpiredToken(user_info: FtUserDto) {
-    user_info.isAuthenticated = false;
-    const expiredToken = this.jwtService.sign(user_info, {
-      expiresIn: 0,
-    });
-    return expiredToken;
+    // user_info.isAuthenticated = false;
+    // console.log(user_info);
+    // const expiredToken = this.jwtService.sign(user_info, {
+    //   expiresIn: 0,
+    // });
+    return ``;
   }
 }
