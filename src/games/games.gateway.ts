@@ -141,6 +141,8 @@ export class GameGateway {
 
   @SubscribeMessage('game/exit')
   exit(client: Socket, room_id: string) {
+    this.logger.error(`========> ${room_id}`);
+
     this.mainGateway.enterPlayer = this.mainGateway.enterPlayer.filter(
       (element) => element != client,
     );
@@ -153,11 +155,10 @@ export class GameGateway {
       this.logger.log(`[exit] : ${client.id} 이런 일은 있을 수 없음.`);
     }
     const gameRoom = this.gameRooms.find(
-      (gameRoom) => gameRoom.room_id == player.gameInfo.room_id,
+      (room) => room.room_id == player.gameInfo.room_id,
     );
     if (gameRoom == undefined) {
       client.leave(room_id);
-      this.logger.error(room_id);
       return;
     }
     this.giveUpGame(client);
@@ -203,7 +204,7 @@ export class GameGateway {
     this.mainGateway.server.emit(`getUserStatus_${p1.id}`, p1.status);
     this.mainGateway.server.emit(`getUserStatus_${p2.id}`, p2.status);
     this.gameRooms.push(gameRoom);
-    this.mainGateway.server.to(room_id).emit('game/getRoomId', gameRoom);
+    this.mainGateway.server.to(room_id).emit('game/getRoomId', room_id);
     this.mainGateway.server.to(room_id).emit('game/start', p1.id, p2.id);
     this.mainGateway.server
       .to(room_id)
