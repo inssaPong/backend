@@ -161,7 +161,7 @@ export class UsersController {
       const userInfo: UserInfoDto = {
         id: userInfoDB[0]['id'],
         nickname: userInfoDB[0]['nickname'],
-        avatar: userInfoDB[0]['avatar'],
+        avatar: `${userInfoDB[0]['avatar']}`,
         relation_status: await this.usersService.getRelationStatus(
           req.user.id,
           target_id,
