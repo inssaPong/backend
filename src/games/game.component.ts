@@ -57,8 +57,8 @@ export class GameRoomComponent {
     this.p2_score = 0;
   }
   nextRound() {
-    this.ball_x_dir = 1;
-    this.ball_y_dir = 1;
+    this.ball_x_dir = Math.random() > 0.5 ? 1 : -1;
+    this.ball_y_dir = Math.random() > 0.5 ? 1 : -1;
     this.ball_x = GAME_OBJECT.CANVAS_WIDTH / 2;
     this.ball_y = GAME_OBJECT.CANVAS_HEIGHT / 2;
     this.p1_x = GAME_OBJECT.MARGIN;
