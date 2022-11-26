@@ -273,22 +273,30 @@ export class ChannelsGateway {
   }
 
   async changeChannelPassword(client: Socket, req: any, password: string) {
-    if (password.length != 4) {
-      client.emit('channel/commandFailed', '4자리 비밀번호를 입력해주세요.');
-      return;
-    }
     const authority = await this.getAuthority(
       client,
       req.sender_id,
       req.channel_id,
     );
-    if (authority == CHANNEL_AUTHORITY.GUEST) {
+    if (authority != CHANNEL_AUTHORITY.OWNER) {
       client.emit('channel/commandFailed', '권한이 없습니다.');
       return;
     }
-
+    if (password.length != 4 && password.length != 0) {
+      client.emit('channel/commandFailed', '4자리 비밀번호를 입력해주세요.');
+      return;
+    }
+    if (password.match(/^[0-9]+$/) == null && password != '') {
+      client.emit(
+        'channel/commandFailed',
+        '비밀번호는 숫자만 입력 가능합니다.',
+      );
+      return;
+    }
     const salt = await bcrypt.genSalt();
-    const salt_password = await bcrypt.hash(password, salt);
+    let salt_password: string;
+    if (password.length == 4) salt_password = await bcrypt.hash(password, salt);
+    else salt_password = '';
     const db_result = await this.channelsRepository.changeChannelPassword(
       req.channel_id,
       salt_password,
@@ -296,11 +304,15 @@ export class ChannelsGateway {
     if (db_result == 500) {
       client.emit('DBError');
     } else {
-      client.emit(
-        'channel/send',
-        'server',
-        `${password}로 비밀번호 변경 성공!`,
-      );
+      if (password.length == 4) {
+        client.emit(
+          'channel/send',
+          'server',
+          `${password}로 비밀번호 변경 성공!`,
+        );
+      } else {
+        client.emit('channel/send', 'server', `공개채널로변경 성공!`);
+      }
     }
   }
 
