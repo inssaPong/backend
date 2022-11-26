@@ -132,17 +132,17 @@ export class GameGateway {
     if (gameRoom == undefined) {
       this.logger.log(`[giveUpGame] : ${player.gameInfo.room_id} error.`);
     }
-    if (gameRoom.p1_id == player.id)
+    if (gameRoom.p1_id == player.id) {
       gameRoom.p2_score = GAME_OBJECT.FINAL_SCORE;
-    else gameRoom.p1_score = GAME_OBJECT.FINAL_SCORE;
+    } else {
+      gameRoom.p1_score = GAME_OBJECT.FINAL_SCORE;
+    }
     this.mainGateway.server.to(gameRoom.room_id).emit('game/giveUp', player.id);
     setTimeout(nextRound, 0, gameRoom, this);
   }
 
   @SubscribeMessage('game/exit')
   exit(client: Socket, room_id: string) {
-    this.logger.error(`========> ${room_id}`);
-
     this.mainGateway.enterPlayer = this.mainGateway.enterPlayer.filter(
       (element) => element != client,
     );
