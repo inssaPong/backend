@@ -34,7 +34,8 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     const isUserExist: boolean = await this.loginRepository.isUserExistInDB(
       profile.id,
     );
-    let twoFactorStatus: boolean = false;
+    let twoFactorStatus = false;
+
     if (isUserExist === true) {
       twoFactorStatus = await this.loginRepository.getTwoFactorStatusByUserId(
         profile.id,

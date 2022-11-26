@@ -52,7 +52,7 @@ export class JwtSignGuard implements CanActivate {
         `'${userInfo.id}: '유저 등록이 필요합니다. editprofile로 이동`,
       );
       response.cookie('Authorization', preLoginAcessToken);
-      response.redirect(`${referer}/editprofile`);
+      response.redirect(`${referer}/signup`);
     }
   }
 }

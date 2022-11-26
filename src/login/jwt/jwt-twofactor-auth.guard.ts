@@ -33,17 +33,21 @@ export class JwtTwoFactorAuthGuard extends AuthGuard('jwt') {
       throw new UnauthorizedException();
     }
     // Description: 이미 인증에 성공한 유저가 접근 시도
+    // home
     if (user.isAuthenticated === true) {
       throw new ForbiddenException();
     }
 
     // Description: DB에 존재하고 2차 인증이 꺼져있는 유저가 접근 시도. twofactor
+    // home
     if (user.isUserExist === true && user.twoFactorStatus === false) {
       throw new ForbiddenException();
     }
 
+    // 이상함!!!
+    // firstlogin
     // Description: 위의 경우를 제외하고 DB에 존재하는 유저가 접근을 시도. edit profile
-    if (user.isUserExist === true) {
+    if (user.isUserExist === false) {
       throw new ForbiddenException();
     }
 
