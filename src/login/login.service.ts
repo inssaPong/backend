@@ -39,11 +39,11 @@ export class LoginService {
   }
 
   // TODO: 회원가입
-  async signUp(user_info: FtUserDto): Promise<void> {
+  async signUp(user_info: FtUserDto, body): Promise<void> {
     const id = user_info.id;
-    const nickname = 'nickname';
     const email = user_info.email;
-    const avatar = 'avatar';
+    const nickname = body.nickname;
+    const avatar = body.avatar;
 
     // Description: DB에 유저 정보 저장
     await this.loginRepository.insertUserData(id, nickname, email, avatar);

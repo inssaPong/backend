@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   ForbiddenException,
   Get,
@@ -87,8 +88,6 @@ export class LoginController {
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.cookie('Authorization', accessToken);
-
-    res.status(200).send();
   }
 
   @ApiOperation({ summary: 'editprofile 입장 유효성 검사' })
@@ -105,7 +104,6 @@ export class LoginController {
     if (user_info.isRegistered === true) {
       throw new ForbiddenException();
     }
-    res.status(200).send();
   }
 
   @ApiOperation({ summary: '최초 로그인 시 signup' })
@@ -115,15 +113,15 @@ export class LoginController {
   @Public()
   @UseGuards(JwtSignupAuthGuard)
   @Post('/signup')
-  async editProfile(@User() user_info: FtUserDto, @Req() req, @Res() res) {
+  async editProfile(@User() user_info: FtUserDto, @Res() res, @Body() body) {
     this.logger.log(`Post /login/editprofile`);
-    await this.loginService.signUp(user_info);
+
+    await this.loginService.signUp(user_info, body);
     const accessToken =
       this.loginService.getAuthenticatedAccessToken(user_info);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.cookie('Authorization', accessToken);
-    res.status(200).send();
   }
 
   // @ApiOperation({ summary: '로그아웃' })
