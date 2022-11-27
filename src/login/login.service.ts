@@ -54,7 +54,7 @@ export class LoginService {
     const test_user: FtUserDto = {
       id: user_info.id,
       email: user_info.email,
-      isRegisteredUser: user_info.isRegisteredUser,
+      isRegistered: user_info.isRegistered,
       twoFactorStatus: user_info.twoFactorStatus,
       isAuthenticated: user_info.isAuthenticated,
     };

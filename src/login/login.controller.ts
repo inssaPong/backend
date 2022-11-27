@@ -19,13 +19,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FtAuthGuard } from './ft_oauth/ft.guard';
-import { JwtSignGuard } from './jwt/jwt-sign.guard';
+import { JwtSignGuard } from './jwt/jwt-signin.guard';
 import { Public } from './public.decorator';
 import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';
 import { User } from './user.decorator';
 import { FtUserDto, RequestEditProfileDto } from './dto/login.dto';
 import { JwtTwoFactorAuthGuard } from './jwt/jwt-twofactor-auth.guard';
 import { LoginService } from './login.service';
+import { JwtSignupAuthGuard } from './jwt/jwt-signup-auth.guard';
 
 // 1-1, 1-2, 1-3, 1-4
 @Controller('/login')
@@ -96,12 +97,12 @@ export class LoginController {
     description: '[Forbidden] 이미 DB에 존재하는 유저',
   })
   @Public()
-  @UseGuards(JwtTwoFactorAuthGuard)
+  @UseGuards(JwtSignupAuthGuard)
   @Get('/first')
   async authEditProfile(@User() user_info: FtUserDto, @Res() res) {
     this.logger.log(`GET /login/editprofile`);
     console.log(user_info);
-    if (user_info.isRegisteredUser === true) {
+    if (user_info.isRegistered === true) {
       throw new ForbiddenException();
     }
     res.status(200).send();

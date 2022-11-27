@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
-export class JwtTwoFactorAuthGuard extends AuthGuard('jwt') {
-  private readonly logger = new Logger(JwtTwoFactorAuthGuard.name);
+export class JwtSignupAuthGuard extends AuthGuard('jwt') {
+  private readonly logger = new Logger(JwtSignupAuthGuard.name);
 
   canActivate(context: ExecutionContext) {
     return super.canActivate(context);
@@ -32,26 +32,17 @@ export class JwtTwoFactorAuthGuard extends AuthGuard('jwt') {
       this.logger.error(`error: ${err}`);
       throw new UnauthorizedException();
     }
-
-    // Description: 이미 인증에 성공한 유저가 접근 시도
-    // home
+    // Description: 이미 인증에 성공한 유저가 접근 시도. home
     if (user.isAuthenticated === true) {
       throw new ForbiddenException();
     }
 
-    // Description: DB에 존재하고 2차 인증이 꺼져있는 유저가 접근 시도. twofactor
-    // home
-    if (user.isRegistered === true && user.twoFactorStatus === false) {
+    // Description: 위의 경우를 제외하고 DB에 존재하는 유저가 접근을 시도. signup
+    if (user.isRegistered === true) {
       throw new ForbiddenException();
     }
 
-    // Description: DB에 없는 유저가 접근 시도
-    // home -> login
-    if (user.isRegistered === false) {
-      throw new ForbiddenException();
-    }
-
-    this.logger.log(`${user.id}: 추가 인증을 진행합니다.`);
+    this.logger.log(`${user.id}: 계정 등록을 진행합니다`);
     return user;
   }
 }

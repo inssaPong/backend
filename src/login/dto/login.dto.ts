@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class FtUserDto {
   id: string;
   email: string;
-  isRegisteredUser: boolean;
+  isRegistered: boolean;
   twoFactorStatus: boolean;
   isAuthenticated: boolean;
 }
