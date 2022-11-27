@@ -58,19 +58,15 @@ export class ChannelsController {
   async createChannel(@Req() req, @Res() res, @Body() body) {
     this.logger.log('POST /channels/create');
 
-    try {
-      const channelId =
-        await this.channelsService.createChannelAndReturnChannelId(
-          req.user.id,
-          body.name,
-          body.pw,
-        );
-      res.status(201).send({
-        id: channelId,
-      });
-    } catch (exception) {
-      throw exception;
-    }
+    const channelId =
+      await this.channelsService.createChannelAndReturnChannelId(
+        req.user.id,
+        body.name,
+        body.pw,
+      );
+    res.status(201).send({
+      id: channelId,
+    });
   }
 
   // 참여할 수 있는 채널 목록 받기
@@ -87,13 +83,10 @@ export class ChannelsController {
   @Get('/list')
   async GetAvailableChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list');
-    try {
-      const availableChannelList =
-        await this.channelsService.getAvailableChannelList(req.user.id);
-      res.status(200).send(availableChannelList);
-    } catch (exception) {
-      throw exception;
-    }
+
+    const availableChannelList =
+      await this.channelsService.getAvailableChannelList(req.user.id);
+    res.status(200).send(availableChannelList);
   }
 
   // 참여 중인 채널 목록 받기
@@ -110,14 +103,11 @@ export class ChannelsController {
   @Get('/list/join')
   async getJoinedChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list/join');
-    try {
-      const joinedChannelList = await this.channelsService.getJoinedChannelList(
-        req.user.id,
-      );
-      res.status(200).send(joinedChannelList);
-    } catch (exception) {
-      throw exception;
-    }
+
+    const joinedChannelList = await this.channelsService.getJoinedChannelList(
+      req.user.id,
+    );
+    res.status(200).send(joinedChannelList);
   }
 
   // 채널 입장
@@ -141,12 +131,9 @@ export class ChannelsController {
     @Body() body,
   ) {
     this.logger.log('POST /channels/enter');
-    try {
-      await this.channelsService.enterChannel(req.user.id, channel_id, body.pw);
-      res.status(201).send();
-    } catch (exception) {
-      throw exception;
-    }
+
+    await this.channelsService.enterChannel(req.user.id, channel_id, body.pw);
+    res.status(201).send();
   }
 
   // Description: 채널 이름 가져오기
@@ -162,12 +149,9 @@ export class ChannelsController {
   @Get('/room/name')
   async getChannelName(@Query('channel_id') channel_id: number, @Res() res) {
     this.logger.log('GET /room/name');
-    try {
-      const channelName = await this.channelsService.getChannelName(channel_id);
-      res.status(200).send(channelName);
-    } catch (exception) {
-      throw exception;
-    }
+
+    const channelName = await this.channelsService.getChannelName(channel_id);
+    res.status(200).send(channelName);
   }
 
   @ApiOperation({
@@ -186,14 +170,11 @@ export class ChannelsController {
     @Res() res,
   ) {
     this.logger.log('GET /channels/room/users');
-    try {
-      const usersId = await this.channelsService.getUserIdListInChannel(
-        channel_id,
-      );
-      res.status(200).send(usersId);
-    } catch (exception) {
-      throw exception;
-    }
+
+    const usersId = await this.channelsService.getUserIdListInChannel(
+      channel_id,
+    );
+    res.status(200).send(usersId);
   }
 
   // 채팅방 나가기
@@ -216,11 +197,8 @@ export class ChannelsController {
     @Res() res,
   ) {
     this.logger.log('DELETE /channels/room/exit');
-    try {
-      await this.channelsService.exitChannel(req.user.id, channel_id);
-      res.status(200).send();
-    } catch (exception) {
-      throw exception;
-    }
+
+    await this.channelsService.exitChannel(req.user.id, channel_id);
+    res.status(200).send();
   }
 }
