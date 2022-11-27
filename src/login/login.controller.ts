@@ -108,7 +108,7 @@ export class LoginController {
     res.status(200).send();
   }
 
-  @ApiOperation({ summary: '최초 로그인 시 editprofile' })
+  @ApiOperation({ summary: '최초 로그인 시 signup' })
   @ApiBody({ type: RequestEditProfileDto })
   @ApiOkResponse({ description: '회원가입 성공' })
   @ApiInternalServerErrorResponse({ description: 'DB에서 에러 반환' })
@@ -120,7 +120,8 @@ export class LoginController {
     await this.loginService.signUp(user_info);
     const accessToken =
       this.loginService.getAuthenticatedAccessToken(user_info);
-
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.cookie('Authorization', accessToken);
     res.status(200).send();
   }
