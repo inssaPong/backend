@@ -2,7 +2,6 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { json } from 'express';
-import { use } from 'passport';
 import { AppModule } from './app.module';
 // import * as cookieParser from 'cookie-parser'; // TODO: Encrypt cookie
 
@@ -30,6 +29,11 @@ async function bootstrap() {
   const DOMAIN = process.env.DOMAIN;
   const PORT = process.env.BACKEND_PORT;
   app.use(json({ limit: '1mb' }));
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+
   await app.listen(PORT);
 
   const logger = new Logger(bootstrap.name);

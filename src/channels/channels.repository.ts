@@ -170,8 +170,8 @@ export class ChannelsRepository {
   }
 
   // Description: 채널이 존재하는지 여부 확인
-  async isChannelThatExist(channel_id: number): Promise<boolean> {
-    this.logger.log(`[${this.isChannelThatExist.name}]`);
+  async isChannelExist(channel_id: number): Promise<boolean> {
+    this.logger.log(`[${this.isChannelExist.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `

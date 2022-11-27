@@ -126,9 +126,7 @@ export class ChannelsService {
     input_pw: string,
   ): Promise<void> {
     // Description: 채널이 존재하는지 여부 확인
-    const isExist = await this.channelsRepository.isChannelThatExist(
-      channel_id,
-    );
+    const isExist = await this.channelsRepository.isChannelExist(channel_id);
     if (isExist === false) {
       this.logger.error('해당 채널이 존재하지 않습니다.');
       throw new NotFoundException();

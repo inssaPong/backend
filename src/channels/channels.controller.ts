@@ -81,7 +81,7 @@ export class ChannelsController {
     description: '[500 internal Server Error] DB에 문제',
   })
   @Get('/list')
-  async GetAvailableChannelList(@Req() req, @Res() res) {
+  async getAvailableChannelList(@Req() req, @Res() res) {
     this.logger.log('GET /channels/list');
 
     const availableChannelList =
