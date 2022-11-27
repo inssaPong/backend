@@ -15,6 +15,7 @@ import {
   ApiResponse,
   ApiOkResponse,
   ApiInternalServerErrorResponse,
+  ApiConflictResponse,
 } from '@nestjs/swagger';
 import {
   GameHistoryDto,
@@ -83,6 +84,9 @@ export class MypageController {
   })
   @ApiOkResponse({
     description: '성공',
+  })
+  @ApiConflictResponse({
+    description: '중복된 닉네임',
   })
   @ApiInternalServerErrorResponse({
     description: '서버 에러',

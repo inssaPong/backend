@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
 import { DEFAULTIMAGE } from 'src/users/users.definition';
 import { UpdateMypageInfoDto } from './dto/update-mypage.dto';
 import { MypageRepository } from './mypage.repository';
@@ -13,9 +13,11 @@ export class MypageService {
 
   async updateMypageInfo(id: string, body: UpdateMypageInfoDto) {
     try {
-      for (let [key, value] of Object.entries(body)) {
-        if (key == 'nickname')
-          await this.mypageRepository.updateNickname(id, value);
+		if (await this.mypageRepository.checkExistNickname(id, body.nickname) >= 1)
+			throw new ConflictException('중복된 닉네임');
+        for (let [key, value] of Object.entries(body)) {
+            if (key == 'nickname')
+            await this.mypageRepository.updateNickname(id, value);
         else if (key == 'avatar') {
           if (body.avatar == null) await this.mypageRepository.deleteAvatar(id);
           else await this.mypageRepository.updateAvatar(id, value);
@@ -24,7 +26,7 @@ export class MypageService {
         else throw new BadRequestException('DTO에 맞지 않는 객체');
       }
     } catch (error) {
-      this.logger.error(`${this.updateMypageInfo.name}: ${error}`);
+      this.logger.error(`[${this.updateMypageInfo.name}] ${error}`);
       throw error;
     }
   }
