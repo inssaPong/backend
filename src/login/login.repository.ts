@@ -18,8 +18,9 @@ export class LoginRepository {
       await this.databaseService.runQuery(
         `
         INSERT INTO "user" (id, nickname, email)
-        VALUES ('${user_id}', '${nickname}', '${email}');
+        VALUES ($1, $2, $3);
         `,
+        [user_id, nickname, email],
       );
     } catch (error) {
       this.logger.error(error);
@@ -33,8 +34,9 @@ export class LoginRepository {
       const databaseResponse = await this.databaseService.runQuery(
         `
         SELECT * FROM "user"
-        WHERE id='${user_id}';
+        WHERE id=$1;
         `,
+        [user_id],
       );
       return databaseResponse[0];
     } catch (error) {
