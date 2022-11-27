@@ -50,8 +50,19 @@ export class LoginService {
   }
 
   getAuthenticatedAccessToken(user_info: FtUserDto) {
-    user_info.isAuthenticated = true;
-    const accessToken = this.jwtService.sign(user_info);
+    ///////
+    const test_user: FtUserDto = {
+      id: user_info.id,
+      email: user_info.email,
+      isRegisteredUser: user_info.isRegisteredUser,
+      twoFactorStatus: user_info.twoFactorStatus,
+      isAuthenticated: user_info.isAuthenticated,
+    };
+    //////
+
+    test_user.isAuthenticated = true;
+    const accessToken = this.jwtService.sign(test_user);
+    console.log(accessToken);
     return accessToken;
   }
 

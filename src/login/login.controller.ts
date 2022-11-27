@@ -25,8 +25,6 @@ import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';
 import { User } from './user.decorator';
 import { FtUserDto, RequestEditProfileDto } from './dto/login.dto';
 import { JwtTwoFactorAuthGuard } from './jwt/jwt-twofactor-auth.guard';
-import { userInfo } from 'os';
-import { MypageInfoDto } from 'src/mypage/dto/create-mypage.dto';
 import { LoginService } from './login.service';
 
 // 1-1, 1-2, 1-3, 1-4
@@ -84,7 +82,11 @@ export class LoginController {
     );
     const accessToken =
       this.loginService.getAuthenticatedAccessToken(user_info);
+
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.cookie('Authorization', accessToken);
+
     res.status(200).send();
   }
 
