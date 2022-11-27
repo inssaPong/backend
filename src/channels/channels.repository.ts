@@ -7,7 +7,7 @@ import { DatabaseService } from 'src/database/database.service';
 import {
   ChannelMemberTableDto,
   ChannelDto as ChannelDto,
-} from './dto/repository-channels.dto';
+} from './dto/channels.dto';
 import * as bcrypt from 'bcrypt';
 import { CHANNEL_AUTHORITY } from './channels.component';
 
@@ -180,10 +180,7 @@ export class ChannelsRepository {
         `,
         [channel_id],
       );
-      if (databaseResponse.length === 0) {
-        return false;
-      }
-      return true;
+      return databaseResponse.length === 0 ? false : true;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException();
@@ -259,7 +256,7 @@ export class ChannelsRepository {
   async getUserAuthorityFromChannel(
     user_id: string,
     channel_id: number,
-  ): Promise<string> {
+  ): Promise<number> {
     this.logger.log(`[${this.getUserAuthorityFromChannel.name}]`);
     try {
       const databaseResponse: ChannelMemberTableDto[] =

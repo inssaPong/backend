@@ -10,6 +10,8 @@ import {
 import { ChannelsRepository } from './channels.repository';
 import * as bcrypt from 'bcrypt';
 import { MainGateway } from 'src/sockets/main.gateway';
+import { ChannelDto } from './dto/channels.dto';
+import { CHANNEL_AUTHORITY } from './channels.component';
 
 @Injectable()
 export class ChannelsService {
@@ -121,9 +123,9 @@ export class ChannelsService {
   }
 
   async enterChannel(
-    user_id: string,
     channel_id: number,
     input_pw: string,
+    user_id: string,
   ): Promise<void> {
     // Description: 채널이 존재하는지 여부 확인
     const isExist = await this.channelsRepository.isChannelExist(channel_id);
@@ -183,8 +185,7 @@ export class ChannelsService {
     return userIdList;
   }
 
-  // TODO: 에러. duplicate 에러가 떴던거 같은데.. Patch or Delete
-  async exitChannel(user_id: string, channel_id: number) {
+  async exitChannel(channel_id: number, user_id: string) {
     // Description: 해당 채널에서 내 권한 정보 가져오기
     const authority = await this.channelsRepository.getUserAuthorityFromChannel(
       user_id,
@@ -201,7 +202,7 @@ export class ChannelsService {
     );
 
     // Description: 내가 채널장인 경우
-    if (authority === '1') {
+    if (authority === CHANNEL_AUTHORITY.OWNER) {
       // Description: channel_id 채널의 메세지 내역 삭제
       await this.channelsRepository.deleteAllMessageInChannel(channel_id);
       this.logger.log(`${channel_id} 채널의 메세지 내역을 삭제했습니다.`);

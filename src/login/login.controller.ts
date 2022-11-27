@@ -22,9 +22,12 @@ import {
 import { FtAuthGuard } from './ft_oauth/ft.guard';
 import { JwtSignGuard } from './jwt/jwt-sign.guard';
 import { Public } from './public.decorator';
-import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';
+import {
+  RequestBodyInputTwoFactorCodeDto,
+  RequestEditProfileDto,
+} from './dto/swagger-login.dto';
 import { User } from './user.decorator';
-import { FtUserDto, RequestEditProfileDto } from './dto/login.dto';
+import { FtUserDto } from './dto/login.dto';
 import { JwtTwoFactorAuthGuard } from './jwt/jwt-twofactor-auth.guard';
 import { LoginService } from './login.service';
 import { JwtSignupAuthGuard } from './jwt/jwt-signup-auth.guard';
