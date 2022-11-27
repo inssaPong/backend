@@ -88,6 +88,7 @@ export class LoginController {
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.cookie('Authorization', accessToken);
+    res.status(200).send();
   }
 
   @ApiOperation({ summary: 'editprofile 입장 유효성 검사' })
