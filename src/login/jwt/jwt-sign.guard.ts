@@ -20,11 +20,11 @@ export class JwtSignGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     this.logger.log(`[${context.getHandler().name}] -> [canActivate]`);
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
+    const req = context.switchToHttp().getRequest();
+    const res = context.switchToHttp().getResponse();
 
     // Description: 유저가 존재하지 않을 때
-    const userInfo = request.user;
+    const userInfo = req.user;
     this.logger.debug(userInfo);
     if (userInfo === undefined) {
       this.logger.log('Undefined user');
@@ -41,18 +41,18 @@ export class JwtSignGuard implements CanActivate {
     const referer = 'http://localhost:8080';
     if (userInfo.isAuthenticated === true) {
       this.logger.log(`'${userInfo.id}': 로그인을 성공했습니다.`);
-      response.cookie('Authorization', loginAccessToken);
-      response.redirect(`${referer}/home`);
+      res.cookie('Authorization', loginAccessToken);
+      res.redirect(`${referer}/home`);
     } else if (userInfo.twoFactorStatus === true) {
       this.logger.log(`'${userInfo.id}': 2차 인증이 필요합니다.`);
-      response.cookie('Authorization', preLoginAcessToken);
-      response.redirect(`${referer}/twofactor`);
+      res.cookie('Authorization', preLoginAcessToken);
+      res.redirect(`${referer}/twofactor`);
     } else if (userInfo.isUserExist === false) {
       this.logger.log(
         `'${userInfo.id}: '유저 등록이 필요합니다. signup로 이동`,
       );
-      response.cookie('Authorization', preLoginAcessToken);
-      response.redirect(`${referer}/signup`);
+      res.cookie('Authorization', preLoginAcessToken);
+      res.redirect(`${referer}/signup`);
     }
   }
 }

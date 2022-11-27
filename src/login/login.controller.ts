@@ -99,7 +99,7 @@ export class LoginController {
   async authEditProfile(@User() user_info: FtUserDto, @Res() res) {
     this.logger.log(`GET /login/editprofile`);
     console.log(user_info);
-    if (user_info.isUserExist === true) {
+    if (user_info.isRegisteredUser === true) {
       throw new ForbiddenException();
     }
     res.status(200).send();
@@ -121,12 +121,13 @@ export class LoginController {
     res.status(200).send();
   }
 
-  @ApiOperation({ summary: '로그아웃' })
-  @ApiOkResponse({ description: '로그아웃 성공' })
-  @Get('/logout')
-  async logOut(@User() user_info: FtUserDto, @Res() res) {
-    const expiredToken = this.loginService.getExpiredToken(user_info);
-    res.cookie('Authorization', expiredToken);
-    res.status(200).send();
-  }
+  // @ApiOperation({ summary: '로그아웃' })
+  // @ApiOkResponse({ description: '로그아웃 성공' })
+  // @Get('/logout')
+  // async logOut(@User() user_info: FtUserDto, @Res() res) {
+  //   const expiredToken = this.loginService.getExpiredToken(user_info);
+  //   console.log(expiredToken);
+  //   res.cookie('Authorization', null);
+  //   res.status(200).send();
+  // }
 }

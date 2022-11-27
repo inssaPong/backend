@@ -31,25 +31,24 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     cb: VerifyCallback,
   ): Promise<any> {
     this.logger.log('[validate]');
-    const isUserExist: boolean = await this.loginRepository.isUserExistInDB(
-      profile.id,
-    );
+    const isRegisteredUser: boolean =
+      await this.loginRepository.isUserExistInDB(profile.id);
     let twoFactorStatus: boolean = false;
-    if (isUserExist === true) {
+    if (isRegisteredUser === true) {
       twoFactorStatus = await this.loginRepository.getTwoFactorStatusByUserId(
         profile.id,
       );
     }
 
     let isAuthenticated = true;
-    if (twoFactorStatus === true || isUserExist === false) {
+    if (twoFactorStatus === true || isRegisteredUser === false) {
       isAuthenticated = false;
     }
 
     const user: FtUserDto = {
       id: profile.id,
       email: profile.email,
-      isUserExist,
+      isRegisteredUser,
       twoFactorStatus,
       isAuthenticated,
     };
