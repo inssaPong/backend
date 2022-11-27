@@ -113,6 +113,7 @@ export class LoginController {
   @ApiOkResponse({ description: '회원가입 성공' })
   @ApiInternalServerErrorResponse({ description: 'DB에서 에러 반환' })
   @Public()
+  @UseGuards(JwtSignupAuthGuard)
   @Post('/signup')
   async editProfile(@User() user_info: FtUserDto, @Req() req, @Res() res) {
     this.logger.log(`Post /login/editprofile`);
