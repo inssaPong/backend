@@ -9,6 +9,7 @@ import {
   ChannelDto as ChannelDto,
 } from './dto/repository-channels.dto';
 import * as bcrypt from 'bcrypt';
+import { CHANNEL_AUTHORITY } from './channels.component';
 
 @Injectable()
 export class ChannelsRepository {
@@ -22,9 +23,10 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-        INSERT INTO "channel" (name, password)
-        VALUES ('${channel_name}', '${channel_pw}');
+          INSERT INTO "channel" (name, password)
+          VALUES ($1, $2);
         `,
+        [channel_name, channel_pw],
       );
     } catch (error) {
       this.logger.error(`${error} in "${error.table}" table`);
@@ -39,9 +41,10 @@ export class ChannelsRepository {
       const databaseResponse: ChannelDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT id FROM "channel"
-        WHERE name='${channel_name}';
+          SELECT id FROM "channel"
+          WHERE name=$1;
         `,
+          [channel_name],
         );
       return databaseResponse[0].id;
     } catch (error) {
@@ -57,9 +60,10 @@ export class ChannelsRepository {
       const databaseResponse: ChannelDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT name FROM "channel"
-        WHERE id='${channel_id}';
+          SELECT name FROM "channel"
+          WHERE id=$1;
         `,
+          [channel_id],
         );
       return databaseResponse[0].name;
     } catch (error) {
@@ -77,9 +81,10 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
-        VALUES ('${user_id}', '${channel_id}', 'false', '1');
+          INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
+          VALUES ($1, $2, $3, $4);
         `,
+        [user_id, channel_id, false, CHANNEL_AUTHORITY.OWNER],
       );
     } catch (error) {
       this.logger.error(error);
@@ -96,9 +101,10 @@ export class ChannelsRepository {
       this.logger.log(`[${this.insertGuestToChannelMember.name}]`);
       await this.databaseService.runQuery(
         `
-        INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
-        VALUES ('${user_id}', '${channel_id}', 'false', '3');
+          INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
+          VALUES ($1, $2, $3, $4);
         `,
+        [user_id, channel_id, false, CHANNEL_AUTHORITY.GUEST],
       );
     } catch (error) {
       this.logger.error(error);
@@ -113,8 +119,8 @@ export class ChannelsRepository {
       const databaseResponse: ChannelDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT id, name, password FROM "channel";
-        `,
+            SELECT id, name, password FROM "channel";
+          `,
         );
       return databaseResponse;
     } catch (error) {
@@ -130,9 +136,10 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT channel_id FROM "channel_member"
-        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
-        `,
+            SELECT channel_id FROM "channel_member"
+            WHERE user_id=$1 AND channel_id=$2;
+          `,
+          [user_id, channel_id],
         );
       return databaseResponse.length === 0 ? false : true;
     } catch (error) {
@@ -150,9 +157,10 @@ export class ChannelsRepository {
       const databaseResopnse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT channel_id, ban_status FROM "channel_member"
-        WHERE user_id='${user_id}';
-        `,
+            SELECT channel_id, ban_status FROM "channel_member"
+            WHERE user_id=$1;
+          `,
+          [user_id],
         );
       return databaseResopnse;
     } catch (error) {
@@ -167,9 +175,10 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT id FROM "channel"
-        WHERE id='${channel_id}';
+          SELECT id FROM "channel"
+          WHERE id=$1;
         `,
+        [channel_id],
       );
       if (databaseResponse.length === 0) {
         return false;
@@ -188,9 +197,10 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT ban_status FROM "channel_member"
-        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
-        `,
+            SELECT ban_status FROM "channel_member"
+            WHERE user_id=$1 AND channel_id=$2;
+          `,
+          [user_id, channel_id],
         );
       if (databaseResponse.length === 0) {
         return false;
@@ -212,9 +222,10 @@ export class ChannelsRepository {
       const databaseResponse: ChannelDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT password FROM "channel"
-        WHERE id='${channel_id}';
-        `,
+            SELECT password FROM "channel"
+            WHERE id=$1;
+          `,
+          [channel_id],
         );
       const password = databaseResponse[0].password;
       if (password) {
@@ -234,9 +245,10 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT user_id FROM "channel_member"
-        WHERE channel_id='${channel_id}';
-        `,
+            SELECT user_id FROM "channel_member"
+            WHERE channel_id=$1;
+          `,
+          [channel_id],
         );
       return databaseResponse;
     } catch (error) {
@@ -253,9 +265,10 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT authority FROM "channel_member"
-        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
-        `,
+            SELECT authority FROM "channel_member"
+            WHERE user_id=$1 AND channel_id=$2;
+          `,
+          [user_id, channel_id],
         );
       return databaseResponse[0].authority;
     } catch (error) {
@@ -269,9 +282,10 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-        DELETE FROM "message"
-        WHERE channel_id='${channel_id}';
+          DELETE FROM "message"
+          WHERE channel_id=$1;
         `,
+        [channel_id],
       );
     } catch (error) {
       this.logger.error(error);
@@ -287,9 +301,10 @@ export class ChannelsRepository {
     try {
       this.databaseService.runQuery(
         `
-        DELETE FROM "channel_member"
-        WHERE user_id='${user_id}' AND channel_id='${channel_id}';
+          DELETE FROM "channel_member"
+          WHERE user_id=$1 AND channel_id=$2;
         `,
+        [user_id, channel_id],
       );
     } catch (error) {
       this.logger.error(error);
@@ -302,9 +317,10 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-        DELETE FROM "channel_member"
-        WHERE channel_id='${channel_id}';
+          DELETE FROM "channel_member"
+          WHERE channel_id=$1;
         `,
+        [channel_id],
       );
     } catch (error) {
       this.logger.error(error);
@@ -317,9 +333,10 @@ export class ChannelsRepository {
     try {
       await this.databaseService.runQuery(
         `
-        DELETE FROM "channel"
-        WHERE id='${channel_id}';
+          DELETE FROM "channel"
+          WHERE id=$1;
         `,
+        [channel_id],
       );
     } catch (error) {
       this.logger.error(error);

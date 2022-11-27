@@ -4,7 +4,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import { UserDto } from './dto/repository-login.dto';
 
 @Injectable()
 export class LoginRepository {
@@ -13,7 +12,7 @@ export class LoginRepository {
   private readonly logger = new Logger(LoginRepository.name);
 
   async insertUserData(
-    id: string,
+    user_id: string,
     nickname: string,
     email: string,
     avatar: string,
@@ -22,9 +21,10 @@ export class LoginRepository {
     try {
       await this.databaseService.runQuery(
         `
-        INSERT INTO "user" (id, nickname, email, twofactor_status, avatar)
-        VALUES ('${id}', '${nickname}', '${email}', 'false', '${avatar}');
+        INSERT INTO "user" (id, nickname, email, avatar)
+        VALUES ($1, $2, $3, $4);
         `,
+        [user_id, nickname, email, avatar],
       );
     } catch (error) {
       this.logger.error(error);
@@ -37,9 +37,10 @@ export class LoginRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT twofactor_status FROM "user"
-        WHERE id='${user_id}';
+        SELECT * FROM "user"
+        WHERE id=$1;
         `,
+        [user_id],
       );
       if (databaseResponse.length === 0) {
         throw `해당 유저가 존재하지 않습니다. `;
