@@ -22,7 +22,7 @@ export class LoginRepository {
       await this.databaseService.runQuery(
         `
         INSERT INTO "user" (id, nickname, email, avatar)
-        VALUES ($1, $2, $3, $4);
+        VALUES ($1, $2, $3, NULLIF($4, '')::bytea));
         `,
         [user_id, nickname, email, avatar],
       );
