@@ -9,6 +9,7 @@ import {
   ChannelDto as ChannelDto,
 } from './dto/repository-channels.dto';
 import * as bcrypt from 'bcrypt';
+import { CHANNEL_AUTHORITY } from './channels.component';
 
 @Injectable()
 export class ChannelsRepository {
@@ -83,7 +84,7 @@ export class ChannelsRepository {
           INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
           VALUES ($1, $2, $3, $4);
         `,
-        [user_id, channel_id, false, 1],
+        [user_id, channel_id, false, CHANNEL_AUTHORITY.OWNER],
       );
     } catch (error) {
       this.logger.error(error);
@@ -103,7 +104,7 @@ export class ChannelsRepository {
           INSERT INTO "channel_member" (user_id, channel_id, ban_status, authority)
           VALUES ($1, $2, $3, $4);
         `,
-        [user_id, channel_id, false, 3],
+        [user_id, channel_id, false, CHANNEL_AUTHORITY.GUEST],
       );
     } catch (error) {
       this.logger.error(error);
