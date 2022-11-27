@@ -19,7 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FtAuthGuard } from './ft_oauth/ft.guard';
-import { JwtSignGuard } from './jwt/jwt-signin.guard';
+import { JwtSignGuard } from './jwt/jwt-sign.guard';
 import { Public } from './public.decorator';
 import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';
 import { User } from './user.decorator';
