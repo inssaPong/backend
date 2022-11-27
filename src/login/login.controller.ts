@@ -98,7 +98,7 @@ export class LoginController {
   @Public()
   @UseGuards(JwtSignupAuthGuard)
   @Get('/first')
-  async authEditProfile(@User() user_info: FtUserDto, @Res() res) {
+  async authEditProfile(@User() user_info: FtUserDto) {
     this.logger.log(`GET /login/editprofile`);
     console.log(user_info);
     if (user_info.isRegistered === true) {
@@ -115,6 +115,7 @@ export class LoginController {
   @Post('/signup')
   async editProfile(@User() user_info: FtUserDto, @Res() res, @Body() body) {
     this.logger.log(`Post /login/editprofile`);
+    console.log(body);
 
     await this.loginService.signUp(user_info, body);
     const accessToken =
@@ -122,6 +123,7 @@ export class LoginController {
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.cookie('Authorization', accessToken);
+    res.status(200).send();
   }
 
   // @ApiOperation({ summary: '로그아웃' })
