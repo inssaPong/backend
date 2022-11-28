@@ -1,5 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  isNotEmpty,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -8,20 +10,19 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class RequestChannelDto {
-  @IsNumber()
-  @IsNotEmpty()
-  readonly id: number;
+export class CreateChannelDto {
+  @IsString()
+  name: string;
 
   @IsString()
-  @IsNotEmpty()
-  @MinLength(1)
-  @MaxLength(20)
-  readonly name: string;
+  @Length(0, 4)
+  password: string;
+}
 
+export class EnterChannelDto {
   @IsString()
-  @Length(4)
-  readonly pw?: string;
+  @Length(0, 4)
+  password: string;
 }
 
 export class ResponseChannelDto {

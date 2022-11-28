@@ -21,8 +21,8 @@ export class LoginRepository {
     try {
       await this.databaseService.runQuery(
         `
-        INSERT INTO "user" (id, nickname, email, avatar)
-        VALUES ($1, $2, $3, NULLIF($4, '')::bytea);
+          INSERT INTO "user" (id, nickname, email, avatar)
+          VALUES ($1, $2, $3, NULLIF($4, '')::bytea);
         `,
         [user_id, nickname, email, avatar],
       );
@@ -37,13 +37,14 @@ export class LoginRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT * FROM "user"
-        WHERE id=$1;
+          SELECT * FROM "user"
+          WHERE id=$1;
         `,
         [user_id],
       );
       if (databaseResponse.length === 0) {
-        throw `해당 유저가 존재하지 않습니다. `;
+        this.logger.error(`해당 유저가 존재하지 않습니다.`);
+        return false;
       }
       return databaseResponse[0].twofactor_status;
     } catch (error) {
@@ -57,9 +58,10 @@ export class LoginRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT id FROM "user"
-        WHERE id='${user_id}';
+          SELECT id FROM "user"
+          WHERE id=$1;
         `,
+        [user_id],
       );
       if (databaseResponse.length === 0) {
         return false;

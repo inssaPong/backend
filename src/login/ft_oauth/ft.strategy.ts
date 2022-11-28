@@ -34,12 +34,9 @@ export class FtStrategy extends PassportStrategy(Strategy, '42') {
     const isRegistered: boolean = await this.loginRepository.isUserExistInDB(
       profile.id,
     );
-    let twoFactorStatus: boolean = false;
-    if (isRegistered === true) {
-      twoFactorStatus = await this.loginRepository.getTwoFactorStatusByUserId(
-        profile.id,
-      );
-    }
+
+    const twoFactorStatus: boolean =
+      await this.loginRepository.getTwoFactorStatusByUserId(profile.id);
 
     let isAuthenticated = true;
     if (twoFactorStatus === true || isRegistered === false) {
