@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
+import { MainGateway } from 'src/sockets/main.gateway';
 import { FtUserDto } from './dto/login.dto';
 import { LoginRepository } from './login.repository';
 import { User } from './user.decorator';
@@ -13,6 +14,7 @@ export class LoginService {
     private readonly mailService: MailService,
     private readonly jwtService: JwtService,
     private readonly loginRepository: LoginRepository,
+    private readonly mainGateway: MainGateway,
   ) {}
 
   async sendTwoFactorMail(@User() user_info: FtUserDto): Promise<void> {
@@ -47,6 +49,8 @@ export class LoginService {
 
     // Description: DB에 유저 정보 저장
     await this.loginRepository.insertUserData(id, nickname, email, avatar);
+    // socket용 객체 생성
+    this.mainGateway.newUser(id);
   }
 
   getAuthenticatedAccessToken(user: FtUserDto) {
