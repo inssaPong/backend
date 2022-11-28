@@ -98,7 +98,7 @@ export class LoginController {
   })
   @Public()
   @UseGuards(JwtSignupAuthGuard)
-  @Get('/first') // TODO: 수정. 이름 변경
+  @Get('/signup')
   async authEditProfile(@User() user_info: FtUserDto) {
     this.logger.log(`GET /login/first`);
     if (user_info.isRegistered === true) {
