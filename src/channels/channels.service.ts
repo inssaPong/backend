@@ -26,7 +26,7 @@ export class ChannelsService {
   async createChannelAndReturnChannelId(
     user_id: string,
     channel_name: string,
-    channel_pw: string,
+    channel_password: string,
   ): Promise<number> {
     if (!channel_name) {
       this.logger.error(
@@ -34,21 +34,21 @@ export class ChannelsService {
       );
       throw new BadRequestException();
     }
-    if (channel_pw.length !== 0 && channel_pw.length !== 4) {
+    if (channel_password.length !== 0 && channel_password.length !== 4) {
       this.logger.error(
-        `유효하지 않은 채널 비밀번호입니다. 입력된 채널 비밀번호: ${channel_pw}`,
+        `유효하지 않은 채널 비밀번호입니다. 입력된 채널 비밀번호: ${channel_password}`,
       );
       throw new BadRequestException();
     }
 
     // Description: 비밀번호 암호화
-    if (channel_pw.length === 4) {
+    if (channel_password.length === 4) {
       const salt = await bcrypt.genSalt();
-      channel_pw = await bcrypt.hash(channel_pw, salt);
+      channel_password = await bcrypt.hash(channel_password, salt);
     }
 
     // Description: 채널 생성
-    await this.channelsRepository.insertChannel(channel_name, channel_pw);
+    await this.channelsRepository.insertChannel(channel_name, channel_password);
     this.logger.log('channel 생성');
 
     // Description: 생성된 채널 id 가져오기
@@ -122,10 +122,11 @@ export class ChannelsService {
 
   async enterChannel(
     channel_id: number,
-    input_pw: string,
+    input_password: string,
     user_id: string,
   ): Promise<void> {
     // Description: 채널이 존재하는지 여부 확인
+
     const isExist = await this.channelsRepository.isChannelExist(channel_id);
     if (isExist === false) {
       this.logger.error('해당 채널이 존재하지 않습니다.');
@@ -151,13 +152,14 @@ export class ChannelsService {
     // Description: 입력 받은 비밀번호 유효성 검사
     const isValidPw = await this.channelsRepository.isValidChannelPassword(
       channel_id,
-      input_pw,
+      input_password,
     );
     if (isValidPw === false) {
       this.logger.error('잘못된 채널 비밀번호입니다.');
       throw new ForbiddenException();
     }
     this.logger.log(`비밀번호 인증에 성공했습니다.`);
+
     // Description: DB channel_member 테이블에 추가
     await this.channelsRepository.insertGuestToChannelMember(
       user_id,
@@ -194,14 +196,8 @@ export class ChannelsService {
       `${channel_id} 채널의 내 권한을 가져왔습니다: ${authority}`,
     );
 
-    // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
-    await this.channelsRepository.deleteOneUserInChannelMember(
-      user_id,
-      channel_id,
-    );
-
     // Description: 내가 채널장인 경우
-    if (authority === CHANNEL_AUTHORITY.OWNER) {
+    if (authority == CHANNEL_AUTHORITY.OWNER) {
       // Description: channel_id 채널의 메세지 내역 삭제
       await this.channelsRepository.deleteAllMessageInChannel(channel_id);
       this.logger.log(`${channel_id} 채널의 메세지 내역을 삭제했습니다.`);
@@ -215,6 +211,11 @@ export class ChannelsService {
       this.logger.log(`${channel_id} 채널 삭제에 성공했습니다.`);
       this.mainGateway.changedChannelList();
     } else {
+      // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
+      await this.channelsRepository.deleteOneUserInChannelMember(
+        user_id,
+        channel_id,
+      );
       this.mainGateway.changedChannelMember(user_id, channel_id);
     }
   }

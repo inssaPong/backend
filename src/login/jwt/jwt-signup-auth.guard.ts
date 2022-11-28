@@ -20,7 +20,6 @@ export class JwtSignupAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
     status?: any,
   ) {
-    console.log(user);
     this.logger.log(`[${context.getHandler().name}] -> [handleRequest]`);
     if (info) {
       this.logger.log(`info: ${info}`);
@@ -32,12 +31,11 @@ export class JwtSignupAuthGuard extends AuthGuard('jwt') {
       this.logger.error(`error: ${err}`);
       throw new UnauthorizedException();
     }
-    // Description: 이미 인증에 성공한 유저가 접근 시도. home
+
     if (user.isAuthenticated === true) {
       throw new ForbiddenException();
     }
 
-    // Description: 위의 경우를 제외하고 DB에 존재하는 유저가 접근을 시도. signup
     if (user.isRegistered === true) {
       throw new ForbiddenException();
     }

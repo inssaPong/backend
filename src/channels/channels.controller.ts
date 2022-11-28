@@ -20,16 +20,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
-  RequestBodyChannelNameAndPwDto,
-  ResponseChannelIdDto,
-  ResponseGetChannelListDto,
-  ResponseGetEnteredChannelListDto,
+  RequestCreateChannelDto,
+  RequestEnterChannelDto,
+  ResponseCreateChannelDto,
+  ResponseGetAvailableChannelListDto,
+  ResponseGetJoinedChannelListDto,
   ResponseUsersIdInChannelDto,
 } from './dto/swagger-channels.dto';
 import { ChannelsService } from './channels.service';
-import { RequestChannelDto } from './dto/channels.dto';
 import { User } from 'src/login/user.decorator';
 import { FtUserDto } from 'src/login/dto/login.dto';
+import { CreateChannelDto, EnterChannelDto } from './dto/channels.dto';
 
 @Controller('/channels')
 @ApiTags('채널 API')
@@ -38,18 +39,18 @@ export class ChannelsController {
 
   private readonly logger = new Logger(ChannelsController.name);
 
-  // 채널 개설
-  @ApiOperation({
-    summary: '채널 생성',
+  @ApiOperation({ summary: '채널 생성' })
+  @ApiBody({ type: RequestCreateChannelDto })
+  @ApiCreatedResponse({
+    description: '채널 생성 성공',
+    type: ResponseCreateChannelDto,
   })
-  @ApiBody({ type: RequestBodyChannelNameAndPwDto })
-  @ApiCreatedResponse({ type: ResponseChannelIdDto })
   @ApiBadRequestResponse({ description: '유효하지 않은 request' })
   @ApiInternalServerErrorResponse({ description: 'DB 문제' })
   @Post('/create')
   async createChannel(
     @User() user: FtUserDto,
-    @Body() channel: RequestChannelDto,
+    @Body() channel: CreateChannelDto,
     @Res() res,
   ) {
     this.logger.log('POST /channels/create');
@@ -58,16 +59,15 @@ export class ChannelsController {
       await this.channelsService.createChannelAndReturnChannelId(
         user.id,
         channel.name,
-        channel.pw,
+        channel.password,
       );
     res.status(201).send({
       id: channelId,
     });
   }
 
-  // 참여할 수 있는 채널 목록 받기
   @ApiOperation({ summary: '참여할 수 있는 채널 목록 받기' })
-  @ApiOkResponse({ type: ResponseGetChannelListDto })
+  @ApiOkResponse({ type: ResponseGetAvailableChannelListDto })
   @ApiInternalServerErrorResponse({ description: 'DB에 문제' })
   @Get('/list')
   async getAvailableChannelList(@User() user: FtUserDto, @Res() res) {
@@ -78,11 +78,10 @@ export class ChannelsController {
     res.status(200).send(availableChannelList);
   }
 
-  // 참여 중인 채널 목록 받기
   @ApiOperation({ summary: '참여 중인 채널 목록 받기' })
   @ApiOkResponse({
     description: '참여 중인 채널 목록 반환',
-    type: ResponseGetEnteredChannelListDto,
+    type: ResponseGetJoinedChannelListDto,
   })
   @ApiInternalServerErrorResponse({ description: 'DB 문제' })
   @Get('/list/join')
@@ -95,8 +94,8 @@ export class ChannelsController {
     res.status(200).send(joinedChannelList);
   }
 
-  // 채널 입장
   @ApiOperation({ summary: '채널 입장' })
+  @ApiBody({ type: RequestEnterChannelDto })
   @ApiCreatedResponse({ description: '입장 성공' })
   @ApiNoContentResponse({ description: '밴' })
   @ApiForbiddenResponse({ description: '유효하지 않은 비밀번호' })
@@ -104,16 +103,19 @@ export class ChannelsController {
   async enterChannel(
     @Query('channel_id') channel_id: number,
     @User() user: FtUserDto,
-    @Body() channel: RequestChannelDto,
+    @Body() channel: EnterChannelDto,
     @Res() res,
   ) {
     this.logger.log('POST /channels/enter');
 
-    await this.channelsService.enterChannel(channel_id, channel.pw, user.id);
+    await this.channelsService.enterChannel(
+      channel_id,
+      channel.password,
+      user.id,
+    );
     res.status(201).send();
   }
 
-  // Description: 채널 이름 가져오기
   @ApiOperation({ summary: '채널 이름 가져오기' })
   @ApiOkResponse({ description: '채널 이름 반환' })
   @ApiBadRequestResponse({ description: 'DB에 문제' })
@@ -141,7 +143,6 @@ export class ChannelsController {
     res.status(200).send(usersId);
   }
 
-  // 채팅방 나가기
   @ApiOperation({ summary: '채팅방 나가기' })
   @ApiOkResponse({ description: 'Channel exit success' })
   @ApiBadRequestResponse({ description: 'Channel exit falied' })
