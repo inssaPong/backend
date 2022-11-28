@@ -22,9 +22,12 @@ import {
 import { FtAuthGuard } from './ft_oauth/ft.guard';
 import { JwtSignGuard } from './jwt/jwt-sign.guard';
 import { Public } from './public.decorator';
-import { RequestBodyInputTwoFactorCodeDto } from './dto/swagger-login.dto';
+import {
+  RequestBodyInputTwoFactorCodeDto,
+  RequestEditProfileDto,
+} from './dto/swagger-login.dto';
 import { User } from './user.decorator';
-import { FtUserDto, RequestEditProfileDto } from './dto/login.dto';
+import { FtUserDto } from './dto/login.dto';
 import { JwtTwoFactorAuthGuard } from './jwt/jwt-twofactor-auth.guard';
 import { LoginService } from './login.service';
 import { JwtSignupAuthGuard } from './jwt/jwt-signup-auth.guard';
@@ -101,7 +104,7 @@ export class LoginController {
   @Get('/first')
   async authEditProfile(@User() user_info: FtUserDto) {
     this.logger.log(`GET /login/editprofile`);
-    console.log(user_info);
+
     if (user_info.isRegistered === true) {
       throw new ForbiddenException();
     }
@@ -116,7 +119,6 @@ export class LoginController {
   @Post('/signup')
   async editProfile(@User() user_info: FtUserDto, @Res() res, @Body() body) {
     this.logger.log(`Post /login/editprofile`);
-    console.log(body);
 
     await this.loginService.signUp(user_info, body);
     const accessToken =
