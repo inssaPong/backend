@@ -14,7 +14,7 @@ export class ResponseGetChannelListDto {
 
 export class ResponseGetEnteredChannelListDto {
   @ApiProperty({
-    description: '[Response] [{channel_id, channel_name}, ...]',
+    description: '[{channel_id, channel_name}, ...]',
     required: true,
     default: [
       { id: 1, name: 'channel 1' },

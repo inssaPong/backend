@@ -389,7 +389,7 @@ export class ChannelsGateway {
     }
 
     try {
-      await this.channelsService.exitChannel(kick_id, req.channel_id);
+      await this.channelsService.exitChannel(req.channel_id, kick_id);
       this.exitSocketEvent(kick_id, 'kick');
       client.emit('channel/send', 'server', `${kick_id}를 kick 완료!`);
     } catch {
