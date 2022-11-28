@@ -23,10 +23,12 @@ export class MainGateway {
   }
 
   handleConnection(client: Socket) {
+    this.logger.error(`connected!`);
     this.setOnline(client);
   }
 
   handleDisconnect(client: Socket) {
+    this.logger.error(`disconnected!`);
     this.userDisconnect(client);
   }
 

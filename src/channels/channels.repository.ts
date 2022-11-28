@@ -223,6 +223,8 @@ export class ChannelsRepository {
           [channel_id],
         );
       const password = databaseResponse[0].password;
+      console.log(password);
+      console.log(input_pw);
       if (password) {
         const isValidPw = await bcrypt.compare(input_pw, password);
         return isValidPw;
@@ -498,7 +500,7 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "channel"
-          SET password=$2
+          SET password=NULLIF($2, '')::varchar
           WHERE id=$1;
         `,
         [id, password],
