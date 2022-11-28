@@ -24,19 +24,19 @@ export class MypageRepository {
     }
   }
 
-  async checkExistNickname(id: string, nickname: string) {
+  async getUserIdByNickname(nickname: string) {
     try {
       const result = await this.databaseService.runQuery(
         `
-          SELECT *
+          SELECT id
           FROM "user"
-          WHERE nickname = $1 AND id != $2;
+          WHERE nickname = $1;
         `,
-        [nickname, id],
+        [nickname],
       );
-      return result.length;
+	  return result;
     } catch (error) {
-      this.logger.error(`checkExistNickname: ${error}`);
+      this.logger.error(`getUserIdByNickname: ${error}`);
       throw error;
     }
   }

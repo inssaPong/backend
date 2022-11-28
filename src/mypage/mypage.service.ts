@@ -13,17 +13,29 @@ export class MypageService {
 
   async updateMypageInfo(id: string, body: UpdateMypageInfoDto) {
     try {
-		if (await this.mypageRepository.checkExistNickname(id, body.nickname) >= 1)
-			throw new ConflictException('중복된 닉네임');
+		const result = await this.mypageRepository.getUserIdByNickname(body.nickname);
+		if (result.length > 0) {
+			if (result[0]['id'] != id)
+				throw new ConflictException('중복된 닉네임');
+		}
         for (let [key, value] of Object.entries(body)) {
-            if (key == 'nickname')
-            await this.mypageRepository.updateNickname(id, value);
-        else if (key == 'avatar') {
-          if (body.avatar == null) await this.mypageRepository.deleteAvatar(id);
-          else await this.mypageRepository.updateAvatar(id, value);
-        } else if (key == 'twofactor_status')
-          await this.mypageRepository.updateTwofactor(id, value);
-        else throw new BadRequestException('DTO에 맞지 않는 객체');
+			switch (key) {
+				case 'nickname':
+					if (result.length != 0 && result[0]['id'] != id)
+						await this.mypageRepository.updateNickname(id, value);
+					break;
+				case 'avatar':
+					if (body.avatar == null) await this.mypageRepository.deleteAvatar(id);
+					else await this.mypageRepository.updateAvatar(id, value);
+					break;
+				case 'twofactor_status':
+					await this.mypageRepository.updateTwofactor(id, value);
+					break;
+				default:
+					this.logger.error(`[${this.updateMypageInfo.name}] Bad Request DTO에 맞지 않는 body`)
+					throw new BadRequestException('잘못된 요청');
+					break;
+			}
       }
     } catch (error) {
       this.logger.error(`[${this.updateMypageInfo.name}] ${error}`);
