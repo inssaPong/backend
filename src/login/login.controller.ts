@@ -3,6 +3,7 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   Logger,
   Post,
   Put,
@@ -72,21 +73,19 @@ export class LoginController {
   @ApiBadRequestResponse({ description: '[Bad Request] 2차 인증 실패' })
   @Public()
   @UseGuards(JwtTwoFactorAuthGuard)
+  @Header('Access-Control-Allow-Credentials', 'true')
+  @Header('Access-Control-Allow-Origin', 'http://localhost:8080')
   @Put('/twofactor')
   async confirmCertificationNumber(
-    @User() user_info: FtUserDto,
+    @User() user: FtUserDto,
     @Req() req,
     @Res() res,
   ) {
     await this.loginService.confirmCertificationNumber(
-      user_info.id,
+      user.id,
       req.body.CertificationNumber,
     );
-    const accessToken =
-      this.loginService.getAuthenticatedAccessToken(user_info);
-
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
+    const accessToken = this.loginService.getAuthenticatedAccessToken(user);
     res.cookie('Authorization', accessToken);
     res.status(200).send();
   }
@@ -98,10 +97,9 @@ export class LoginController {
   })
   @Public()
   @UseGuards(JwtSignupAuthGuard)
-  @Get('/first')
+  @Get('/first') // TODO: 수정. 이름 변경
   async authEditProfile(@User() user_info: FtUserDto) {
-    this.logger.log(`GET /login/editprofile`);
-    console.log(user_info);
+    this.logger.log(`GET /login/first`);
     if (user_info.isRegistered === true) {
       throw new ForbiddenException();
     }
@@ -113,27 +111,14 @@ export class LoginController {
   @ApiInternalServerErrorResponse({ description: 'DB에서 에러 반환' })
   @Public()
   @UseGuards(JwtSignupAuthGuard)
+  @Header('Access-Control-Allow-Credentials', 'true')
+  @Header('Access-Control-Allow-Origin', 'http://localhost:8080')
   @Post('/signup')
-  async editProfile(@User() user_info: FtUserDto, @Res() res, @Body() body) {
-    this.logger.log(`Post /login/editprofile`);
-    console.log(body);
-
-    await this.loginService.signUp(user_info, body);
-    const accessToken =
-      this.loginService.getAuthenticatedAccessToken(user_info);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
+  async editProfile(@User() user: FtUserDto, @Res() res, @Body() body) {
+    this.logger.log(`Post /login/signup`);
+    await this.loginService.signUp(user, body);
+    const accessToken = this.loginService.getAuthenticatedAccessToken(user);
     res.cookie('Authorization', accessToken);
     res.status(200).send();
   }
-
-  // @ApiOperation({ summary: '로그아웃' })
-  // @ApiOkResponse({ description: '로그아웃 성공' })
-  // @Get('/logout')
-  // async logOut(@User() user_info: FtUserDto, @Res() res) {
-  //   const expiredToken = this.loginService.getExpiredToken(user_info);
-  //   console.log(expiredToken);
-  //   res.cookie('Authorization', null);
-  //   res.status(200).send();
-  // }
 }

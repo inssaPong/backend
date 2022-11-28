@@ -49,29 +49,15 @@ export class LoginService {
     await this.loginRepository.insertUserData(id, nickname, email, avatar);
   }
 
-  getAuthenticatedAccessToken(user_info: FtUserDto) {
-    ///////
-    const test_user: FtUserDto = {
-      id: user_info.id,
-      email: user_info.email,
-      isRegistered: user_info.isRegistered,
-      twoFactorStatus: user_info.twoFactorStatus,
-      isAuthenticated: user_info.isAuthenticated,
-    };
-    //////
-
-    test_user.isAuthenticated = true;
-    const accessToken = this.jwtService.sign(test_user);
-    console.log(accessToken);
+  getAuthenticatedAccessToken(user: FtUserDto) {
+    console.log(user.isRegistered);
+    const accessToken = this.jwtService.sign({
+      id: user.id,
+      email: user.email,
+      isRegistered: true,
+      twoFactorStatus: user.twoFactorStatus,
+      isAuthenticated: true,
+    });
     return accessToken;
-  }
-
-  getExpiredToken(user_info: FtUserDto) {
-    // user_info.isAuthenticated = false;
-    // console.log(user_info);
-    // const expiredToken = this.jwtService.sign(user_info, {
-    //   expiresIn: 0,
-    // });
-    return ``;
   }
 }
