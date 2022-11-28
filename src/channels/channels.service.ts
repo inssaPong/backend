@@ -196,14 +196,8 @@ export class ChannelsService {
       `${channel_id} 채널의 내 권한을 가져왔습니다: ${authority}`,
     );
 
-    // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
-    await this.channelsRepository.deleteOneUserInChannelMember(
-      user_id,
-      channel_id,
-    );
-
     // Description: 내가 채널장인 경우
-    if (authority === CHANNEL_AUTHORITY.OWNER) {
+    if (authority == CHANNEL_AUTHORITY.OWNER) {
       // Description: channel_id 채널의 메세지 내역 삭제
       await this.channelsRepository.deleteAllMessageInChannel(channel_id);
       this.logger.log(`${channel_id} 채널의 메세지 내역을 삭제했습니다.`);
@@ -217,6 +211,11 @@ export class ChannelsService {
       this.logger.log(`${channel_id} 채널 삭제에 성공했습니다.`);
       this.mainGateway.changedChannelList();
     } else {
+      // Description: channel_member 테이블에서 내가 입장한 channel_id를 삭제
+      await this.channelsRepository.deleteOneUserInChannelMember(
+        user_id,
+        channel_id,
+      );
       this.mainGateway.changedChannelMember(user_id, channel_id);
     }
   }
