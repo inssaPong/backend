@@ -25,7 +25,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  // app.use(cookieParser(process.env.COOKIE_SECRET)); // TODO: Env config. Encrypt cookie
   const DOMAIN = process.env.DOMAIN;
   const PORT = process.env.BACKEND_PORT;
   app.use(json({ limit: '1mb' }));

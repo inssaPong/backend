@@ -124,7 +124,9 @@ export class ChannelsController {
     this.logger.log('GET /room/name');
 
     const channelName = await this.channelsService.getChannelName(channel_id);
-    res.status(200).send(channelName);
+    res.status(200).send({
+      name: channelName,
+    });
   }
 
   @ApiOperation({ summary: '채널에 참가 중인 유저 id 리스트 가져오기' })

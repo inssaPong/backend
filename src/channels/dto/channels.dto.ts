@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsEmpty,
   isNotEmpty,
   IsNotEmpty,
   IsNumber,
@@ -12,6 +13,7 @@ import {
 
 export class CreateChannelDto {
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @IsString()

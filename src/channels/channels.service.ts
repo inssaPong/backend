@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -28,12 +29,16 @@ export class ChannelsService {
     channel_name: string,
     channel_password: string,
   ): Promise<number> {
-    if (!channel_name) {
-      this.logger.error(
-        `유효하지 않은 채널 이름입니다. 입력된 채널 이름: ${channel_name}`,
-      );
-      throw new BadRequestException();
+    // Description: 채널명이 겹치는지 확인
+    const isChannelExist = await this.channelsRepository.isChannelExistByName(
+      channel_name,
+    );
+    if (isChannelExist === true) {
+      this.logger.error(`채널명 '${channel_name}': 이미 존재하는 채널입니다.`);
+      throw new ConflictException();
     }
+
+    // Description: 비밀번호 유효성 검사
     if (channel_password.length !== 0 && channel_password.length !== 4) {
       this.logger.error(
         `유효하지 않은 채널 비밀번호입니다. 입력된 채널 비밀번호: ${channel_password}`,
@@ -106,7 +111,6 @@ export class ChannelsService {
 
     const channelIdAndNameList: ResponseChannelDto[] = [];
     for (const channelObject of joinedChannelIdList) {
-      if (channelObject.ban_status == true) continue;
       const channelName =
         await this.channelsRepository.getChannelNameByChannelId(
           channelObject.channel_id,
@@ -126,8 +130,9 @@ export class ChannelsService {
     user_id: string,
   ): Promise<void> {
     // Description: 채널이 존재하는지 여부 확인
-
-    const isExist = await this.channelsRepository.isChannelExist(channel_id);
+    const isExist = await this.channelsRepository.isChannelExistById(
+      channel_id,
+    );
     if (isExist === false) {
       this.logger.error('해당 채널이 존재하지 않습니다.');
       throw new NotFoundException();
@@ -156,7 +161,7 @@ export class ChannelsService {
     );
     if (isValidPw === false) {
       this.logger.error('잘못된 채널 비밀번호입니다.');
-      throw new ForbiddenException();
+      throw new BadRequestException();
     }
     this.logger.log(`비밀번호 인증에 성공했습니다.`);
 
