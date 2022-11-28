@@ -4,7 +4,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import { UserDto } from './dto/repository-login.dto';
 
 @Injectable()
 export class LoginRepository {
@@ -12,15 +11,20 @@ export class LoginRepository {
 
   private readonly logger = new Logger(LoginRepository.name);
 
-  async insertUserData(user_id: string, nickname: string, email: string) {
+  async insertUserData(
+    user_id: string,
+    nickname: string,
+    email: string,
+    avatar: string,
+  ) {
     this.logger.log(`[${this.insertUserData.name}]`);
     try {
       await this.databaseService.runQuery(
         `
-        INSERT INTO "user" (id, nickname, email)
-        VALUES ($1, $2, $3);
+        INSERT INTO "user" (id, nickname, email, avatar)
+        VALUES ($1, $2, $3, NULLIF($4, '')::bytea);
         `,
-        [user_id, nickname, email],
+        [user_id, nickname, email, avatar],
       );
     } catch (error) {
       this.logger.error(error);
@@ -28,8 +32,8 @@ export class LoginRepository {
     }
   }
 
-  async getUserData(user_id: string): Promise<UserDto> {
-    this.logger.log(`[${this.getUserData.name}]`);
+  async getTwoFactorStatusByUserId(user_id: string): Promise<boolean> {
+    this.logger.log(`[${this.getTwoFactorStatusByUserId.name}]`);
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
@@ -38,7 +42,29 @@ export class LoginRepository {
         `,
         [user_id],
       );
-      return databaseResponse[0];
+      if (databaseResponse.length === 0) {
+        throw `해당 유저가 존재하지 않습니다. `;
+      }
+      return databaseResponse[0].twofactor_status;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async isUserExistInDB(user_id: string): Promise<boolean> {
+    this.logger.log(`[${this.isUserExistInDB.name}]`);
+    try {
+      const databaseResponse = await this.databaseService.runQuery(
+        `
+        SELECT id FROM "user"
+        WHERE id='${user_id}';
+        `,
+      );
+      if (databaseResponse.length === 0) {
+        return false;
+      }
+      return true;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException();

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
+import { FtUserDto } from 'src/login/dto/login.dto';
 
 @Injectable()
 export class MailService {
@@ -20,7 +21,9 @@ export class MailService {
 
   logger = new Logger(MailService.name);
 
-  async sendMail(user_id: string, email: string) {
+  async sendMail(user_info: FtUserDto): Promise<void> {
+    const userId = user_info.id;
+    const email = user_info.email;
     try {
       const certificationNumber = Math.random().toString(36).substring(2);
       this.logger.debug(`email: ${email}`);
@@ -31,7 +34,7 @@ export class MailService {
         html: '인증 코드: ' + `<b> ${certificationNumber} </b>`,
       };
       await this.cacheManager.set(
-        `${user_id}_twofactor`,
+        `${userId}_twofactor`,
         certificationNumber,
         this.configService.get<number>('twofactor.expiration_time'),
       );
@@ -42,18 +45,16 @@ export class MailService {
     }
   }
 
-  async confirmCertificationNumber(user_id: string, input_number: string) {
-    try {
-      const certificationNumber = await this.cacheManager.get(
-        `${user_id}_twofactor`,
-      );
-      if (certificationNumber !== input_number) {
-        throw new BadRequestException('Secondary authentication failed');
-      }
-      this.logger.log('Secondary Authentication Successful');
-    } catch (error) {
-      this.logger.error(error);
-      throw error;
+  async isValidCertificationNumber(
+    user_id,
+    input_number: string,
+  ): Promise<boolean> {
+    const certificationNumber = await this.cacheManager.get(
+      `${user_id}_twofactor`,
+    );
+    if (certificationNumber !== input_number) {
+      return false;
     }
+    return true;
   }
 }
