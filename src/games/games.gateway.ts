@@ -143,7 +143,6 @@ export class GameGateway {
 
   @SubscribeMessage('game/exit')
   exit(client: Socket, room_id: string) {
-    this.logger.error(`game/exit=============+> good22!`);
     this.mainGateway.enterPlayer = this.mainGateway.enterPlayer.filter(
       (element) => element != client,
     );
