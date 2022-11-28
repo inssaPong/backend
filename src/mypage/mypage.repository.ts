@@ -24,6 +24,23 @@ export class MypageRepository {
     }
   }
 
+  async getUserIdByNickname(nickname: string) {
+    try {
+      const result = await this.databaseService.runQuery(
+        `
+          SELECT id
+          FROM "user"
+          WHERE nickname = $1;
+        `,
+        [nickname],
+      );
+	  return result;
+    } catch (error) {
+      this.logger.error(`getUserIdByNickname: ${error}`);
+      throw error;
+    }
+  }
+
   async updateNickname(user_id: string, nickname: string) {
     try {
       await this.databaseService.runQuery(
@@ -46,7 +63,7 @@ export class MypageRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "user"
-          SET avatar = $1
+          SET avatar = NULLIF($1, '')::bytea
           WHERE id = $2;
         `,
         [avatar, user_id],
@@ -58,22 +75,6 @@ export class MypageRepository {
     }
   }
 
-  async deleteAvatar(user_id: string) {
-    try {
-      await this.databaseService.runQuery(
-        `
-          UPDATE "user"
-          SET avatar = null
-          WHERE id = $1;
-        `,
-        [user_id],
-      );
-      return 200;
-    } catch (error) {
-      this.logger.error(`deleteAvatar: ${error}`);
-      throw error;
-    }
-  }
 
   async updateTwofactor(user_id: string, twofactor: boolean) {
     try {

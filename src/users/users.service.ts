@@ -13,7 +13,6 @@ export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
   async getRelationStatus(user_id: string, partner_id: string) : Promise<Relation_status> {
-    try {
       const relationStatusDB = await this.usersRepository.getRelationStatus(
         user_id,
         partner_id,
@@ -26,16 +25,12 @@ export class UsersService {
 		else
 			return Relation_status.BLOCK;
       } else {
+		this.logger.error(`[${this.getRelationStatus.name}] ${InternalServerErrorException.name} 서버 에러`)
         throw new InternalServerErrorException('서버 에러');
       }
-    } catch (error) {
-      this.logger.error(`${this.getRelationStatus.name}: ${error}`);
-      throw error;
-    }
   }
 
   async onFollowStatus(user_id: string, partner_id: string) {
-    try {
       const relation_status = await this.usersRepository.getRelationStatus(
         user_id,
         partner_id,
@@ -44,24 +39,23 @@ export class UsersService {
         await this.usersRepository.updateFollowStatus(user_id, partner_id);
       else if (relation_status.length == 0)
         await this.usersRepository.insertFollowStatus(user_id, partner_id);
-      else throw new InternalServerErrorException('서버 에러');
-    } catch (error) {
-      this.logger.error(`${this.onFollowStatus.name}: ${error}`);
-      throw error;
-    }
+      else {
+		this.logger.error(`[${this.onFollowStatus.name}] ${InternalServerErrorException.name} 서버 에러`)
+		throw new InternalServerErrorException('서버 에러');
+	  }
   }
 
   async checkUserExist(target_id: string) {
-    try {
       const databaseResponse = await this.usersRepository.findUser(target_id);
       if (databaseResponse.length == 1) return;
-      else if (databaseResponse.length == 0)
-        throw new NotFoundException(`${target_id}: 존재하지 않는 유저`);
-      else throw new InternalServerErrorException('서버 에러');
-    } catch (error) {
-      this.logger.error(`${this.checkUserExist.name}: ${error}`);
-      throw error;
-    }
+      else if (databaseResponse.length == 0) {
+		this.logger.error(`[${this.onFollowStatus.name}] ${NotFoundException.name} 존재하지 않는 유저`)
+		throw new NotFoundException(`${target_id}: 존재하지 않는 유저`);
+	  }
+      else {
+		this.logger.error(`[${this.onFollowStatus.name}] ${InternalServerErrorException.name} 서버 에러`)
+		throw new InternalServerErrorException('서버 에러');
+	  }
   }
 
   getDefaultImage(): string {
