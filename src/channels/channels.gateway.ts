@@ -99,21 +99,20 @@ export class ChannelsGateway {
       user_id,
       partner_id,
     );
-    if (is_block == 200) {
-      return;
-    }
     if (is_block == 500) {
       client.emit('DBError');
       return;
     }
 
     messages.forEach((element) => {
-      client.emit(
-        'DM/send',
-        element.sender_id,
-        element.receiver_id,
-        element.content,
-      );
+      if (!(element.sender_id == partner_id && is_block == 200)) {
+        client.emit(
+          'DM/send',
+          element.sender_id,
+          element.receiver_id,
+          element.content,
+        );
+      }
     });
   }
 
