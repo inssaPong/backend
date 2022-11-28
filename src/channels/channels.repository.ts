@@ -498,7 +498,7 @@ export class ChannelsRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "channel"
-          SET password=$2
+          SET password=NULLIF($2, '')::varchar
           WHERE id=$1;
         `,
         [id, password],

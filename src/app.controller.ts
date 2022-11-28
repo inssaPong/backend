@@ -1,6 +1,5 @@
 import { Controller, Get, Logger, Req, Res } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Public } from './login/public.decorator';
 
 // 2-1
 @Controller('')
