@@ -103,7 +103,7 @@ export class LoginController {
   @Get('/first')
   async authEditProfile(@User() user_info: FtUserDto) {
     this.logger.log(`GET /login/editprofile`);
-    console.log(user_info);
+
     if (user_info.isRegistered === true) {
       throw new ForbiddenException();
     }
@@ -118,7 +118,6 @@ export class LoginController {
   @Post('/signup')
   async editProfile(@User() user_info: FtUserDto, @Res() res, @Body() body) {
     this.logger.log(`Post /login/editprofile`);
-    console.log(body);
 
     await this.loginService.signUp(user_info, body);
     const accessToken =

@@ -4,12 +4,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import {
-  ChannelMemberTableDto,
-  ChannelDto as ChannelDto,
-} from './dto/channels.dto';
-import * as bcrypt from 'bcrypt';
 import { CHANNEL_AUTHORITY } from './channels.component';
+import { ChannelMemberTableDto } from './dto/channels.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChannelsRepository {
@@ -38,12 +35,12 @@ export class ChannelsRepository {
   async getChannelIdByChannelName(channel_name: string): Promise<number> {
     this.logger.log(`[${this.getChannelIdByChannelName.name}]`);
     try {
-      const databaseResponse: ChannelDto[] =
+      const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-          SELECT id FROM "channel"
-          WHERE name=$1;
-        `,
+            SELECT id FROM "channel"
+            WHERE name=$1;
+          `,
           [channel_name],
         );
       return databaseResponse[0].id;
@@ -57,12 +54,12 @@ export class ChannelsRepository {
   async getChannelNameByChannelId(channel_id: number): Promise<string> {
     this.logger.log(`[${this.getChannelNameByChannelId.name}]`);
     try {
-      const databaseResponse: ChannelDto[] =
+      const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-          SELECT name FROM "channel"
-          WHERE id=$1;
-        `,
+            SELECT name FROM "channel"
+            WHERE id=$1;
+          `,
           [channel_id],
         );
       return databaseResponse[0].name;
@@ -113,10 +110,10 @@ export class ChannelsRepository {
   }
 
   // Description: 채널 목록 가져오기
-  async getAllChannelListIncludePrivate(): Promise<ChannelDto[]> {
+  async getAllChannelListIncludePrivate(): Promise<ChannelMemberTableDto[]> {
     this.logger.log(`[${this.getAllChannelListIncludePrivate.name}]`);
     try {
-      const databaseResponse: ChannelDto[] =
+      const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
             SELECT id, name, password FROM "channel";
@@ -173,13 +170,14 @@ export class ChannelsRepository {
   async isChannelExist(channel_id: number): Promise<boolean> {
     this.logger.log(`[${this.isChannelExist.name}]`);
     try {
-      const databaseResponse = await this.databaseService.runQuery(
-        `
-          SELECT id FROM "channel"
-          WHERE id=$1;
-        `,
-        [channel_id],
-      );
+      const databaseResponse: ChannelMemberTableDto[] =
+        await this.databaseService.runQuery(
+          `
+            SELECT id FROM "channel"
+            WHERE id=$1;
+          `,
+          [channel_id],
+        );
       return databaseResponse.length === 0 ? false : true;
     } catch (error) {
       this.logger.error(error);
@@ -216,7 +214,7 @@ export class ChannelsRepository {
   ): Promise<boolean> {
     this.logger.log(`[${this.isValidChannelPassword.name}]`);
     try {
-      const databaseResponse: ChannelDto[] =
+      const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
             SELECT password FROM "channel"
@@ -236,7 +234,9 @@ export class ChannelsRepository {
     }
   }
 
-  async getUserIdListInChannelMember(channel_id: number): Promise<Object[]> {
+  async getUserIdListInChannelMember(
+    channel_id: number,
+  ): Promise<ChannelMemberTableDto[]> {
     this.logger.log(`[${this.getUserIdListInChannelMember.name}]`);
     try {
       const databaseResponse: ChannelMemberTableDto[] =
@@ -296,7 +296,7 @@ export class ChannelsRepository {
   ): Promise<void> {
     this.logger.log(`[${this.deleteOneUserInChannelMember.name}]`);
     try {
-      this.databaseService.runQuery(
+      await this.databaseService.runQuery(
         `
           DELETE FROM "channel_member"
           WHERE user_id=$1 AND channel_id=$2;

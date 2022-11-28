@@ -8,7 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class ChannelDto {
+export class RequestChannelDto {
   @IsNumber()
   @IsNotEmpty()
   readonly id: number;
@@ -21,11 +21,10 @@ export class ChannelDto {
 
   @IsString()
   @Length(4)
-  readonly password: string;
+  readonly pw?: string;
 }
 
-// Repository
-export class ChannelMemberTableDto {
+export class ResponseChannelDto {
   @IsNumber()
   @IsNotEmpty()
   id: number;
@@ -33,19 +32,46 @@ export class ChannelMemberTableDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(10)
-  user_id: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  channel_id: number;
+  @MaxLength(20)
+  name?: string;
 
   @IsBoolean()
   @IsNotEmpty()
-  ban_status: boolean;
+  has_password?: boolean;
+}
+
+// Repository
+export class ChannelMemberTableDto {
+  @IsNumber()
+  @IsNotEmpty()
+  readonly id: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(20)
+  readonly name: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  readonly channel_id: number;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(10)
+  readonly user_id: string;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  readonly ban_status: boolean;
 
   @IsNumber()
   @IsNotEmpty()
   @Length(1)
-  authority: number;
+  readonly authority: number;
+
+  @IsNumber()
+  @MaxLength(60)
+  readonly password: string;
 }

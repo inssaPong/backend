@@ -27,11 +27,10 @@ import {
   ResponseUsersIdInChannelDto,
 } from './dto/swagger-channels.dto';
 import { ChannelsService } from './channels.service';
-import { ChannelDto } from './dto/channels.dto';
+import { RequestChannelDto } from './dto/channels.dto';
 import { User } from 'src/login/user.decorator';
 import { FtUserDto } from 'src/login/dto/login.dto';
 
-// 4-0, 4-1, 4-2, 4-3
 @Controller('/channels')
 @ApiTags('채널 API')
 export class ChannelsController {
@@ -50,7 +49,7 @@ export class ChannelsController {
   @Post('/create')
   async createChannel(
     @User() user: FtUserDto,
-    @Body() channel: ChannelDto,
+    @Body() channel: RequestChannelDto,
     @Res() res,
   ) {
     this.logger.log('POST /channels/create');
@@ -59,7 +58,7 @@ export class ChannelsController {
       await this.channelsService.createChannelAndReturnChannelId(
         user.id,
         channel.name,
-        channel.password,
+        channel.pw,
       );
     res.status(201).send({
       id: channelId,
@@ -105,16 +104,12 @@ export class ChannelsController {
   async enterChannel(
     @Query('channel_id') channel_id: number,
     @User() user: FtUserDto,
-    @Body() channel: ChannelDto,
+    @Body() channel: RequestChannelDto,
     @Res() res,
   ) {
     this.logger.log('POST /channels/enter');
 
-    await this.channelsService.enterChannel(
-      channel_id,
-      channel.password,
-      user.id,
-    );
+    await this.channelsService.enterChannel(channel_id, channel.pw, user.id);
     res.status(201).send();
   }
 

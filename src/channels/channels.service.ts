@@ -10,8 +10,8 @@ import {
 import { ChannelsRepository } from './channels.repository';
 import * as bcrypt from 'bcrypt';
 import { MainGateway } from 'src/sockets/main.gateway';
-import { ChannelDto } from './dto/channels.dto';
 import { CHANNEL_AUTHORITY } from './channels.component';
+import { ResponseChannelDto } from './dto/channels.dto';
 
 @Injectable()
 export class ChannelsService {
@@ -28,7 +28,6 @@ export class ChannelsService {
     channel_name: string,
     channel_pw: string,
   ): Promise<number> {
-    // TODO: dto 추가
     if (!channel_name) {
       this.logger.error(
         `유효하지 않은 채널 이름입니다. 입력된 채널 이름: ${channel_name}`,
@@ -69,8 +68,9 @@ export class ChannelsService {
     return channelId;
   }
 
-  // TODO: 수정. dto
-  async getAvailableChannelList(user_id: string): Promise<Object[]> {
+  async getAvailableChannelList(
+    user_id: string,
+  ): Promise<ResponseChannelDto[]> {
     const allChannelList =
       await this.channelsRepository.getAllChannelListIncludePrivate();
     if (allChannelList.length === 0) {
@@ -100,13 +100,11 @@ export class ChannelsService {
     return availableChannelList;
   }
 
-  // TODO: 수정. dto
-  async getJoinedChannelList(user_id: string): Promise<Object[]> {
+  async getJoinedChannelList(user_id: string): Promise<ResponseChannelDto[]> {
     const joinedChannelIdList =
       await this.channelsRepository.getJoinedChannelIdListByUserId(user_id);
 
-    // TODO: 수정. dto?
-    const channelIdAndNameList = [];
+    const channelIdAndNameList: ResponseChannelDto[] = [];
     for (const channelObject of joinedChannelIdList) {
       if (channelObject.ban_status == true) continue;
       const channelName =
@@ -177,8 +175,9 @@ export class ChannelsService {
     return channelName;
   }
 
-  // TODO: 수정. dto
-  async getUserIdListInChannel(channel_id: number): Promise<Object[]> {
+  async getUserIdListInChannel(
+    channel_id: number,
+  ): Promise<ResponseChannelDto[]> {
     const userIdList =
       await this.channelsRepository.getUserIdListInChannelMember(channel_id);
     this.logger.log(`${userIdList.length}개의 유저 id 리스트를 가져왔습니다.`);
