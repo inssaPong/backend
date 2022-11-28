@@ -1,6 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString, Length } from 'class-validator';
 
-export class ResponseGetChannelListDto {
+// Request
+export class RequestCreateChannelDto {
+  @ApiProperty({
+    description: '채널 이름',
+    default: 'channel 42',
+  })
+  name: string;
+
+  @ApiProperty({
+    description: '채널 비밀번호',
+    default: '',
+  })
+  password: string;
+}
+
+export class RequestEnterChannelDto {
+  @ApiProperty({
+    description: '채널 비밀번호',
+    default: '',
+  })
+  password: string;
+}
+
+// Response
+export class ResponseCreateChannelDto {
+  @ApiProperty({
+    description: '[Response] Channel ID',
+    required: true,
+    default: 42,
+  })
+  id: number;
+}
+
+export class ResponseGetAvailableChannelListDto {
   @ApiProperty({
     description: '[Response] [{channel_id, channel_name, has_password}, ...]',
     required: true,
@@ -12,9 +46,9 @@ export class ResponseGetChannelListDto {
   example: Object[];
 }
 
-export class ResponseGetEnteredChannelListDto {
+export class ResponseGetJoinedChannelListDto {
   @ApiProperty({
-    description: '[{channel_id, channel_name}, ...]',
+    description: '[Response] [{channel_id, channel_name}, ...]',
     required: true,
     default: [
       { id: 1, name: 'channel 1' },
@@ -37,45 +71,4 @@ export class ResponseUsersIdInChannelDto {
     ],
   })
   example: Object[];
-}
-
-export class RequestBodyChannelNameAndPwDto {
-  @ApiProperty({
-    description: '[Request Body] Channel name',
-    required: true,
-    default: 'channel 42',
-  })
-  name: string;
-
-  @ApiProperty({
-    description: '[Request Body] Channel password',
-    required: false,
-    default: '0000',
-  })
-  pw: number;
-}
-
-export class ResponseChannelIdDto {
-  @ApiProperty({
-    description: '[Response] Channel ID',
-    required: true,
-    default: 42,
-  })
-  id: number;
-}
-
-export class RequestBodyConnectDmDto {
-  @ApiProperty({
-    description: '[Request Body] Sender ID',
-    default: 'dason',
-    required: true,
-  })
-  sender_id: number;
-
-  @ApiProperty({
-    description: '[Request Body] Reciever ID',
-    default: 'sanjeon',
-    required: true,
-  })
-  receiver_id: number;
 }

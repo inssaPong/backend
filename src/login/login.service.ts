@@ -50,7 +50,6 @@ export class LoginService {
   }
 
   getAuthenticatedAccessToken(user: FtUserDto) {
-    console.log(user.isRegistered);
     const accessToken = this.jwtService.sign({
       id: user.id,
       email: user.email,
@@ -58,6 +57,7 @@ export class LoginService {
       twoFactorStatus: user.twoFactorStatus,
       isAuthenticated: true,
     });
+    this.logger.log(`${user.id}: 로그인 성공`);
     return accessToken;
   }
 }
