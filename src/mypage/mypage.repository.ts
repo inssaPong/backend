@@ -19,6 +19,7 @@ export class MypageRepository {
       return databaseResponse;
     } catch (error) {
       this.logger.error(`[${this.getUserInfo.name}] ${error}`);
+      console.log(error);
       throw error;
     }
   }
@@ -62,7 +63,7 @@ export class MypageRepository {
       await this.databaseService.runQuery(
         `
           UPDATE "user"
-          SET avatar = $1
+          SET avatar = NULLIF($1, '')::bytea
           WHERE id = $2;
         `,
         [avatar, user_id],
