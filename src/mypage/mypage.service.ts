@@ -12,11 +12,12 @@ export class MypageService {
   }
 
   async updateMypageInfo(id: string, body: UpdateMypageInfoDto) {
-    try {
 		const result = await this.mypageRepository.getUserIdByNickname(body.nickname);
 		if (result.length > 0) {
-			if (result[0]['id'] != id)
+			if (result[0]['id'] != id) {
+				this.logger.error(`[${this.updateMypageInfo.name}] Conflict 중복된 닉네임`);
 				throw new ConflictException('중복된 닉네임');
+			}
 		}
         for (let [key, value] of Object.entries(body)) {
 			switch (key) {
@@ -36,10 +37,6 @@ export class MypageService {
 					break;
 			}
       }
-    } catch (error) {
-      this.logger.error(`[${this.updateMypageInfo.name}] ${error}`);
-      throw error;
-    }
   }
 
   printObject(objectName: string, object: Object, logger: Logger) {

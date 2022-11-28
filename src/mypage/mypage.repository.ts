@@ -19,7 +19,6 @@ export class MypageRepository {
       return databaseResponse;
     } catch (error) {
       this.logger.error(`[${this.getUserInfo.name}] ${error}`);
-      console.log(error);
       throw error;
     }
   }
@@ -74,6 +73,7 @@ export class MypageRepository {
       throw error;
     }
   }
+
 
   async updateTwofactor(user_id: string, twofactor: boolean) {
     try {
