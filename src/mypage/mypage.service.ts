@@ -21,12 +21,11 @@ export class MypageService {
         for (let [key, value] of Object.entries(body)) {
 			switch (key) {
 				case 'nickname':
-					if (result.length != 0 && result[0]['id'] != id)
+					if (result.length == 0 || result[0]['id'] != id)
 						await this.mypageRepository.updateNickname(id, value);
 					break;
 				case 'avatar':
-					if (body.avatar == null) await this.mypageRepository.deleteAvatar(id);
-					else await this.mypageRepository.updateAvatar(id, value);
+					await this.mypageRepository.updateAvatar(id, value);
 					break;
 				case 'twofactor_status':
 					await this.mypageRepository.updateTwofactor(id, value);

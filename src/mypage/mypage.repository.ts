@@ -75,23 +75,6 @@ export class MypageRepository {
     }
   }
 
-  async deleteAvatar(user_id: string) {
-    try {
-      await this.databaseService.runQuery(
-        `
-          UPDATE "user"
-          SET avatar = null
-          WHERE id = $1;
-        `,
-        [user_id],
-      );
-      return 200;
-    } catch (error) {
-      this.logger.error(`deleteAvatar: ${error}`);
-      throw error;
-    }
-  }
-
   async updateTwofactor(user_id: string, twofactor: boolean) {
     try {
       await this.databaseService.runQuery(
