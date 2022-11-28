@@ -59,8 +59,9 @@ export class LoginRepository {
       const databaseResponse = await this.databaseService.runQuery(
         `
           SELECT id FROM "user"
-          WHERE id='${user_id}';
+          WHERE id=$1;
         `,
+        [user_id],
       );
       if (databaseResponse.length === 0) {
         return false;
