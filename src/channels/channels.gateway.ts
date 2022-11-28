@@ -289,7 +289,6 @@ export class ChannelsGateway {
       return;
     }
 
-    this.logger.error(`==========> ${salt_password}`);
     const db_result = await this.channelsRepository.changeChannelPassword(
       req.channel_id,
       salt_password,
