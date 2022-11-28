@@ -63,15 +63,15 @@ export class LoginController {
   @Public()
   @UseGuards(JwtTwoFactorAuthGuard)
   @Get('/twofactor')
-  async sendTwoFactorMail(@User() user_info: FtUserDto) {
+  async sendTwoFactorMail(@User() user: FtUserDto) {
     this.logger.log(`GET /login/twofactor`);
-    await this.loginService.sendTwoFactorMail(user_info);
+    await this.loginService.sendTwoFactorMail(user);
   }
 
   @ApiOperation({ summary: '2차 인증 성공 여부' })
   @ApiBody({ type: RequestConfirmCertificationNumberDTO })
-  @ApiOkResponse({ description: '[OK] 2차 인증 성공' })
-  @ApiBadRequestResponse({ description: '[Bad Request] 2차 인증 실패' })
+  @ApiOkResponse({ description: '2차 인증 성공' })
+  @ApiBadRequestResponse({ description: '2차 인증 실패' })
   @Public()
   @UseGuards(JwtTwoFactorAuthGuard)
   @Header('Access-Control-Allow-Credentials', 'true')
@@ -92,16 +92,14 @@ export class LoginController {
   }
 
   @ApiOperation({ summary: 'editprofile 입장 유효성 검사' })
-  @ApiOkResponse({ description: '[OK] 회원 가입이 필요한 유저' })
-  @ApiForbiddenResponse({
-    description: '[Forbidden] 이미 DB에 존재하는 유저',
-  })
+  @ApiOkResponse({ description: '회원 가입이 필요한 유저' })
+  @ApiForbiddenResponse({ description: '이미 DB에 존재하는 유저' })
   @Public()
   @UseGuards(JwtSignupAuthGuard)
   @Get('/signup')
-  async authEditProfile(@User() user_info: FtUserDto) {
+  async authEditProfile(@User() user: FtUserDto) {
     this.logger.log(`GET /login/first`);
-    if (user_info.isRegistered === true) {
+    if (user.isRegistered === true) {
       throw new ForbiddenException();
     }
   }

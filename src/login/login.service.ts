@@ -15,8 +15,8 @@ export class LoginService {
     private readonly loginRepository: LoginRepository,
   ) {}
 
-  async sendTwoFactorMail(@User() user_info: FtUserDto): Promise<void> {
-    await this.mailService.sendMail(user_info);
+  async sendTwoFactorMail(user: FtUserDto): Promise<void> {
+    await this.mailService.sendMail(user);
   }
 
   // Description: 2차 인증
@@ -32,16 +32,16 @@ export class LoginService {
       certification_number,
     );
     if (isSuccess === false) {
-      this.logger.error('2차 인증에 실패했습니다.');
+      this.logger.error(`${user_id}: 2차 인증에 실패했습니다.`);
       throw new ForbiddenException();
     }
-    this.logger.log('2차 인증에 성공했습니다.');
+    this.logger.log(`${user_id}: 2차 인증에 성공했습니다.`);
   }
 
   // TODO: 회원가입
-  async signUp(user_info: FtUserDto, signup_data: SignupDTO): Promise<void> {
-    const id = user_info.id;
-    const email = user_info.email;
+  async signUp(user: FtUserDto, signup_data: SignupDTO): Promise<void> {
+    const id = user.id;
+    const email = user.email;
     const nickname = signup_data.nickname;
     const avatar = signup_data.avatar;
 
