@@ -44,8 +44,15 @@ export class ChannelsGateway {
   }
 
   @SubscribeMessage('channel/enteredDM')
-  enteredDM(client: Socket, data: string) {
+  async enteredDM(client: Socket, data: string) {
     const req = JSON.parse(data);
+    const is_user_exist = await this.channelsRepository.isUserExist(
+      req.partner_id,
+    );
+    if (is_user_exist != 200) {
+      client.emit('DBError');
+      return;
+    }
     this.sendPreviousDM(client, req.user_id, req.partner_id);
   }
 
