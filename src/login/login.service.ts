@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
-import { FtUserDto } from './dto/login.dto';
+import { FtUserDto, SignupDTO } from './dto/login.dto';
 import { LoginRepository } from './login.repository';
 import { User } from './user.decorator';
 
@@ -39,11 +39,11 @@ export class LoginService {
   }
 
   // TODO: 회원가입
-  async signUp(user_info: FtUserDto, body): Promise<void> {
+  async signUp(user_info: FtUserDto, signup_data: SignupDTO): Promise<void> {
     const id = user_info.id;
     const email = user_info.email;
-    const nickname = body.nickname;
-    const avatar = body.avatar;
+    const nickname = signup_data.nickname;
+    const avatar = signup_data.avatar;
 
     // Description: DB에 유저 정보 저장
     await this.loginRepository.insertUserData(id, nickname, email, avatar);
