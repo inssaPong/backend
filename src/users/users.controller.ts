@@ -55,14 +55,9 @@ export class UsersController {
   })
   @Get()
   async findUser(@Query('id') id: string, @Res() res: Response) {
-    try {
       await this.usersService.checkUserExist(id);
       this.logger.log(`${id} 유저 존재`);
       res.status(200).send();
-    } catch (error) {
-      this.logger.error(`[${this.findUser.name}] ${error}`);
-      throw error;
-    }
   }
 
   @ApiOperation({
@@ -81,7 +76,6 @@ export class UsersController {
   })
   @Get('/gameHistory')
   async getGameHistory(@Query('id') id: string, @Res() res: Response) {
-    try {
       await this.usersService.checkUserExist(id);
       const gameHistoryDB = await this.usersRepository.getGameHistory(id);
       const gameHistory: GameHistoryDto = { gameHistory: [] };
@@ -95,10 +89,6 @@ export class UsersController {
       }
       this.logger.log(`${id}의 전적을 가져오는데 성공`);
       res.status(200).send(gameHistory);
-    } catch (error) {
-      this.logger.error(`[${this.getGameHistory.name}] ${error}`);
-      throw error;
-    }
   }
 
   @ApiOperation({
@@ -117,7 +107,6 @@ export class UsersController {
   })
   @Get('/gameStat')
   async getGameStat(@Query('id') id: string, @Res() res: Response) {
-    try {
       await this.usersService.checkUserExist(id);
       const winHistoryDB = await this.usersRepository.getWinHistory(id);
       const loseHistoryDB = await this.usersRepository.getLoseHistory(id);
@@ -127,10 +116,6 @@ export class UsersController {
       };
       this.logger.log(`${id}의 승패수를 가져오는데 성공`);
       res.status(200).send(gameStat);
-    } catch (error) {
-      this.logger.error(`[${this.getGameStat.name}] ${error}`);
-      throw error;
-    }
   }
 
   @ApiOperation({
@@ -153,7 +138,6 @@ export class UsersController {
     @Req() req,
     @Res() res: Response,
   ) {
-    try {
       await this.usersService.checkUserExist(target_id);
       const userInfoDB = await this.usersRepository.getUserInfo(target_id);
       if (userInfoDB[0][`avatar`] == null)
@@ -169,10 +153,6 @@ export class UsersController {
       };
       this.logger.log(`${target_id}의 유저 정보를 가져오는데 성공`);
       res.status(200).send(userInfo);
-    } catch (error) {
-      this.logger.error(`[${this.getUserInfo.name}] ${error}`);
-      throw error;
-    }
   }
 
   @ApiOperation({
@@ -203,12 +183,12 @@ export class UsersController {
     @Req() req,
     @Res() res: Response,
   ) {
-    try {
       await this.usersService.checkUserExist(req.user.id);
       await this.usersService.checkUserExist(body.partner_id);
-
-      if (req.user.id == body.partner_id)
-        throw new BadRequestException('자기 자신을 follow 할 수 없음');
+      if (req.user.id == body.partner_id) {
+		this.logger.error(`[${this.changeFollowStatus.name}] ${BadRequestException.name} 자기 자신을 follow 할 수 없음`)
+		throw new BadRequestException('자기 자신을 follow 할 수 없음');
+	  }
       if (body.follow_status == false) {
         await this.usersRepository.offFollowStatus(
           req.user.id,
@@ -220,10 +200,6 @@ export class UsersController {
         this.logger.log(`${req.user.id}가 ${body.partner_id}를 follow`);
       }
       res.status(200).send();
-    } catch (error) {
-      this.logger.error(`[${this.changeFollowStatus.name}] ${error}`);
-      throw error;
-    }
   }
 
   @ApiOperation({
@@ -244,7 +220,6 @@ export class UsersController {
   })
   @Patch('block')
   async blockUser(@Query('id') blockId, @Req() req, @Res() res: Response) {
-    try {
       await this.usersService.checkUserExist(req.user.id);
       await this.usersService.checkUserExist(blockId);
       const relation_status = await this.usersRepository.getRelationStatus(
@@ -257,9 +232,5 @@ export class UsersController {
         await this.usersRepository.blockUnfollow(req.user.id, blockId);
       this.logger.log(`${req.user.id}가 ${blockId}를 차단`);
       res.status(200).send();
-    } catch (error) {
-      this.logger.error(`[${this.blockUser.name}] ${error}`);
-      throw error;
-    }
   }
 }
