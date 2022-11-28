@@ -22,6 +22,7 @@ import {
 import {
   RequestCreateChannelDto,
   RequestEnterChannelDto,
+  ResponseChannelNameDto,
   ResponseCreateChannelDto,
   ResponseGetAvailableChannelListDto,
   ResponseGetJoinedChannelListDto,
@@ -117,8 +118,11 @@ export class ChannelsController {
   }
 
   @ApiOperation({ summary: '채널 이름 가져오기' })
-  @ApiOkResponse({ description: '채널 이름 반환' })
-  @ApiBadRequestResponse({ description: 'DB에 문제' })
+  @ApiOkResponse({
+    description: '채널 이름 반환',
+    type: ResponseChannelNameDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'DB에 문제' })
   @Get('/room/name')
   async getChannelName(@Query('channel_id') channel_id: number, @Res() res) {
     this.logger.log('GET /room/name');
