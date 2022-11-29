@@ -8,11 +8,10 @@ export class RequestEditProfileDto {
   avatar: string;
 }
 
-export class RequestBodyInputTwoFactorCodeDto {
+export class RequestConfirmCertificationNumberDTO {
   @ApiProperty({
-    description: '[Request Body] 유저가 입력한 2차 인증 코드',
-    required: true,
+    description: '유저가 입력한 2차 인증 코드',
     default: '',
   })
-  CertificationNumber: string;
+  certificationNumber: string;
 }

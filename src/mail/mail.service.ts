@@ -21,9 +21,9 @@ export class MailService {
 
   logger = new Logger(MailService.name);
 
-  async sendMail(user_info: FtUserDto): Promise<void> {
-    const userId = user_info.id;
-    const email = user_info.email;
+  async sendMail(user: FtUserDto): Promise<void> {
+    const userId = user.id;
+    const email = user.email;
     try {
       const certificationNumber = Math.random().toString(36).substring(2);
       this.logger.debug(`email: ${email}`);

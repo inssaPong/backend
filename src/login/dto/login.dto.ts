@@ -18,3 +18,18 @@ export class FtUserDto {
   @IsBoolean()
   isAuthenticated?: boolean;
 }
+
+export class TwoFactorDTO {
+  @IsString()
+  @IsNotEmpty()
+  certificationNumber: string;
+}
+
+export class SignupDTO {
+  @IsString()
+  @IsNotEmpty()
+  nickname: string;
+
+  @IsString()
+  avatar?: string;
+}
