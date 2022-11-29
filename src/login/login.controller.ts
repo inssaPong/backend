@@ -24,16 +24,15 @@ import { FtAuthGuard } from './ft_oauth/ft.guard';
 import { JwtSignGuard } from './jwt/jwt-sign.guard';
 import { Public } from './public.decorator';
 import {
-  RequestBodyInputTwoFactorCodeDto,
+  RequestConfirmCertificationNumberDTO,
   RequestEditProfileDto,
 } from './dto/swagger-login.dto';
 import { User } from './user.decorator';
-import { FtUserDto } from './dto/login.dto';
+import { TwoFactorDTO, FtUserDto, SignupDTO } from './dto/login.dto';
 import { JwtTwoFactorAuthGuard } from './jwt/jwt-twofactor-auth.guard';
 import { LoginService } from './login.service';
 import { JwtSignupAuthGuard } from './jwt/jwt-signup-auth.guard';
 
-// 1-1, 1-2, 1-3, 1-4
 @Controller('/login')
 @ApiTags('로그인 API')
 export class LoginController {
@@ -64,16 +63,15 @@ export class LoginController {
   @Public()
   @UseGuards(JwtTwoFactorAuthGuard)
   @Get('/twofactor')
-  async sendTwoFactorMail(@User() user_info: FtUserDto) {
+  async sendTwoFactorMail(@User() user: FtUserDto) {
     this.logger.log(`GET /login/twofactor`);
-    await this.loginService.sendTwoFactorMail(user_info);
+    await this.loginService.sendTwoFactorMail(user);
   }
 
-  // 2차 인증 성공 여부
   @ApiOperation({ summary: '2차 인증 성공 여부' })
-  @ApiBody({ type: RequestBodyInputTwoFactorCodeDto })
-  @ApiOkResponse({ description: '[OK] 2차 인증 성공' })
-  @ApiBadRequestResponse({ description: '[Bad Request] 2차 인증 실패' })
+  @ApiBody({ type: RequestConfirmCertificationNumberDTO })
+  @ApiOkResponse({ description: '2차 인증 성공' })
+  @ApiBadRequestResponse({ description: '2차 인증 실패' })
   @Public()
   @UseGuards(JwtTwoFactorAuthGuard)
   @Header('Access-Control-Allow-Credentials', 'true')
@@ -81,12 +79,12 @@ export class LoginController {
   @Put('/twofactor')
   async confirmCertificationNumber(
     @User() user: FtUserDto,
-    @Req() req,
+    @Body() twofactor: TwoFactorDTO,
     @Res() res,
   ) {
     await this.loginService.confirmCertificationNumber(
       user.id,
-      req.body.CertificationNumber,
+      twofactor.certificationNumber,
     );
     const accessToken = this.loginService.getAuthenticatedAccessToken(user);
     res.cookie('Authorization', accessToken);
@@ -94,16 +92,14 @@ export class LoginController {
   }
 
   @ApiOperation({ summary: 'editprofile 입장 유효성 검사' })
-  @ApiOkResponse({ description: '[OK] 회원 가입이 필요한 유저' })
-  @ApiForbiddenResponse({
-    description: '[Forbidden] 이미 DB에 존재하는 유저',
-  })
+  @ApiOkResponse({ description: '회원 가입이 필요한 유저' })
+  @ApiForbiddenResponse({ description: '이미 DB에 존재하는 유저' })
   @Public()
   @UseGuards(JwtSignupAuthGuard)
-  @Get('/first') // TODO: 수정. 이름 변경
-  async authEditProfile(@User() user_info: FtUserDto) {
+  @Get('/signup')
+  async authEditProfile(@User() user: FtUserDto) {
     this.logger.log(`GET /login/first`);
-    if (user_info.isRegistered === true) {
+    if (user.isRegistered === true) {
       throw new ForbiddenException();
     }
   }
@@ -117,9 +113,13 @@ export class LoginController {
   @Header('Access-Control-Allow-Credentials', 'true')
   @Header('Access-Control-Allow-Origin', 'http://localhost:8080')
   @Post('/signup')
-  async editProfile(@User() user: FtUserDto, @Res() res, @Body() body) {
+  async editProfile(
+    @User() user: FtUserDto,
+    @Body() signup_data: SignupDTO,
+    @Res() res,
+  ) {
     this.logger.log(`Post /login/signup`);
-    await this.loginService.signUp(user, body);
+    await this.loginService.signUp(user, signup_data);
     const accessToken = this.loginService.getAuthenticatedAccessToken(user);
     res.cookie('Authorization', accessToken);
     res.status(200).send();

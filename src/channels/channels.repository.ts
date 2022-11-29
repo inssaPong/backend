@@ -567,9 +567,9 @@ export class ChannelsRepository {
     try {
       const databaseResponse = await this.databaseService.runQuery(
         `
-        SELECT *
-        FROM "user"
-        WHERE id=$1;
+          SELECT *
+          FROM "user"
+          WHERE id=$1;
         `,
         [id],
       );

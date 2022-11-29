@@ -1,9 +1,9 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
-import { FtUserDto } from './dto/login.dto';
+import { MainGateway } from 'src/sockets/main.gateway';
+import { FtUserDto, SignupDTO } from './dto/login.dto';
 import { LoginRepository } from './login.repository';
-import { User } from './user.decorator';
 
 @Injectable()
 export class LoginService {
@@ -13,10 +13,11 @@ export class LoginService {
     private readonly mailService: MailService,
     private readonly jwtService: JwtService,
     private readonly loginRepository: LoginRepository,
+    private readonly mainGateway: MainGateway,
   ) {}
 
-  async sendTwoFactorMail(@User() user_info: FtUserDto): Promise<void> {
-    await this.mailService.sendMail(user_info);
+  async sendTwoFactorMail(user: FtUserDto): Promise<void> {
+    await this.mailService.sendMail(user);
   }
 
   // Description: 2차 인증
@@ -32,21 +33,23 @@ export class LoginService {
       certification_number,
     );
     if (isSuccess === false) {
-      this.logger.error('2차 인증에 실패했습니다.');
+      this.logger.error(`${user_id}: 2차 인증에 실패했습니다.`);
       throw new ForbiddenException();
     }
-    this.logger.log('2차 인증에 성공했습니다.');
+    this.logger.log(`${user_id}: 2차 인증에 성공했습니다.`);
   }
 
   // TODO: 회원가입
-  async signUp(user_info: FtUserDto, body): Promise<void> {
-    const id = user_info.id;
-    const email = user_info.email;
-    const nickname = body.nickname;
-    const avatar = body.avatar;
+  async signUp(user: FtUserDto, signup_data: SignupDTO): Promise<void> {
+    const id = user.id;
+    const email = user.email;
+    const nickname = signup_data.nickname;
+    const avatar = signup_data.avatar;
 
     // Description: DB에 유저 정보 저장
     await this.loginRepository.insertUserData(id, nickname, email, avatar);
+    // socket용 객체 생성
+    this.mainGateway.newUser(id);
   }
 
   getAuthenticatedAccessToken(user: FtUserDto) {
