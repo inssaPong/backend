@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length } from 'class-validator';
 
-// Request
 export class RequestCreateChannelDto {
   @ApiProperty({
     description: '채널 이름',
@@ -24,7 +22,6 @@ export class RequestEnterChannelDto {
   password: string;
 }
 
-// Response
 export class ResponseCreateChannelDto {
   @ApiProperty({
     description: '[Response] Channel ID',
@@ -56,6 +53,15 @@ export class ResponseGetJoinedChannelListDto {
     ],
   })
   example: Object[];
+}
+
+export class ResponseChannelNameDto {
+  @ApiProperty({
+    description: '유저 아이디 반환',
+    required: true,
+    default: 'dason',
+  })
+  name: string;
 }
 
 export class ResponseUsersIdInChannelDto {

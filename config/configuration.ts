@@ -15,10 +15,6 @@ export default () => ({
       parseInt(process.env.JWT_EXPIRATION_TIME_SHORT, 10) || 180,
   },
 
-  cookie: {
-    secret: process.env.COOKIE_SECRET,
-  },
-
   mail: {
     host: process.env.MAIL_HOST,
     user: process.env.MAIL_USER,

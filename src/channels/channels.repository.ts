@@ -28,9 +28,7 @@ export class ChannelsRepository {
         [channel_name, channel_password],
       );
     } catch (error) {
-      this.logger.error(
-        `[${this.insertChannel.name}] ${error} in "${error.table}" table`,
-      );
+      this.logger.error(`[${this.insertChannel.name}] ${error}`);
       throw new InternalServerErrorException();
     }
   }
@@ -115,7 +113,7 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-          SELECT id, name, password FROM "channel";
+            SELECT id, name, password FROM "channel";
           `,
         );
       return databaseResponse;
@@ -133,8 +131,8 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-          SELECT channel_id FROM "channel_member"
-          WHERE user_id=$1 AND channel_id=$2;
+            SELECT channel_id FROM "channel_member"
+            WHERE user_id=$1 AND channel_id=$2;
           `,
           [user_id, channel_id],
         );
@@ -153,9 +151,9 @@ export class ChannelsRepository {
       const databaseResopnse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT channel_id, ban_status FROM "channel_member"
-        WHERE user_id=$1;
-        `,
+            SELECT channel_id, ban_status FROM "channel_member"
+            WHERE user_id=$1 AND ban_status=false;
+          `,
           [user_id],
         );
       return databaseResopnse;
@@ -168,20 +166,40 @@ export class ChannelsRepository {
   }
 
   // Description: 채널이 존재하는지 여부 확인
-  async isChannelExist(channel_id: number): Promise<boolean> {
+  async isChannelExistById(channel_id: number): Promise<boolean> {
     try {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT id FROM "channel"
-        WHERE id=$1;
-        `,
+            SELECT id FROM "channel"
+            WHERE id=$1;
+          `,
           [channel_id],
         );
       return databaseResponse.length === 0 ? false : true;
     } catch (error) {
-      this.logger.error(`[${this.isChannelExist.name}] ${error}`);
+      this.logger.error(`[${this.isChannelExistById.name}] ${error}`);
       throw new InternalServerErrorException();
+    }
+  }
+
+  async isChannelExistByName(channel_name: string): Promise<boolean> {
+    try {
+      const databaseResopnse: ChannelMemberTableDto[] =
+        await this.databaseService.runQuery(
+          `
+            SELECT name FROM "channel"
+            WHERE name=$1;
+          `,
+          [channel_name],
+        );
+      if (databaseResopnse.length === 0) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      this.logger.error(`[${this.isChannelExistByName.name}] ${error}`);
+      throw error;
     }
   }
 
@@ -191,9 +209,9 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-        SELECT ban_status FROM "channel_member"
-        WHERE user_id=$1 AND channel_id=$2;
-        `,
+            SELECT ban_status FROM "channel_member"
+            WHERE user_id=$1 AND channel_id=$2;
+          `,
           [user_id, channel_id],
         );
       if (databaseResponse.length === 0) {
@@ -215,8 +233,8 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-          SELECT password FROM "channel"
-          WHERE id=$1;
+            SELECT password FROM "channel"
+            WHERE id=$1;
           `,
           [channel_id],
         );
@@ -239,8 +257,8 @@ export class ChannelsRepository {
       const databaseResponse: ChannelMemberTableDto[] =
         await this.databaseService.runQuery(
           `
-          SELECT user_id FROM "channel_member"
-          WHERE channel_id=$1;
+            SELECT user_id FROM "channel_member"
+            WHERE channel_id=$1;
           `,
           [channel_id],
         );

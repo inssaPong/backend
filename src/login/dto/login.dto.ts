@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsString, MaxLength } from 'class-validator';
 
 export class FtUserDto {
   @IsString()
